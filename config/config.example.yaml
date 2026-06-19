@@ -1,0 +1,9 @@
+monitored_dir: "/app/data"
+quarantine_dir: "/app/quarantine"
+leak_keywords:
+  - "AWS_SECRET_ACCESS_KEY"
+  - "PRIVATE_KEY"
+  - "PASSWORD"
+  - "SECRET"
+spiderfoot_api: "http://osint-spiderfoot:5001"
+log_level: "INFO"

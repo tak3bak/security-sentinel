@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "security-sentinel"
+version = "0.1.0"
+description = "Automated Security Sentinel for monitoring and responding to sensitive data leaks."
+authors = ["Your Name <youremail@example.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/yourusername/security-sentinel"
+repository = "https://github.com/yourusername/security-sentinel"
+keywords = ["security", "monitoring", "leak detection", "osint"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.26.0"
+watchdog = "^2.1.6"
+pyyaml = "^5.4.1"
+python-dotenv = "^0.19.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
