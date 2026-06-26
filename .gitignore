@@ -1,3 +1,23 @@
-venv/
-__pycache__/
+# Ignore secrets and environment files
+*.env
+.env
+data/*.env
+
+# Ignore logs
+*.log
+
+# Ignore OS files
 .DS_Store
+Thumbs.db
+
+# Ignore local audit data (keep your sensitive client info private)
+audits/
+data/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# If you don't need to track the entire spiderfoot dependency tree
+# (You might want to exclude it if it's too large)
+# spiderfoot/
