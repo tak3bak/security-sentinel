@@ -1,0 +1,53 @@
+services:
+  spiderfoot:
+    build: 
+      context: ./spiderfoot
+      dockerfile: Dockerfile
+    container_name: sentinel-spiderfoot
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - spiderfoot_data:/var/lib/spiderfoot
+    networks:
+      - sentinel_net
+    labels:
+      - "com.sentinel.project=security-sentinel"
+
+  analysis-engine:
+    build:
+      context: ./analysis
+      dockerfile: Dockerfile
+    container_name: sentinel-analysis
+    restart: unless-stopped
+    networks:
+      - sentinel_net
+    env_file: .env
+    depends_on:
+      - sentinel-db
+    labels:
+      - "com.sentinel.project=security-sentinel"
+
+  sentinel-db:
+    image: postgres:17-alpine
+    container_name: sentinel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sentinel_user
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: sentinel_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - sentinel_net
+    labels:
+      - "com.sentinel.project=security-sentinel"
+
+networks:
+  sentinel_net:
+    driver: bridge
+
+volumes:
+  spiderfoot_data:
+  db_data:

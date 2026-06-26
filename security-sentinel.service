@@ -1,0 +1,14 @@
+[Unit]
+Description=Security Sentinel Background Service
+After=network.target
+
+[Service]
+Type=simple
+User=nomadik
+WorkingDirectory=/home/nomadik/security-sentinel-project
+# We use a loop in a small bash script to keep it running hourly
+ExecStart=/bin/bash -c "while true; do /usr/bin/python3 /home/nomadik/security-sentinel-project/src/audit_runner.py dev-test-target dev@example.com; sleep 3600; done"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

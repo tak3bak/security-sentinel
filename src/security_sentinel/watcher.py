@@ -3,7 +3,7 @@ import time
 import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from .file_inspector import FileInspector
+from security_sentinel.file_inspector import FileInspector
 
 class SecuritySentinelHandler(FileSystemEventHandler):
     def __init__(self):
