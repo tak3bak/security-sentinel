@@ -1,0 +1,6 @@
+{"type": "metadata", "control_name": "Access Control", "shared_requirements": ["MFA", "Least privilege", "RBAC", "Provisioning", "Session timeout", "Encrypted access", "Audit logging"], "hipaa_refs": ["164.312(a)(1)"], "cmmc_refs": ["AC.1.001", "AC.2.007", "AC.2.008", "AC.3.021"], "soc2_refs": ["CC6.1", "CC6.2", "CC6.3", "CC6.6"], "overlap_strength": "high"}
+{"control_id": "AC-1", "framework": "CMMC_2.0", "description": "Access Control Policy", "hipaa_crosswalk": "164.308(a)(1)", "soc2_crosswalk": "CC6.1", "priority": "High"}
+{"control_id": "AC-2", "framework": "CMMC_2.0", "description": "Account Management", "hipaa_crosswalk": "164.308(a)(3)", "soc2_crosswalk": "CC6.2", "priority": "High"}
+{"control_id": "SC-7", "framework": "CMMC_2.0", "description": "Boundary Protection", "hipaa_crosswalk": "164.312(a)(1)", "soc2_crosswalk": "CC6.6", "priority": "Medium"}
+{"control_id": "AU-2", "framework": "CMMC_2.0", "description": "Audit Events", "hipaa_crosswalk": "164.312(b)", "soc2_crosswalk": "CC7.2", "priority": "High"}
+{"control_id": "IA-2", "framework": "CMMC_2.0", "description": "Identification and Authentication", "hipaa_crosswalk": "164.308(a)(5)", "soc2_crosswalk": "CC6.1", "priority": "High"}

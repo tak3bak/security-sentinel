@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Nomadik Active Leases</h2>
+    <table border="1">
+        <tr><th>Token</th><th>Expiry</th></tr>
+        {% for lease in leases %}
+        <tr><td>{{ lease[0] }}</td><td>{{ lease[1] }}</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
