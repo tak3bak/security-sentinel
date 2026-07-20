@@ -1,0 +1,17 @@
+<group name="compliance_soc2_cc5_2,">
+  <rule id="100001" level="10">
+    <if_sid>5710, 5712</if_sid>
+    <description>SOC 2 CC5.2 - Incident Detection: SSH Brute Force Attempt Detected.</description>
+    <mitre><id>T1110</id></mitre>
+  </rule>
+  <rule id="100002" level="7">
+    <if_sid>550</if_sid>
+    <description>SOC 2 CC5.2 - Change Control: Critical System File Modified.</description>
+    <mitre><id>T1492</id></mitre>
+  </rule>
+  <rule id="100003" level="12">
+    <if_sid>5716</if_sid>
+    <description>SOC 2 CC5.2 - Unauthorized Access: Privilege Escalation Attempt Detected.</description>
+    <mitre><id>T1068</id></mitre>
+  </rule>
+</group>

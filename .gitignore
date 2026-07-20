@@ -23,3 +23,6 @@ api/venv/
 .pytest_cache/
 >>>>>>> 103143a (Include missing files and finalize structure before sync)
 app/core/core/
+.env
+config.env
+config.env

@@ -1,53 +1,45 @@
 services:
-  spiderfoot:
-    build: 
-      context: ./spiderfoot
-      dockerfile: Dockerfile
-    container_name: sentinel-spiderfoot
-    restart: unless-stopped
-    ports:
-      - "5001:5001"
-    volumes:
-      - spiderfoot_data:/var/lib/spiderfoot
-    networks:
-      - sentinel_net
-    labels:
-      - "com.sentinel.project=security-sentinel"
-
-  analysis-engine:
-    build:
-      context: ./analysis
-      dockerfile: Dockerfile
-    container_name: sentinel-analysis
-    restart: unless-stopped
-    networks:
-      - sentinel_net
-    env_file: .env
-    depends_on:
-      - sentinel-db
-    labels:
-      - "com.sentinel.project=security-sentinel"
-
   sentinel-db:
     image: postgres:17-alpine
     container_name: sentinel-db
-    restart: unless-stopped
     environment:
-      POSTGRES_USER: sentinel_user
-      POSTGRES_PASSWORD: secure_password
-      POSTGRES_DB: sentinel_db
+      POSTGRES_USER: sentinel_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_sentinel_password}
+      POSTGRES_DB: security_sentinel
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
-      - sentinel_net
-    labels:
-      - "com.sentinel.project=security-sentinel"
+      - sentinel-net
+    restart: unless-stopped
 
-networks:
-  sentinel_net:
-    driver: bridge
+  analysis-engine:
+    build: .
+    container_name: sentinel-analysis
+    command: python main.py
+    environment:
+      - DATABASE_URL=postgresql://sentinel_admin:${DB_PASSWORD:-secure_sentinel_password}@sentinel-db:5432/security_sentinel
+    depends_on:
+      - sentinel-db
+    networks:
+      - sentinel-net
+    restart: unless-stopped
+
+  spiderfoot:
+    build:
+      context: ./spiderfoot
+    container_name: sentinel-spiderfoot
+    command: python sf.py -l 0.0.0.0:5001
+    ports:
+      - "5001:5001"
+    networks:
+      - sentinel-net
+    restart: unless-stopped
 
 volumes:
-  spiderfoot_data:
-  db_data:
+  pgdata:
+
+networks:
+  sentinel-net:
+    driver: bridge
