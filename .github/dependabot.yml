@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "pip" # Or "npm" depending on your stack manifests
+    directory: "/" 
+    schedule:
+      interval: "weekly"
