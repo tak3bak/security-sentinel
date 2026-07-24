@@ -26,3 +26,5 @@ app/core/core/
 .env
 config.env
 config.env
+.vercel
+.env*
