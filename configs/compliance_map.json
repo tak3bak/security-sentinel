@@ -1,0 +1,20 @@
+{
+  "unencrypted_sensitive_file": {
+    "control_id": "AC-3",
+    "frameworks": {
+      "HIPAA": "164.312(a)(2)(iv) - Encryption and Decryption",
+      "SOC 2": "CC6.1 - Logical Access",
+      "CMMC 2.0": "SC.L2-3.13.11"
+    },
+    "severity": "High"
+  },
+  "unauthorized_access_attempt": {
+    "control_id": "AU-2",
+    "frameworks": {
+      "HIPAA": "164.308(b)(1) - Audit Controls",
+      "SOC 2": "CC7.2 - Monitoring",
+      "CMMC 2.0": "AU.L1-3.3.1"
+    },
+    "severity": "Critical"
+  }
+}

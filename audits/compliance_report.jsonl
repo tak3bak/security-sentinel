@@ -1,0 +1,1 @@
+{"timestamp": "2026-07-16T00:00:00", "threat_type": "unencrypted_sensitive_file", "file_path": "/home/nomadik/test_dir/test.txt", "details": "Test findings", "compliance_control": {"control_id": "AC-3", "frameworks": {"HIPAA": "164.312(a)(2)(iv) - Encryption and Decryption", "SOC 2": "CC6.1 - Logical Access", "CMMC 2.0": "SC.L2-3.13.11"}, "severity": "High"}}
