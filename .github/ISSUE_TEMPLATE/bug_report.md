@@ -1,38 +1,42 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+name: 🐛 Bug Report
+about: Create a report to help us fix issues and improve Security Sentinel
+title: '[BUG]: '
+labels: 'bug'
 assignees: ''
+---
+
+## 🐛 Describe the Bug
+A clear and concise description of what the bug is in Security Sentinel (e.g., pipeline execution failure, container crash, rule evaluation error, dashboard anomaly).
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## ⚙️ Affected Component
+Select or specify which part of Security Sentinel is impacted:
+- [ ] Backend / API Service
+- [ ] Security Agent / Collector
+- [ ] Docker / Container Deployment
+- [ ] CI/CD & Security Workflows (CodeQL, Dependabot, Actions)
+- [ ] Frontend / Web Dashboard
 
-**To Reproduce**
+---
+
+## 🔁 To Reproduce
 Steps to reproduce the behavior:
 1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+2. Execute command or click on '....'
+3. Set environment variable or config '....'
+4. See error output below
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+---
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+##🎯 Expected Behavior
+A clear and concise description of what you expected to happen instead.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+---
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+## 📋 Logs & Screenshots
+If applicable, paste relevant terminal outputs, container logs (`docker logs <container_id>`), or screenshots to help explain your problem.
 
-**Additional context**
-Add any other context about the problem here.
+```text
+# Paste error logs or stack traces here
