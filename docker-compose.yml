@@ -24,7 +24,7 @@ services:
       - sentinel-db
     networks:
       - sentinel-net
-    restart: unless-stopped
+    restart: "on-failure"
 
   spiderfoot:
     build:
