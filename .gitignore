@@ -28,3 +28,14 @@ config.env
 config.env
 .vercel
 .env*
+
+# Security & Secrets
+.env
+*.env
+*.pem
+*.key
+*.cert
+secrets/
+
+# Docker Local State
+.docker/
