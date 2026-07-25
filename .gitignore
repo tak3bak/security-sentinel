@@ -39,3 +39,9 @@ secrets/
 
 # Docker Local State
 .docker/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
