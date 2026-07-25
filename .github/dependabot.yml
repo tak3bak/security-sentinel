@@ -1,6 +1,12 @@
-version: 2
 updates:
-  - package-ecosystem: "pip" # Or "npm" depending on your stack manifests
-    directory: "/" 
+  # Monitor Node.js / NPM dependencies for frontend dashboard
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Monitor Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
       interval: "weekly"
