@@ -6,6 +6,7 @@ app/core/core/
 audits/
 *.cert
 config.env
+*.crt
 data/
 # Databases & Caches
 *.db
@@ -16,6 +17,7 @@ data/
 .env
 .env*
 # Environment & Credentials
+# Environment variables & secrets
 <<<<<<< HEAD
 # Ignore environment variables and secrets
 # Ignore local audit data
@@ -23,12 +25,17 @@ data/
 # Ignore OS junk
 # Ignore Python bytecode and cache
 *.key
+# Keys & Certificates
 *.log
 *.pem
 prioritized_threats.txt
+*.pub
 *.pyc
 __pycache__/
 .pytest_cache/
+quarantine/
+*.quarantined
+# Quarantined test artifacts
 secrets/
 # Security & Secrets
 semgrep_findings.json

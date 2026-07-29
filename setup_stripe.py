@@ -6,7 +6,7 @@ load_dotenv()
 
 # .strip() removes any accidental trailing \n or spaces from the key
 raw_key = os.getenv("STRIPE_SECRET_KEY", "")
-stripe.api_key = raw_key.strip() if raw_key else "sk_test_placeholder"
+stripe.api_key = raw_key.strip() if raw_key else "YOUR_STRIPE_SECRET_KEY"
 
 DOMAIN = os.getenv("APP_URL", "https://nomadik.site").strip()
 
