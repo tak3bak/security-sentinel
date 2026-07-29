@@ -36,6 +36,7 @@ __pycache__/
 quarantine/
 *.quarantined
 # Quarantined test artifacts
+# Quarantine test artifacts
 secrets/
 # Security & Secrets
 semgrep_findings.json

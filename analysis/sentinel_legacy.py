@@ -23,7 +23,7 @@ TARGET_DIR = "./secure_zone"
 # ---------------------------------------------------------
 LEAK_PATTERNS = {
     "AWS_ACCESS_KEY": r"(?i)AKIA[0-9A-Z]{16}",
-    "RSA_PRIVATE_KEY": r"-----BEGIN RSA PRIVATE KEY-----",
+    "RSA_PRIVATE_KEY": r"-----BEGIN RSA PRIVATE KEY (PLACEHOLDER)-----",
     "GENERIC_API_KEY": r"(?i)(api_key|apikey|secret|token)[\s:=]+['\"]?[0-9a-zA-Z]{16,}['\"]?",
     "HARDCODED_CREDENTIALS": r"(?i)(password|passwd|pwd)[\s:=]+['\"]?[^'\"]+['\"]?"
 }
