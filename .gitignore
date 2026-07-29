@@ -1,41 +1,38 @@
-# Ignore environment variables and secrets
-*.env
-.env
 
-# Ignore logs
-*.log
-
-# Ignore local audit data
-audits/
-data/
-
-# Ignore Python bytecode and cache
-__pycache__/
-*.pyc
-<<<<<<< HEAD
-
-# Ignore OS junk
-.DS_Store
-Thumbs.db
 =======
-api/venv/
-.env
-.pytest_cache/
 >>>>>>> 103143a (Include missing files and finalize structure before sync)
+api/venv/
 app/core/core/
-.env
-config.env
-config.env
-.vercel
-.env*
-
-# Security & Secrets
-.env
-*.env
-*.pem
-*.key
+audits/
 *.cert
-secrets/
-
-# Docker Local State
+config.env
+data/
+# Databases & Caches
+*.db
 .docker/
+# Docker Local State
+.DS_Store
+*.env
+.env
+.env*
+# Environment & Credentials
+<<<<<<< HEAD
+# Ignore environment variables and secrets
+# Ignore local audit data
+# Ignore logs
+# Ignore OS junk
+# Ignore Python bytecode and cache
+*.key
+*.log
+*.pem
+prioritized_threats.txt
+*.pyc
+__pycache__/
+.pytest_cache/
+secrets/
+# Security & Secrets
+semgrep_findings.json
+# Temporary Audit Outputs
+Thumbs.db
+.vercel
+.wrangler/
