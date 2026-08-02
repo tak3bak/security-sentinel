@@ -107,7 +107,7 @@ class SentinelHandler(FileSystemEventHandler):
                     data = res.json()
                     logging.info(f"{mode_tag} [SHODAN MATCH] ISP: {data.get('isp', 'Unknown')} | Open Ports: {data.get('ports', [])}")
             except Exception as e:
-                logging.error(f"{mode_tag} [SHODAN FAULT] Connection failed: {e}")
+                logging.error(f"{mode_tag} [SHODAN FAULT] Connection failed: {type(e).__name__}")
 
         # Decoupled CLI SpiderFoot Orchestration
         sf_cli = os.path.join(SPIDERFOOT_PATH_ENV, "sfcli.py")
