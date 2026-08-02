@@ -127,8 +127,8 @@ class sfp_webserver(SpiderFootPlugin):
         if cookies and 'ASP.NET' in cookies:
             tech.append("ASP.NET")
 
-        parsed_src = urlparse(str(eventSource))
-        if parsed_src.hostname and parsed_src.path.lower().endswith(".asp"):
+        src_str = str(eventSource)
+        if ".asp" in src_str[-5:].lower():
             tech.append("ASP")
 
         if urlparse(eventSource).netloc.lower() == ".jsp" or urlparse(eventSource).netloc.lower().endswith("..jsp"):
