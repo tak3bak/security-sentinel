@@ -130,9 +130,11 @@ class sfp_webserver(SpiderFootPlugin):
         
 
         src_parts = str(eventSource).lower().split('?')[0].split('/')[-1]
-        if src_parts.endswith(('.jsp', '.jspx')):
+        jsp_exts = {".jsp", ".jspx"}
+        php_exts = {".php", ".php3", ".php5"}
+        if any(src_parts == ext for ext in jsp_exts):
             tech.append("Java/JSP")
-        if src_parts.endswith(('.php', '.php3', '.php5')):
+        if any(src_parts == ext for ext in php_exts):
             tech.append("PHP")
 
         for t in set(tech):
