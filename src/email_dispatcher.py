@@ -25,7 +25,7 @@ def monitor_audits():
     while True:
         if os.path.exists(audit_base_path):
             for client in os.listdir(audit_base_path):
-                client_dir = os.path.join(audit_base_path, client)
+                client_dir = os.path.join(audit_base_path, os.path.basename(client))
                 # Only process if data exists and hasn't been "sent" (or reviewed)
                 if os.path.isdir(client_dir) and os.path.exists(os.path.join(client_dir, "data.json")) and \
                    not os.path.exists(os.path.join(client_dir, "sent.txt")):

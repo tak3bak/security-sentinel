@@ -15,7 +15,7 @@ class QuarantineManager:
     def quarantine_file(self, file_path):
         if os.path.exists(file_path):
             filename = os.path.basename(file_path)
-            destination = os.path.join(self.quarantine_dir, filename)
+            destination = os.path.join(self.quarantine_dir, os.path.basename(filename))
             shutil.move(file_path, destination)
             logging.warning(f"File quarantined: {filename}")
         else:

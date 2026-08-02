@@ -43,7 +43,7 @@ class SecurityEngine:
         
         for root, _, files in os.walk(target_dir):
             for file in files:
-                file_path = os.path.join(root, file)
+                file_path = os.path.join(root, os.path.basename(file))
                 
                 # Check 1: Content Patterns
                 try:

@@ -41,7 +41,7 @@ class SentinelEventHandler(FileSystemEventHandler):
             
         for root, _, files in os.walk(self.watch_directory):
             for file in files:
-                filepath = os.path.join(root, file)
+                filepath = os.path.join(root, os.path.basename(file))
                 self.file_hashes[filepath] = self._calculate_hash(filepath)
         logging.info("Baseline established. Directory scanning is active at FULL PACE.")
 

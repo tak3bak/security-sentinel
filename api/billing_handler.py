@@ -223,4 +223,4 @@ def stripe_webhook():
 if __name__ == "__main__":
     init_db()
     print("🔥 Starting Flask Server on http://localhost:4242")
-    app.run(port=4242, debug=True)
+    app.run(port=4242, debug=False)

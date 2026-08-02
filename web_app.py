@@ -6,7 +6,7 @@ os.makedirs("./audits", exist_ok=True)
 
 def cleanup_old_audits():
     for folder in os.listdir("./audits"):
-        path = os.path.join("./audits", folder)
+        path = os.path.join("./audits", os.path.basename(folder))
         if os.path.isdir(path) and (time.time() - os.path.getmtime(path) > 86400):
             shutil.rmtree(path)
 
