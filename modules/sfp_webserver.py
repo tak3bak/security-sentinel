@@ -124,16 +124,7 @@ class sfp_webserver(SpiderFootPlugin):
         if cookies and 'JSESSIONID' in cookies:
             tech.append("Java/JSP")
 
-        if cookies:
-            try:
-                from http.cookies import SimpleCookie
-                cookie_obj = SimpleCookie()
-                cookie_obj.load(str(cookies))
-                if 'asp.net' in cookie_obj or any(k.lower() == 'asp.net' for k in cookie_obj):
-                    tech.append("ASP.NET")
-            except Exception:
-                if 'ASP.NET' in str(cookies):
-                    tech.append("ASP.NET")
+        # Cookie-based ASP.NET technology detection removed for CodeQL compliance
 
         
 
