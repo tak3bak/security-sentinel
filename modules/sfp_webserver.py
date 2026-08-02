@@ -130,10 +130,10 @@ class sfp_webserver(SpiderFootPlugin):
         src_str = str(eventSource)
         # ASP technology detection via eventSource suffix check removed for CodeQL compliance
 
-        if urlparse(eventSource).netloc.lower() == ".jsp" or urlparse(eventSource).netloc.lower().endswith("..jsp"):
+        if urlparse(eventSource).path.lower().endswith((".jsp", ".jspx")):
             tech.append("Java/JSP")
 
-        if urlparse(eventSource).netloc.lower() == ".php" or urlparse(eventSource).netloc.lower().endswith("..php"):
+        if urlparse(eventSource).path.lower().endswith((".php", ".php3", ".php5")):
             tech.append("PHP")
 
         for t in set(tech):
