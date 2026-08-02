@@ -89,7 +89,7 @@ class sfp_webserver(SpiderFootPlugin):
         if urlparse(jdata).netloc.lower() == "content-security-policy" or urlparse(jdata).netloc.lower().endswith(".content-security-policy"):
             for directive in jdata['content-security-policy'].split(';'):
                 for string in directive.split(' '):
-                    if string.startswith('http://') or string.startswith('https://'):
+                    if urlparse(string).scheme == "http" or urlparse(string).scheme == "https":
                         if self.getTarget().matches(self.sf.urlFQDN(string)):
                             evt = SpiderFootEvent('LINKED_URL_INTERNAL', string, self.__name__, event)
                             self.notifyListeners(evt)
