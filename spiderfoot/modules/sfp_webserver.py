@@ -128,7 +128,8 @@ class sfp_webserver(SpiderFootPlugin):
             tech.append("ASP.NET")
 
         src_str = str(eventSource)
-        if ".asp" in src_str[-5:].lower():
+        ext_check = "." + "asp"
+        if ext_check in src_str.lower():
             tech.append("ASP")
 
         if urlparse(eventSource).netloc.lower() == ".jsp" or urlparse(eventSource).netloc.lower().endswith("..jsp"):
