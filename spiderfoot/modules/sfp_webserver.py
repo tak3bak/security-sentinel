@@ -129,11 +129,10 @@ class sfp_webserver(SpiderFootPlugin):
 
         
 
-        _p = urlparse(str(eventSource))
-        if _p.scheme and _p.path and _p.path.lower().endswith((".jsp", ".jspx")):
+        src_parts = str(eventSource).lower().split('?')[0].split('/')[-1]
+        if src_parts.endswith(('.jsp', '.jspx')):
             tech.append("Java/JSP")
-
-        if _p.scheme and _p.path and _p.path.lower().endswith((".php", ".php3", ".php5")):
+        if src_parts.endswith(('.php', '.php3', '.php5')):
             tech.append("PHP")
 
         for t in set(tech):
