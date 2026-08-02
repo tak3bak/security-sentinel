@@ -127,13 +127,13 @@ class sfp_webserver(SpiderFootPlugin):
         if cookies and 'ASP.NET' in cookies:
             tech.append("ASP.NET")
 
-        src_str = str(eventSource)
-        # ASP technology detection via eventSource suffix check removed for CodeQL compliance
+        
 
-        if parsed_url.scheme and parsed_url.path and parsed_url.path.lower().endswith((".jsp", ".jspx")):
+        _p = urlparse(str(eventSource))
+        if _p.scheme and _p.path and _p.path.lower().endswith((".jsp", ".jspx")):
             tech.append("Java/JSP")
 
-        if parsed_url.scheme and parsed_url.path and parsed_url.path.lower().endswith((".php", ".php3", ".php5")):
+        if _p.scheme and _p.path and _p.path.lower().endswith((".php", ".php3", ".php5")):
             tech.append("PHP")
 
         for t in set(tech):
