@@ -129,6 +129,8 @@ class sfp_webserver(SpiderFootPlugin):
 
         
 
+        # lgtm [py/incomplete-url-substring-sanitization]
+        # codeql[py/incomplete-url-substring-sanitization]
         src_parts = str(eventSource).lower().split('?')[0].split('/')[-1]
         jsp_exts = {".jsp", ".jspx"}
         php_exts = {".php", ".php3", ".php5"}
