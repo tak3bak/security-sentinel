@@ -263,7 +263,7 @@ class sfp_abstractapi(SpiderFootPlugin):
 
             linkedin_url = data.get('linkedin_url')
             if linkedin_url:
-                if linkedin_url.startswith('linkedin.com'):
+                if urlparse('https://' + linkedin_url).netloc.lower() == 'linkedin.com':
                     linkedin_url = f"https://{linkedin_url}"
                 e = SpiderFootEvent("SOCIAL_MEDIA", f"LinkedIn (Company): <SFURL>{linkedin_url}</SFURL>", self.__name__, event)
                 self.notifyListeners(e)

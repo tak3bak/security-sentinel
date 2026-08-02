@@ -94,7 +94,7 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
             return
 
         if eventName == "SOCIAL_MEDIA":
-            if "github.com/" in eventData.lower() or "gitlab.com/" in eventData.lower() or "bitbucket.org/" in eventData.lower():
+            if any(domain in urlparse(eventData.lower()).netloc for domain in ["github.com", "gitlab.com", "bitbucket.org"]):
                 try:
                     url = eventData.split(": ")[1].replace("<SFURL>", "").replace("</SFURL>", "")
                 except BaseException:
@@ -104,7 +104,7 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
                 return
 
         if eventName == "PUBLIC_CODE_REPO" and self.opts['allrepos']:
-            if "github.com/" in eventData.lower() or "gitlab.com/" in eventData.lower() or "bitbucket.org/" in eventData.lower():
+            if any(domain in urlparse(eventData.lower()).netloc for domain in ["github.com", "gitlab.com", "bitbucket.org"]):
                 try:
                     url = eventData.split("\n")[1].replace("URL: ", "")
                 except BaseException:
