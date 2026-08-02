@@ -131,12 +131,12 @@ class sfp_webserver(SpiderFootPlugin):
         # ASP technology detection via eventSource suffix check removed for CodeQL compliance
 
         netloc = urlparse(eventSource).netloc.lower()
-        path_val = urlparse(eventSource).path.lower()
+        # path_val check removed
         if parsed_url.scheme and parsed_url.path and parsed_url.path.lower().endswith((".jsp", ".jspx")):
             tech.append("Java/JSP")
 
         netloc = urlparse(eventSource).netloc.lower()
-        path_val = urlparse(eventSource).path.lower()
+        # path_val check removed
         if parsed_url.scheme and parsed_url.path and parsed_url.path.lower().endswith((".php", ".php3", ".php5")):
             tech.append("PHP")
 
