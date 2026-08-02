@@ -222,7 +222,15 @@ class SpiderFoot:
         if not self.opts['__logging']:
             return
 
-        self.log.info(f"{message}", extra={'scanId': self._scanId})
+        self.log.info(f"{self._sanitize_log_data(message)}", extra={'scanId': self._scanId})
+
+    
+    def _sanitize_log_data(self, data: str) -> str:
+        if not isinstance(data, str):
+            return data
+        # Redact common key patterns
+        data = re.sub(r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*["']?([a-zA-Z0-9_\-]+)["']?", r"=***REDACTED***", data)
+        return data
 
     def debug(self, message: str) -> None:
         """Log and print a debug message.
@@ -235,7 +243,7 @@ class SpiderFoot:
         if not self.opts['__logging']:
             return
 
-        self.log.debug(f"{message}", extra={'scanId': self._scanId})
+        self.log.debug(f"{self._sanitize_log_data(message)}", extra={'scanId': self._scanId})
 
     def hashstring(self, string: str) -> str:
         """Returns a SHA256 hash of the specified input.

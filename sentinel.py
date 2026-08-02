@@ -102,7 +102,7 @@ class SentinelHandler(FileSystemEventHandler):
         # Shodan API Integration
         if SHODAN_API_KEY and SHODAN_API_KEY != "your_shodan_api_key_here":
             try:
-                res = requests.get(f"https://api.shodan.io/shodan/host/{ip}?key={SHODAN_API_KEY}", timeout=5)
+                res = requests.get(f"https://api.shodan.io/shodan/host/{ip}", params={"key": SHODAN_API_KEY}, timeout=5)
                 if res.status_code == 200:
                     data = res.json()
                     logging.info(f"{mode_tag} [SHODAN MATCH] ISP: {data.get('isp', 'Unknown')} | Open Ports: {data.get('ports', [])}")
