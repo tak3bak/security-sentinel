@@ -134,7 +134,7 @@ class sfp_webanalytics(SpiderFootPlugin):
                 self.notifyListeners(evt)
 
             # Quantcast
-            if '_qevents.push' in eventData:
+            if urlparse(eventData).netloc.lower() == "_qevents.push" or urlparse(eventData).netloc.lower().endswith("._qevents.push"):
                 matches = re.findall(r"\bqacct:\"(p-[a-z0-9]+)\"", eventData, re.IGNORECASE)
                 for m in matches:
                     self.debug("Quantcast match: " + m)

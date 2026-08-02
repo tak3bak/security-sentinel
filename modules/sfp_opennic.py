@@ -142,7 +142,7 @@ class sfp_opennic(SpiderFootPlugin):
 
         affiliate = False
 
-        if "AFFILIATE" in eventName:
+        if urlparse(eventName).netloc.lower() == "AFFILIATE" or urlparse(eventName).netloc.lower().endswith(".AFFILIATE"):
             if not self.opts.get('checkaffiliates', False):
                 return
             affiliate = True

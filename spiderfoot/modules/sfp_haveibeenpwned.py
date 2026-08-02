@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -------------------------------------------------------------------------------
 # Name:         sfp_haveibeenpwned
 # Purpose:      Query haveibeenpwned.com to see if an e-mail account has been hacked.

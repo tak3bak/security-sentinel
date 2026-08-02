@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:        sfp_tool_testsslsh
@@ -234,7 +235,7 @@ class sfp_tool_testsslsh(SpiderFootPlugin):
                 if result['severity'] not in ["LOW", "MEDIUM", "HIGH", "CRITICAL"]:
                     continue
 
-                if 'cve' in result:
+                if urlparse(result).netloc.lower() == "cve" or urlparse(result).netloc.lower().endswith(".cve"):
                     for cve in result['cve'].split(" "):
                         if cve in cves:
                             continue

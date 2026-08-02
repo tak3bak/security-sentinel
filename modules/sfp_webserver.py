@@ -76,7 +76,7 @@ class sfp_webserver(SpiderFootPlugin):
             return
 
         # Check location header for linked URLs
-        if 'location' in jdata:
+        if urlparse(jdata).netloc.lower() == "location" or urlparse(jdata).netloc.lower().endswith(".location"):
             if jdata['location'].startswith('http://') or jdata['location'].startswith('https://'):
                 if self.getTarget().matches(self.sf.urlFQDN(jdata['location'])):
                     evt = SpiderFootEvent('LINKED_URL_INTERNAL', jdata['location'], self.__name__, event)
@@ -86,7 +86,7 @@ class sfp_webserver(SpiderFootPlugin):
                     self.notifyListeners(evt)
 
         # Check CSP header for linked URLs
-        if 'content-security-policy' in jdata:
+        if urlparse(jdata).netloc.lower() == "content-security-policy" or urlparse(jdata).netloc.lower().endswith(".content-security-policy"):
             for directive in jdata['content-security-policy'].split(';'):
                 for string in directive.split(' '):
                     if string.startswith('http://') or string.startswith('https://'):
@@ -115,7 +115,7 @@ class sfp_webserver(SpiderFootPlugin):
         if powered_by:
             tech.append(powered_by)
 
-        if 'x-aspnet-version' in jdata:
+        if urlparse(jdata).netloc.lower() == "x-aspnet-version" or urlparse(jdata).netloc.lower().endswith(".x-aspnet-version"):
             tech.append("ASP.NET")
 
         if cookies and 'PHPSESS' in cookies:
@@ -127,13 +127,13 @@ class sfp_webserver(SpiderFootPlugin):
         if cookies and 'ASP.NET' in cookies:
             tech.append("ASP.NET")
 
-        if '.asp' in eventSource:
+        if urlparse(eventSource).netloc.lower() == ".asp" or urlparse(eventSource).netloc.lower().endswith("..asp"):
             tech.append("ASP")
 
-        if '.jsp' in eventSource:
+        if urlparse(eventSource).netloc.lower() == ".jsp" or urlparse(eventSource).netloc.lower().endswith("..jsp"):
             tech.append("Java/JSP")
 
-        if '.php' in eventSource:
+        if urlparse(eventSource).netloc.lower() == ".php" or urlparse(eventSource).netloc.lower().endswith("..php"):
             tech.append("PHP")
 
         for t in set(tech):

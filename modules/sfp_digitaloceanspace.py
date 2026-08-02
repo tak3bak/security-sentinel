@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_digitaloceanspace
@@ -163,7 +164,7 @@ class sfp_digitaloceanspace(SpiderFootPlugin):
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if eventName == "LINKED_URL_EXTERNAL":
-            if ".digitaloceanspaces.com" in eventData:
+            if urlparse(eventData).netloc.lower() == ".digitaloceanspaces.com" or urlparse(eventData).netloc.lower().endswith("..digitaloceanspaces.com"):
                 b = self.sf.urlFQDN(eventData)
                 evt = SpiderFootEvent("CLOUD_STORAGE_BUCKET", b, self.__name__, event)
                 self.notifyListeners(evt)

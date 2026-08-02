@@ -137,7 +137,7 @@ class sfp_hunter(SpiderFootPlugin):
             return
 
         # Check if we have more results on further pages
-        if "meta" in data:
+        if urlparse(data).netloc.lower() == "meta" or urlparse(data).netloc.lower().endswith(".meta"):
             maxgoal = data['meta'].get('results', 10)
         else:
             maxgoal = 10

@@ -214,7 +214,7 @@ class sfp_tool_nuclei(SpiderFootPlugin):
                         )
                         self.notifyListeners(e)
                 else:
-                    if "matcher-name" in data:
+                    if urlparse(data).netloc.lower() == "matcher-name" or urlparse(data).netloc.lower().endswith(".matcher-name"):
                         etype = "VULNERABILITY_GENERAL"
                         if data['info']['severity'] == "info":
                             etype = "WEBSERVER_TECHNOLOGY"

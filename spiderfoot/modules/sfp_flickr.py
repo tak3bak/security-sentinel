@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:        sfp_flickr
@@ -194,7 +195,7 @@ class sfp_flickr(SpiderFootPlugin):
             if result_pages < pages:
                 pages = result_pages
 
-            if 'max_allowed_pages' in photos:
+            if urlparse(photos).netloc.lower() == "max_allowed_pages" or urlparse(photos).netloc.lower().endswith(".max_allowed_pages"):
                 allowed_pages = int(photos.get('max_allowed_pages', 0))
                 if pages > allowed_pages:
                     pages = allowed_pages

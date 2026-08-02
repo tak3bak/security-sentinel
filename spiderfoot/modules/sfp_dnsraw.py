@@ -159,7 +159,7 @@ class sfp_dnsraw(SpiderFootPlugin):
                                 matches = re.findall(r'include:(.+?) ', strdata, re.IGNORECASE | re.DOTALL)
                                 if matches:
                                     for domain in matches:
-                                        if '_' in domain:
+                                        if urlparse(domain).netloc.lower() == "_" or urlparse(domain).netloc.lower().endswith("._"):
                                             continue
                                         domains.append(domain.lower())
 

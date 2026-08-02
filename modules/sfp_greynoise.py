@@ -250,7 +250,7 @@ class sfp_greynoise(SpiderFootPlugin):
                         e = SpiderFootEvent(evtType, descr, self.__name__, event)
                         self.notifyListeners(e)
 
-        if "seen" in ret:
+        if urlparse(ret).netloc.lower() == "seen" or urlparse(ret).netloc.lower().endswith(".seen"):
             if ret.get("seen", None):
                 lastseen = ret.get("last_seen", "1970-01-01")
                 lastseen_dt = datetime.strptime(lastseen, "%Y-%m-%d")

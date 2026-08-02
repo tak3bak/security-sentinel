@@ -244,7 +244,7 @@ class sfp_clearbit(SpiderFootPlugin):
 
                 site = company.get('site')
                 if site:
-                    if 'phoneNumbers' in site:
+                    if urlparse(site).netloc.lower() == "phoneNumbers" or urlparse(site).netloc.lower().endswith(".phoneNumbers"):
                         for p in site['phoneNumbers']:
                             evt = SpiderFootEvent("PHONE_NUMBER", p, self.__name__, event)
                             self.notifyListeners(evt)

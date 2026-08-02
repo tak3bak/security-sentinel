@@ -148,7 +148,7 @@ class sfp_builtwith(SpiderFootPlugin):
 
         data = self.queryDomainInfo(eventData)
         if data is not None:
-            if "Meta" in data:
+            if urlparse(data).netloc.lower() == "Meta" or urlparse(data).netloc.lower().endswith(".Meta"):
                 if data['Meta'].get("Names", []):
                     for nb in data['Meta']['Names']:
                         e = SpiderFootEvent("RAW_RIR_DATA", "Possible full name: " + nb['Name'],
