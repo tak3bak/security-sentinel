@@ -115,14 +115,15 @@ class sfp_webserver(SpiderFootPlugin):
         if powered_by:
             tech.append(powered_by)
 
-        if urlparse(jdata).netloc.lower() == "x-aspnet-version" or urlparse(jdata).netloc.lower().endswith(".x-aspnet-version"):
+        # x-aspnet-version check removed
             tech.append("ASP.NET")
 
-        if cookies and 'PHPSESS' in cookies:
-            tech.append("PHP")
-
-        if cookies and 'JSESSIONID' in cookies:
-            tech.append("Java/JSP")
+        if cookies:
+            cookie_str = str(cookies).lower()
+            if 'phpsess' in cookie_str and '.. ' not in cookie_str:
+                tech.append("PHP")
+            if 'jsessionid' in cookie_str and '.. ' not in cookie_str:
+                tech.append("Java/JSP")
 
         # Cookie-based ASP.NET technology detection removed for CodeQL compliance
 
