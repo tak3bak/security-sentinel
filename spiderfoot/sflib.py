@@ -229,7 +229,7 @@ class SpiderFoot:
         if not isinstance(data, str):
             return data
         # Redact common key patterns
-        data = re.sub(r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*["']?([a-zA-Z0-9_\-]+)["']?", r"=***REDACTED***", data)
+        return re.sub(r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*["\']?([a-zA-Z0-9_\-]+)["\']?", r"\1=***REDACTED***", data)
         return data
 
     def debug(self, message: str) -> None:
