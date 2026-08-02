@@ -16,7 +16,7 @@ class SpiderFootLib:
     def _sanitize_log_data(self, data: str) -> str:
         if not isinstance(data, str):
             return data
-        pattern = r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['"]?([a-zA-Z0-9_\-]+)['"]?"
+        pattern = r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]+)['\"]?"
         return re.sub(pattern, r"\1=***REDACTED***", data)
 
     def error(self, message: str) -> None:
