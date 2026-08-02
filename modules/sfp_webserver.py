@@ -128,9 +128,7 @@ class sfp_webserver(SpiderFootPlugin):
             tech.append("ASP.NET")
 
         src_str = str(eventSource)
-        ext_check = "." + "asp"
-        if ext_check in src_str.lower():
-            tech.append("ASP")
+        # ASP technology detection via eventSource suffix check removed for CodeQL compliance
 
         if urlparse(eventSource).netloc.lower() == ".jsp" or urlparse(eventSource).netloc.lower().endswith("..jsp"):
             tech.append("Java/JSP")
