@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -------------------------------------------------------------------------------
 # Name:         sfp_clearbit
 # Purpose:      Query clearbit.com using their API.

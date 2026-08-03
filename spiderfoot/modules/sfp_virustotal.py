@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_virustotal

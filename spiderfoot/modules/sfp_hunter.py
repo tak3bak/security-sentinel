@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -------------------------------------------------------------------------------
 # Name:         sfp_hunter
 # Purpose:      Query hunter.io using their API.
