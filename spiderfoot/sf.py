@@ -595,8 +595,6 @@ def handle_abort(signal, frame) -> None:
 
 
     if scanId and dbh:
-        log.info(f"Aborting scan [{scanId}] ...")
-        dbh.scanInstanceSet(scanId, None, None, "ABORTED")
     sys.exit(-1)
 
 
