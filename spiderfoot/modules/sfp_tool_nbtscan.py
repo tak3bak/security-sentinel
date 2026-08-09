@@ -28,27 +28,23 @@ class sfp_tool_nbtscan(SpiderFootPlugin):
         "useCases": ["Footprint", "Investigate"],
         "categories": ["Crawling and Scanning"],
         "toolDetails": {
-                "name": "nbtscan",
-                "description": "nbtscan is a tool that scans for open NETBIOS nameservers "
-                               "on a local or remote TCP/IP network, and this is a first "
-                               "step in finding of open shares. It is based on the functionality "
-                               "of the standard Windows tool nbtstat, but it operates on a range "
-                               "of addresses instead of just one.",
-                "website": "http://www.unixwiz.net/tools/nbtscan.html",
-                "repository": "http://www.unixwiz.net/tools/nbtscan.html"
-        }
+            "name": "nbtscan",
+            "description": "nbtscan is a tool that scans for open NETBIOS nameservers "
+            "on a local or remote TCP/IP network, and this is a first "
+            "step in finding of open shares. It is based on the functionality "
+            "of the standard Windows tool nbtstat, but it operates on a range "
+            "of addresses instead of just one.",
+            "website": "http://www.unixwiz.net/tools/nbtscan.html",
+            "repository": "http://www.unixwiz.net/tools/nbtscan.html",
+        },
     }
 
-    opts = {
-        'nbtscan_path': '',
-        'netblockscan': True,
-        'netblockscanmax': 24
-    }
+    opts = {"nbtscan_path": "", "netblockscan": True, "netblockscanmax": 24}
 
     optdescs = {
-        'nbtscan_path': "The path to your nbtscan binary",
-        'netblockscan': "Scan all IPs within identified owned netblocks?",
-        'netblockscanmax': "Maximum netblock/subnet size to scan IPs within (CIDR value, 24 = /24, 16 = /16, etc.)"
+        "nbtscan_path": "The path to your nbtscan binary",
+        "netblockscan": "Scan all IPs within identified owned netblocks?",
+        "netblockscanmax": "Maximum netblock/subnet size to scan IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
     }
 
     results = None
@@ -64,10 +60,10 @@ class sfp_tool_nbtscan(SpiderFootPlugin):
             self.opts[opt] = userOpts[opt]
 
     def watchedEvents(self):
-        return ['IP_ADDRESS', 'NETBLOCK_OWNER']
+        return ["IP_ADDRESS", "NETBLOCK_OWNER"]
 
     def producedEvents(self):
-        return ['UDP_PORT_OPEN', 'UDP_PORT_OPEN_INFO', 'IP_ADDRESS']
+        return ["UDP_PORT_OPEN", "UDP_PORT_OPEN_INFO", "IP_ADDRESS"]
 
     def handleEvent(self, event):
         eventName = event.eventType
@@ -84,13 +80,15 @@ class sfp_tool_nbtscan(SpiderFootPlugin):
             self.debug("Skipping event from myself.")
             return
 
-        if not self.opts['nbtscan_path']:
-            self.error("You enabled sfp_tool_nbtscan but did not set a path to the tool!")
+        if not self.opts["nbtscan_path"]:
+            self.error(
+                "You enabled sfp_tool_nbtscan but did not set a path to the tool!"
+            )
             self.errorState = True
             return
 
-        exe = self.opts['nbtscan_path']
-        if self.opts['nbtscan_path'].endswith('/'):
+        exe = self.opts["nbtscan_path"]
+        if self.opts["nbtscan_path"].endswith("/"):
             exe = f"{exe}nbtscan"
 
         if not os.path.isfile(exe):
@@ -98,19 +96,21 @@ class sfp_tool_nbtscan(SpiderFootPlugin):
             self.errorState = True
             return
 
-        if not SpiderFootHelpers.sanitiseInput(eventData, extra=['/']):
+        if not SpiderFootHelpers.sanitiseInput(eventData, extra=["/"]):
             self.debug("Invalid input, skipping.")
             return
 
         try:
-            if eventName == "NETBLOCK_OWNER" and self.opts['netblockscan']:
+            if eventName == "NETBLOCK_OWNER" and self.opts["netblockscan"]:
                 net = IPNetwork(eventData)
-                if net.prefixlen < self.opts['netblockscanmax']:
+                if net.prefixlen < self.opts["netblockscanmax"]:
                     self.debug(f"Skipping scanning of {eventData}, too big.")
                     return
                 timeout = timeout * net.size
         except BaseException as e:
-            self.error(f"Strange netblock identified, unable to parse: {eventData} ({e})")
+            self.error(
+                f"Strange netblock identified, unable to parse: {eventData} ({e})"
+            )
             return
 
         # Don't look up stuff twice, check IP == IP here
@@ -126,11 +126,7 @@ class sfp_tool_nbtscan(SpiderFootPlugin):
 
         self.results[eventData] = True
 
-        args = [
-            exe,
-            "-v",
-            eventData
-        ]
+        args = [exe, "-v", eventData]
 
         try:
             p = Popen(args, stdout=PIPE, stderr=PIPE)
@@ -174,11 +170,14 @@ class sfp_tool_nbtscan(SpiderFootPlugin):
                     srcEvent = SpiderFootEvent("IP_ADDRESS", addr, self.__name__, event)
                     self.notifyListeners(srcEvent)
 
-                evt = SpiderFootEvent('UDP_PORT_OPEN', f"{addr}:137", self.__name__, srcEvent)
+                evt = SpiderFootEvent(
+                    "UDP_PORT_OPEN", f"{addr}:137", self.__name__, srcEvent
+                )
                 self.notifyListeners(evt)
 
-                evt = SpiderFootEvent('UDP_PORT_OPEN_INFO', info, self.__name__, evt)
+                evt = SpiderFootEvent("UDP_PORT_OPEN_INFO", info, self.__name__, evt)
                 self.notifyListeners(evt)
                 info = ""
+
 
 # End of sfp_tool_nbtscan class

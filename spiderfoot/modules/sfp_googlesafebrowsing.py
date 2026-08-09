@@ -21,7 +21,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
     meta = {
         "name": "Google SafeBrowsing",
         "summary": "Check if the URL is included on any of the Safe Browsing lists.",
-        'flags': ["slow", "apikey"],
+        "flags": ["slow", "apikey"],
         "useCases": ["Passive", "Investigate"],
         "categories": ["Reputation Systems"],
         "dataSource": {
@@ -140,9 +140,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
             return None
 
         if res["code"] == "403":
-            self.error(
-                "Permission denied, invalid API key on Google Safe Browsing API"
-            )
+            self.error("Permission denied, invalid API key on Google Safe Browsing API")
             self.errorState = True
             return None
 
@@ -176,9 +174,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if self.opts["api_key"] == "":
-            self.error(
-                "You enabled sfp_googlesafebrowsing but did not set an API key!"
-            )
+            self.error("You enabled sfp_googlesafebrowsing but did not set an API key!")
             self.errorState = True
             return
 

@@ -1,0 +1,32 @@
+# Keys & Certificates
+*.key
+*.pem
+*.pub
+secrets/
+
+# Environment variables & Wrangler configuration
+.dev.vars*
+!.dev.vars.example
+!.env.example
+
+# Logs & Audit outputs
+*.log
+prioritized_threats.txt
+semgrep_findings.json
+quarantine/
+*.quarantined
+
+# Python bytecode & cache
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Docker Local State
+.docker/
+
+# Deployment & Build artifacts
+.wrangler/
+
+# OS junk
+Thumbs.db
+.DS_Store

@@ -18,8 +18,8 @@ from bs4 import BeautifulSoup, SoupStrainer
 from networkx.readwrite.gexf import GEXFWriter
 import phonenumbers
 
-
 if sys.version_info >= (3, 8):  # PEP 589 support (TypedDict)
+
     class _GraphNode(typing.TypedDict):
         id: str  # noqa: A003
         label: str
@@ -44,6 +44,7 @@ if sys.version_info >= (3, 8):  # PEP 589 support (TypedDict)
     class ExtractedLink(typing.TypedDict):
         source: str
         original: str
+
 else:
     _GraphNode = typing.Dict[str, typing.Union[str, int]]
 
@@ -65,7 +66,7 @@ else:
 EmptyTree = typing.Dict[None, object]
 
 
-class SpiderFootHelpers():
+class SpiderFootHelpers:
     """SpiderFoot helper functions.
 
     This class is used to store static helper functions which are
@@ -82,7 +83,7 @@ class SpiderFootHelpers():
         Returns:
             str: SpiderFoot data file system path
         """
-        path = os.environ.get('SPIDERFOOT_DATA')
+        path = os.environ.get("SPIDERFOOT_DATA")
         if not path:
             path = f"{Path.home()}/.spiderfoot/"
         if not os.path.isdir(path):
@@ -96,7 +97,7 @@ class SpiderFootHelpers():
         Returns:
             str: SpiderFoot cache file system path
         """
-        path = os.environ.get('SPIDERFOOT_CACHE')
+        path = os.environ.get("SPIDERFOOT_CACHE")
         if not path:
             path = f"{Path.home()}/.spiderfoot/cache"
         if not os.path.isdir(path):
@@ -110,7 +111,7 @@ class SpiderFootHelpers():
         Returns:
             str: SpiderFoot data file system path
         """
-        path = os.environ.get('SPIDERFOOT_LOGS')
+        path = os.environ.get("SPIDERFOOT_LOGS")
         if not path:
             path = f"{Path.home()}/.spiderfoot/logs"
         if not os.path.isdir(path):
@@ -118,7 +119,9 @@ class SpiderFootHelpers():
         return path
 
     @staticmethod
-    def loadModulesAsDict(path: str, ignore_files: typing.Optional[typing.List[str]] = None) -> dict:
+    def loadModulesAsDict(
+        path: str, ignore_files: typing.Optional[typing.List[str]] = None
+    ) -> dict:
         """Load modules from modules directory.
 
         Args:
@@ -143,10 +146,19 @@ class SpiderFootHelpers():
             raise ValueError(f"Modules directory does not exist: {path}")
 
         sfModules = dict()
-        valid_categories = ["Content Analysis", "Crawling and Scanning", "DNS",
-                            "Leaks, Dumps and Breaches", "Passive DNS",
-                            "Public Registries", "Real World", "Reputation Systems",
-                            "Search Engines", "Secondary Networks", "Social Media"]
+        valid_categories = [
+            "Content Analysis",
+            "Crawling and Scanning",
+            "DNS",
+            "Leaks, Dumps and Breaches",
+            "Passive DNS",
+            "Public Registries",
+            "Real World",
+            "Reputation Systems",
+            "Search Engines",
+            "Secondary Networks",
+            "Social Media",
+        ]
 
         for filename in os.listdir(path):
             if not filename.startswith("sfp_"):
@@ -156,23 +168,32 @@ class SpiderFootHelpers():
             if filename in ignore_files:
                 continue
 
-            modName = filename.split('.')[0]
+            modName = filename.split(".")[0]
             sfModules[modName] = dict()
-            mod = __import__('modules.' + modName, globals(), locals(), [modName])
-            sfModules[modName]['object'] = getattr(mod, modName)()
-            mod_dict = sfModules[modName]['object'].asdict()
+            mod = __import__("modules." + modName, globals(), locals(), [modName])
+            sfModules[modName]["object"] = getattr(mod, modName)()
+            mod_dict = sfModules[modName]["object"].asdict()
             sfModules[modName].update(mod_dict)
 
-            if len(sfModules[modName]['cats']) > 1:
-                raise SyntaxError(f"Module {modName} has multiple categories defined but only one is supported.")
+            if len(sfModules[modName]["cats"]) > 1:
+                raise SyntaxError(
+                    f"Module {modName} has multiple categories defined but only one is supported."
+                )
 
-            if sfModules[modName]['cats'] and sfModules[modName]['cats'][0] not in valid_categories:
-                raise SyntaxError(f"Module {modName} has invalid category '{sfModules[modName]['cats']}'.")
+            if (
+                sfModules[modName]["cats"]
+                and sfModules[modName]["cats"][0] not in valid_categories
+            ):
+                raise SyntaxError(
+                    f"Module {modName} has invalid category '{sfModules[modName]['cats']}'."
+                )
 
         return sfModules
 
     @staticmethod
-    def loadCorrelationRulesRaw(path: str, ignore_files: typing.Optional[typing.List[str]] = None) -> typing.Dict[str, str]:
+    def loadCorrelationRulesRaw(
+        path: str, ignore_files: typing.Optional[typing.List[str]] = None
+    ) -> typing.Dict[str, str]:
         """Load correlation rules from correlations directory.
 
         Args:
@@ -202,8 +223,8 @@ class SpiderFootHelpers():
             if filename in ignore_files:
                 continue
 
-            ruleName = filename.split('.')[0]
-            with open(path + filename, 'r') as f:
+            ruleName = filename.split(".")[0]
+            with open(path + filename, "r") as f:
                 correlationRulesRaw[ruleName] = f.read()
 
         return correlationRulesRaw
@@ -232,8 +253,12 @@ class SpiderFootHelpers():
             {r"^[0-9]+$": "BGP_AS_OWNER"},
             {r"^[0-9a-f:]+$": "IPV6_ADDRESS"},
             {r"^[0-9a-f:]+::/[0-9]+$": "NETBLOCKV6_OWNER"},
-            {r"^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)+([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$": "INTERNET_NAME"},
-            {r"^(bc(0([ac-hj-np-z02-9]{39}|[ac-hj-np-z02-9]{59})|1[ac-hj-np-z02-9]{8,87})|[13][a-km-zA-HJ-NP-Z1-9]{25,35})$": "BITCOIN_ADDRESS"},
+            {
+                r"^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)+([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$": "INTERNET_NAME"
+            },
+            {
+                r"^(bc(0([ac-hj-np-z02-9]{39}|[ac-hj-np-z02-9]{59})|1[ac-hj-np-z02-9]{8,87})|[13][a-km-zA-HJ-NP-Z1-9]{25,35})$": "BITCOIN_ADDRESS"
+            },
         ]
 
         # Parse the target and set the target type
@@ -260,13 +285,13 @@ class SpiderFootHelpers():
         if not isinstance(url, str):
             return None
 
-        if '..' not in url:
+        if ".." not in url:
             return url
 
         finalBits: typing.List[str] = list()
 
-        for chunk in url.split('/'):
-            if chunk != '..':
+        for chunk in url.split("/"):
+            if chunk != "..":
                 finalBits.append(chunk)
                 continue
 
@@ -275,12 +300,12 @@ class SpiderFootHelpers():
                 continue
 
             # Don't pop the last item off if the first bits are not the path
-            if '://' in url and len(finalBits) <= 3:
+            if "://" in url and len(finalBits) <= 3:
                 continue
 
             finalBits.pop()
 
-        return '/'.join(finalBits)
+        return "/".join(finalBits)
 
     @staticmethod
     def urlBaseDir(url: str) -> typing.Optional[str]:
@@ -298,19 +323,19 @@ class SpiderFootHelpers():
         if not isinstance(url, str):
             return None
 
-        bits = url.split('/')
+        bits = url.split("/")
 
         # For cases like 'www.somesite.com'
         if len(bits) == 0:
-            return url + '/'
+            return url + "/"
 
         # For cases like 'http://www.blah.com'
-        if '://' in url and url.count('/') < 3:
-            return url + '/'
+        if "://" in url and url.count("/") < 3:
+            return url + "/"
 
-        base = '/'.join(bits[:-1])
+        base = "/".join(bits[:-1])
 
-        return base + '/'
+        return base + "/"
 
     @staticmethod
     def urlBaseUrl(url: str) -> typing.Optional[str]:
@@ -330,10 +355,10 @@ class SpiderFootHelpers():
         if not isinstance(url, str):
             return None
 
-        if '://' in url:
-            bits = re.match(r'(\w+://.[^/:\?]*)[:/\?].*', url)
+        if "://" in url:
+            bits = re.match(r"(\w+://.[^/:\?]*)[:/\?].*", url)
         else:
-            bits = re.match(r'(.[^/:\?]*)[:/\?]', url)
+            bits = re.match(r"(.[^/:\?]*)[:/\?]", url)
 
         if bits is None:
             return url.lower()
@@ -341,7 +366,9 @@ class SpiderFootHelpers():
         return bits.group(1).lower()
 
     @staticmethod
-    def dictionaryWordsFromWordlists(wordlists: typing.Optional[typing.List[str]] = None) -> typing.Set[str]:
+    def dictionaryWordsFromWordlists(
+        wordlists: typing.Optional[typing.List[str]] = None,
+    ) -> typing.Set[str]:
         """Return dictionary words from several language dictionaries.
 
         Args:
@@ -360,16 +387,20 @@ class SpiderFootHelpers():
 
         for d in wordlists:
             try:
-                with resources.open_text('spiderfoot.dicts.ispell', f"{d}.dict", errors='ignore') as dict_file:
+                with resources.open_text(
+                    "spiderfoot.dicts.ispell", f"{d}.dict", errors="ignore"
+                ) as dict_file:
                     for w in dict_file.readlines():
-                        words.add(w.strip().lower().split('/')[0])
+                        words.add(w.strip().lower().split("/")[0])
             except BaseException as e:
                 raise IOError(f"Could not read wordlist file '{d}.dict'") from e
 
         return words
 
     @staticmethod
-    def humanNamesFromWordlists(wordlists: typing.Optional[typing.List[str]] = None) -> typing.Set[str]:
+    def humanNamesFromWordlists(
+        wordlists: typing.Optional[typing.List[str]] = None,
+    ) -> typing.Set[str]:
         """Return list of human names from wordlist file.
 
         Args:
@@ -388,16 +419,20 @@ class SpiderFootHelpers():
 
         for d in wordlists:
             try:
-                with resources.open_text('spiderfoot.dicts.ispell', f"{d}.dict", errors='ignore') as dict_file:
+                with resources.open_text(
+                    "spiderfoot.dicts.ispell", f"{d}.dict", errors="ignore"
+                ) as dict_file:
                     for w in dict_file.readlines():
-                        words.add(w.strip().lower().split('/')[0])
+                        words.add(w.strip().lower().split("/")[0])
             except BaseException as e:
                 raise IOError(f"Could not read wordlist file '{d}.dict'") from e
 
         return words
 
     @staticmethod
-    def usernamesFromWordlists(wordlists: typing.Optional[typing.List[str]] = None) -> typing.Set[str]:
+    def usernamesFromWordlists(
+        wordlists: typing.Optional[typing.List[str]] = None,
+    ) -> typing.Set[str]:
         """Return list of usernames from wordlist file.
 
         Args:
@@ -416,16 +451,23 @@ class SpiderFootHelpers():
 
         for d in wordlists:
             try:
-                with resources.open_text('spiderfoot.dicts', f"{d}.txt", errors='ignore') as dict_file:
+                with resources.open_text(
+                    "spiderfoot.dicts", f"{d}.txt", errors="ignore"
+                ) as dict_file:
                     for w in dict_file.readlines():
-                        words.add(w.strip().lower().split('/')[0])
+                        words.add(w.strip().lower().split("/")[0])
             except BaseException as e:
                 raise IOError(f"Could not read wordlist file '{d}.txt'") from e
 
         return words
 
     @staticmethod
-    def buildGraphGexf(root: str, title: str, data: typing.List[str], flt: typing.Optional[typing.List[str]] = None) -> str:
+    def buildGraphGexf(
+        root: str,
+        title: str,
+        data: typing.List[str],
+        flt: typing.Optional[typing.List[str]] = None,
+    ) -> str:
         """Convert supplied raw data into GEXF (Graph Exchange XML Format) format (e.g. for Gephi).
 
         Args:
@@ -446,42 +488,39 @@ class SpiderFootHelpers():
         nodelist: typing.Dict[str, int] = dict()
         ncounter = 0
         for pair in mapping:
-            (dst, src) = pair
+            dst, src = pair
 
             # Leave out this special case
             if dst == "ROOT" or src == "ROOT":
                 continue
 
-            color = {
-                'r': 0,
-                'g': 0,
-                'b': 0,
-                'a': 0
-            }
+            color = {"r": 0, "g": 0, "b": 0, "a": 0}
 
             if dst not in nodelist:
                 ncounter = ncounter + 1
                 if dst in root:
-                    color['r'] = 255
+                    color["r"] = 255
                 graph.add_node(dst)
-                graph.nodes[dst]['viz'] = {'color': color}
+                graph.nodes[dst]["viz"] = {"color": color}
                 nodelist[dst] = ncounter
 
             if src not in nodelist:
                 ncounter = ncounter + 1
                 if src in root:
-                    color['r'] = 255
+                    color["r"] = 255
                 graph.add_node(src)
-                graph.nodes[src]['viz'] = {'color': color}
+                graph.nodes[src]["viz"] = {"color": color}
                 nodelist[src] = ncounter
 
             graph.add_edge(src, dst)
 
         gexf = GEXFWriter(graph=graph)
-        return str(gexf).encode('utf-8')
+        return str(gexf).encode("utf-8")
 
     @staticmethod
-    def buildGraphJson(root: str, data: typing.List[str], flt: typing.Optional[typing.List[str]] = None) -> str:
+    def buildGraphJson(
+        root: str, data: typing.List[str], flt: typing.Optional[typing.List[str]] = None
+    ) -> str:
         """Convert supplied raw data into JSON format for SigmaJS.
 
         Args:
@@ -497,14 +536,14 @@ class SpiderFootHelpers():
 
         mapping = SpiderFootHelpers.buildGraphData(data, flt)
         ret: _Graph = {}
-        ret['nodes'] = list()
-        ret['edges'] = list()
+        ret["nodes"] = list()
+        ret["edges"] = list()
 
         nodelist: typing.Dict[str, int] = dict()
         ecounter = 0
         ncounter = 0
         for pair in mapping:
-            (dst, src) = pair
+            dst, src = pair
             col = "#000"
 
             # Leave out this special case
@@ -517,14 +556,16 @@ class SpiderFootHelpers():
                 if dst in root:
                     col = "#f00"
 
-                ret['nodes'].append({
-                    'id': str(ncounter),
-                    'label': str(dst),
-                    'x': random.SystemRandom().randint(1, 1000),
-                    'y': random.SystemRandom().randint(1, 1000),
-                    'size': "1",
-                    'color': col
-                })
+                ret["nodes"].append(
+                    {
+                        "id": str(ncounter),
+                        "label": str(dst),
+                        "x": random.SystemRandom().randint(1, 1000),
+                        "y": random.SystemRandom().randint(1, 1000),
+                        "size": "1",
+                        "color": col,
+                    }
+                )
 
                 nodelist[dst] = ncounter
 
@@ -534,29 +575,35 @@ class SpiderFootHelpers():
                 if src in root:
                     col = "#f00"
 
-                ret['nodes'].append({
-                    'id': str(ncounter),
-                    'label': str(src),
-                    'x': random.SystemRandom().randint(1, 1000),
-                    'y': random.SystemRandom().randint(1, 1000),
-                    'size': "1",
-                    'color': col
-                })
+                ret["nodes"].append(
+                    {
+                        "id": str(ncounter),
+                        "label": str(src),
+                        "x": random.SystemRandom().randint(1, 1000),
+                        "y": random.SystemRandom().randint(1, 1000),
+                        "size": "1",
+                        "color": col,
+                    }
+                )
 
                 nodelist[src] = ncounter
 
             ecounter = ecounter + 1
 
-            ret['edges'].append({
-                'id': str(ecounter),
-                'source': str(nodelist[src]),
-                'target': str(nodelist[dst])
-            })
+            ret["edges"].append(
+                {
+                    "id": str(ecounter),
+                    "source": str(nodelist[src]),
+                    "target": str(nodelist[dst]),
+                }
+            )
 
         return json.dumps(ret)
 
     @staticmethod
-    def buildGraphData(data: typing.List[str], flt: typing.Optional[typing.List[str]] = None) -> typing.Set[typing.Tuple[str, str]]:
+    def buildGraphData(
+        data: typing.List[str], flt: typing.Optional[typing.List[str]] = None
+    ) -> typing.Set[typing.Tuple[str, str]]:
         """Return a format-agnostic collection of tuples to use as the
         basis for building graphs in various formats.
 
@@ -580,7 +627,9 @@ class SpiderFootHelpers():
         if not data:
             raise ValueError("data is empty")
 
-        def get_next_parent_entities(item: str, pids: typing.Optional[typing.List[str]] = None) -> typing.List[str]:
+        def get_next_parent_entities(
+            item: str, pids: typing.Optional[typing.List[str]] = None
+        ) -> typing.List[str]:
             if not pids:
                 pids = []
 
@@ -633,7 +682,9 @@ class SpiderFootHelpers():
         return mapping
 
     @staticmethod
-    def dataParentChildToTree(data: typing.Dict[str, typing.Optional[typing.List[str]]]) -> typing.Union[Tree, EmptyTree]:
+    def dataParentChildToTree(
+        data: typing.Dict[str, typing.Optional[typing.List[str]]],
+    ) -> typing.Union[Tree, EmptyTree]:
         """Converts a dictionary of k -> array to a nested
         tree that can be digested by d3 for visualizations.
 
@@ -653,7 +704,9 @@ class SpiderFootHelpers():
         if not data:
             raise ValueError("data is empty")
 
-        def get_children(needle: str, haystack: typing.Dict[str, typing.Optional[typing.List[str]]]) -> typing.Optional[typing.List[Tree]]:
+        def get_children(
+            needle: str, haystack: typing.Dict[str, typing.Optional[typing.List[str]]]
+        ) -> typing.Optional[typing.List[Tree]]:
             ret: typing.List[Tree] = list()
 
             if needle not in list(haystack.keys()):
@@ -706,7 +759,7 @@ class SpiderFootHelpers():
         if not isinstance(lei, str):
             return False
 
-        if not re.match(r'^[A-Z0-9]{18}[0-9]{2}$', lei, re.IGNORECASE):
+        if not re.match(r"^[A-Z0-9]{18}[0-9]{2}$", lei, re.IGNORECASE):
             return False
 
         return True
@@ -727,7 +780,9 @@ class SpiderFootHelpers():
         if "@" not in email:
             return False
 
-        if not re.match(r'^([\%a-zA-Z\.0-9_\-\+]+@[a-zA-Z\.0-9\-]+\.[a-zA-Z\.0-9\-]+)$', email):
+        if not re.match(
+            r"^([\%a-zA-Z\.0-9_\-\+]+@[a-zA-Z\.0-9\-]+\.[a-zA-Z\.0-9\-]+)$", email
+        ):
             return False
 
         if len(email) < 6:
@@ -771,7 +826,9 @@ class SpiderFootHelpers():
         return str(uuid.uuid4()).split("-")[0].upper()
 
     @staticmethod
-    def extractLinksFromHtml(url: str, data: str, domains: typing.Optional[typing.List[str]]) -> typing.Dict[str, ExtractedLink]:
+    def extractLinksFromHtml(
+        url: str, data: str, domains: typing.Optional[typing.List[str]]
+    ) -> typing.Dict[str, ExtractedLink]:
         """Find all URLs within the supplied content.
 
         This function does not fetch any URLs.
@@ -807,20 +864,22 @@ class SpiderFootHelpers():
             domains = [domains]
 
         tags = {
-            'a': 'href',
-            'img': 'src',
-            'script': 'src',
-            'link': 'href',
-            'area': 'href',
-            'base': 'href',
-            'form': 'action'
+            "a": "href",
+            "img": "src",
+            "script": "src",
+            "link": "href",
+            "area": "href",
+            "base": "href",
+            "form": "action",
         }
 
         links: typing.List[typing.Union[typing.List[str], str]] = []
 
         try:
             for t in list(tags.keys()):
-                for lnk in BeautifulSoup(data, features="lxml", parse_only=SoupStrainer(t)).find_all(t):
+                for lnk in BeautifulSoup(
+                    data, features="lxml", parse_only=SoupStrainer(t)
+                ).find_all(t):
                     if lnk.has_attr(tags[t]):
                         links.append(lnk[tags[t]])
         except BaseException:
@@ -843,42 +902,52 @@ class SpiderFootHelpers():
 
             # Don't include stuff likely part of some dynamically built incomplete
             # URL found in Javascript code (character is part of some logic)
-            if link[len(link) - 1] in ['.', '#'] or link[0] == '+' or 'javascript:' in link.lower() or '()' in link \
-               or '+"' in link or '"+' in link or "+'" in link or "'+" in link or "data:image" in link \
-               or ' +' in link or '+ ' in link:
+            if (
+                link[len(link) - 1] in [".", "#"]
+                or link[0] == "+"
+                or "javascript:" in link.lower()
+                or "()" in link
+                or '+"' in link
+                or '"+' in link
+                or "+'" in link
+                or "'+" in link
+                or "data:image" in link
+                or " +" in link
+                or "+ " in link
+            ):
                 continue
 
             # Filter in-page links
-            if re.match('.*#.[^/]+', link):
+            if re.match(".*#.[^/]+", link):
                 continue
 
             # Ignore mail links
-            if 'mailto:' in link.lower():
+            if "mailto:" in link.lower():
                 continue
 
             # URL decode links
-            if '%2f' in link.lower():
+            if "%2f" in link.lower():
                 link = urllib.parse.unquote(link)
 
             absLink = None
 
             # Capture the absolute link:
             # If the link contains ://, it is already an absolute link
-            if '://' in link:
+            if "://" in link:
                 absLink = link
 
             # If the link starts with //, it is likely a protocol relative URL
-            elif link.startswith('//'):
-                absLink = proto + ':' + link
+            elif link.startswith("//"):
+                absLink = proto + ":" + link
 
             # If the link starts with a /, the absolute link is off the base URL
-            elif link.startswith('/'):
+            elif link.startswith("/"):
                 absLink = SpiderFootHelpers.urlBaseUrl(url) + link
 
             # Maybe the domain was just mentioned and not a link, so we make it one
             for domain in domains:
                 if absLink is None and domain.lower() in link.lower():
-                    absLink = proto + '://' + link
+                    absLink = proto + "://" + link
 
             # Otherwise, it's a flat link within the current directory
             if absLink is None:
@@ -886,7 +955,7 @@ class SpiderFootHelpers():
 
             # Translate any relative pathing (../)
             absLink = SpiderFootHelpers.urlRelativeToAbsolute(absLink)
-            returnLinks[absLink] = {'source': url, 'original': link}
+            returnLinks[absLink] = {"source": url, "original": link}
 
         return returnLinks
 
@@ -908,8 +977,12 @@ class SpiderFootHelpers():
         hashes = {
             "MD5": re.compile(r"(?:[^a-fA-F\d]|\b)([a-fA-F\d]{32})(?:[^a-fA-F\d]|\b)"),
             "SHA1": re.compile(r"(?:[^a-fA-F\d]|\b)([a-fA-F\d]{40})(?:[^a-fA-F\d]|\b)"),
-            "SHA256": re.compile(r"(?:[^a-fA-F\d]|\b)([a-fA-F\d]{64})(?:[^a-fA-F\d]|\b)"),
-            "SHA512": re.compile(r"(?:[^a-fA-F\d]|\b)([a-fA-F\d]{128})(?:[^a-fA-F\d]|\b)")
+            "SHA256": re.compile(
+                r"(?:[^a-fA-F\d]|\b)([a-fA-F\d]{64})(?:[^a-fA-F\d]|\b)"
+            ),
+            "SHA512": re.compile(
+                r"(?:[^a-fA-F\d]|\b)([a-fA-F\d]{128})(?:[^a-fA-F\d]|\b)"
+            ),
         }
 
         for h in hashes:
@@ -940,8 +1013,8 @@ class SpiderFootHelpers():
             return returnArr
 
         for line in robotsTxtData.splitlines():
-            if line.lower().startswith('disallow:'):
-                m = re.match(r'disallow:\s*(.[^ #]*)', line, re.IGNORECASE)
+            if line.lower().startswith("disallow:"):
+                m = re.match(r"disallow:\s*(.[^ #]*)", line, re.IGNORECASE)
                 if m:
                     returnArr.append(m.group(1))
 
@@ -962,7 +1035,9 @@ class SpiderFootHelpers():
 
         keys: typing.Set[str] = set()
 
-        pattern = re.compile("(-----BEGIN.*?END.*?BLOCK-----)", re.MULTILINE | re.DOTALL)
+        pattern = re.compile(
+            "(-----BEGIN.*?END.*?BLOCK-----)", re.MULTILINE | re.DOTALL
+        )
         for key in re.findall(pattern, data):
             if len(key) >= 300:
                 keys.add(key)
@@ -983,7 +1058,9 @@ class SpiderFootHelpers():
             return list()
 
         emails: typing.Set[str] = set()
-        matches = re.findall(r'([\%a-zA-Z\.0-9_\-\+]+@[a-zA-Z\.0-9\-]+\.[a-zA-Z\.0-9\-]+)', data)
+        matches = re.findall(
+            r"([\%a-zA-Z\.0-9_\-\+]+@[a-zA-Z\.0-9\-]+\.[a-zA-Z\.0-9\-]+)", data
+        )
 
         for match in matches:
             if SpiderFootHelpers.validEmail(match):
@@ -1013,30 +1090,101 @@ class SpiderFootHelpers():
 
         # Dictionary of country codes and their respective IBAN lengths
         ibanCountryLengths = {
-            "AL": 28, "AD": 24, "AT": 20, "AZ": 28,
-            "ME": 22, "BH": 22, "BY": 28, "BE": 16,
-            "BA": 20, "BR": 29, "BG": 22, "CR": 22,
-            "HR": 21, "CY": 28, "CZ": 24, "DK": 18,
-            "DO": 28, "EG": 29, "SV": 28, "FO": 18,
-            "FI": 18, "FR": 27, "GE": 22, "DE": 22,
-            "GI": 23, "GR": 27, "GL": 18, "GT": 28,
-            "VA": 22, "HU": 28, "IS": 26, "IQ": 23,
-            "IE": 22, "IL": 23, "JO": 30, "KZ": 20,
-            "XK": 20, "KW": 30, "LV": 21, "LB": 28,
-            "LI": 21, "LT": 20, "LU": 20, "MT": 31,
-            "MR": 27, "MU": 30, "MD": 24, "MC": 27,
-            "DZ": 24, "AO": 25, "BJ": 28, "VG": 24,
-            "BF": 27, "BI": 16, "CM": 27, "CV": 25,
-            "CG": 27, "EE": 20, "GA": 27, "GG": 22,
-            "IR": 26, "IM": 22, "IT": 27, "CI": 28,
-            "JE": 22, "MK": 19, "MG": 27, "ML": 28,
-            "MZ": 25, "NL": 18, "NO": 15, "PK": 24,
-            "PS": 29, "PL": 28, "PT": 25, "QA": 29,
-            "RO": 24, "LC": 32, "SM": 27, "ST": 25,
-            "SA": 24, "SN": 28, "RS": 22, "SC": 31,
-            "SK": 24, "SI": 19, "ES": 24, "CH": 21,
-            "TL": 23, "TN": 24, "TR": 26, "UA": 29,
-            "AE": 23, "GB": 22, "SE": 24
+            "AL": 28,
+            "AD": 24,
+            "AT": 20,
+            "AZ": 28,
+            "ME": 22,
+            "BH": 22,
+            "BY": 28,
+            "BE": 16,
+            "BA": 20,
+            "BR": 29,
+            "BG": 22,
+            "CR": 22,
+            "HR": 21,
+            "CY": 28,
+            "CZ": 24,
+            "DK": 18,
+            "DO": 28,
+            "EG": 29,
+            "SV": 28,
+            "FO": 18,
+            "FI": 18,
+            "FR": 27,
+            "GE": 22,
+            "DE": 22,
+            "GI": 23,
+            "GR": 27,
+            "GL": 18,
+            "GT": 28,
+            "VA": 22,
+            "HU": 28,
+            "IS": 26,
+            "IQ": 23,
+            "IE": 22,
+            "IL": 23,
+            "JO": 30,
+            "KZ": 20,
+            "XK": 20,
+            "KW": 30,
+            "LV": 21,
+            "LB": 28,
+            "LI": 21,
+            "LT": 20,
+            "LU": 20,
+            "MT": 31,
+            "MR": 27,
+            "MU": 30,
+            "MD": 24,
+            "MC": 27,
+            "DZ": 24,
+            "AO": 25,
+            "BJ": 28,
+            "VG": 24,
+            "BF": 27,
+            "BI": 16,
+            "CM": 27,
+            "CV": 25,
+            "CG": 27,
+            "EE": 20,
+            "GA": 27,
+            "GG": 22,
+            "IR": 26,
+            "IM": 22,
+            "IT": 27,
+            "CI": 28,
+            "JE": 22,
+            "MK": 19,
+            "MG": 27,
+            "ML": 28,
+            "MZ": 25,
+            "NL": 18,
+            "NO": 15,
+            "PK": 24,
+            "PS": 29,
+            "PL": 28,
+            "PT": 25,
+            "QA": 29,
+            "RO": 24,
+            "LC": 32,
+            "SM": 27,
+            "ST": 25,
+            "SA": 24,
+            "SN": 28,
+            "RS": 22,
+            "SC": 31,
+            "SK": 24,
+            "SI": 19,
+            "ES": 24,
+            "CH": 21,
+            "TL": 23,
+            "TN": 24,
+            "TR": 26,
+            "UA": 29,
+            "AE": 23,
+            "GB": 22,
+            "SE": 24,
         }
 
         # Normalize input data to remove whitespace
@@ -1063,7 +1211,9 @@ class SpiderFootHelpers():
             iban_int = iban[4:] + iban[0:4]
             for character in iban_int:
                 if character.isalpha():
-                    iban_int = iban_int.replace(character, str((ord(character) - 65) + 10))
+                    iban_int = iban_int.replace(
+                        character, str((ord(character) - 65) + 10)
+                    )
 
             # Check IBAN integer mod 97 for remainder
             if int(iban_int) % 97 != 1:
@@ -1137,7 +1287,10 @@ class SpiderFootHelpers():
             return []
 
         # https://tools.ietf.org/html/rfc3986#section-3.3
-        return re.findall(r"(https?://[a-zA-Z0-9-\.:]+/[\-\._~!\$&'\(\)\*\+\,\;=:@/a-zA-Z0-9]*)", html.unescape(content))
+        return re.findall(
+            r"(https?://[a-zA-Z0-9-\.:]+/[\-\._~!\$&'\(\)\*\+\,\;=:@/a-zA-Z0-9]*)",
+            html.unescape(content),
+        )
 
     @staticmethod
     def sslDerToPem(der_cert: bytes) -> str:
@@ -1196,7 +1349,7 @@ class SpiderFootHelpers():
             "NET": "United States",
             "ORG": "United States",
             "GOV": "United States",
-            "MIL": "United States"
+            "MIL": "United States",
         }
 
         country_name = country_tlds.get(tld.upper())
@@ -1471,11 +1624,13 @@ class SpiderFootHelpers():
             "AC": "Ascension Island",
             "EU": "European Union",
             "SU": "Soviet Union",
-            "UK": "United Kingdom"
+            "UK": "United Kingdom",
         }
 
     @staticmethod
-    def sanitiseInput(cmd: str, extra: typing.Optional[typing.List[str]] = None) -> bool:
+    def sanitiseInput(
+        cmd: str, extra: typing.Optional[typing.List[str]] = None
+    ) -> bool:
         """Verify input command is safe to execute
 
         Args:
@@ -1488,9 +1643,46 @@ class SpiderFootHelpers():
         if not extra:
             extra = []
 
-        chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.']
+        chars = [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "-",
+            ".",
+        ]
 
         if extra:
             chars.extend(extra)
@@ -1499,7 +1691,7 @@ class SpiderFootHelpers():
             if c.lower() not in chars:
                 return False
 
-        if '..' in cmd:
+        if ".." in cmd:
             return False
 
         if cmd.startswith("-"):

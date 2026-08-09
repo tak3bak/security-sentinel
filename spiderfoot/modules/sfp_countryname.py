@@ -22,25 +22,25 @@ from spiderfoot import SpiderFootEvent, SpiderFootHelpers, SpiderFootPlugin
 class sfp_countryname(SpiderFootPlugin):
 
     meta = {
-        'name': "Country Name Extractor",
-        'summary': "Identify country names in any obtained data.",
-        'flags': [],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Country Name Extractor",
+        "summary": "Identify country names in any obtained data.",
+        "flags": [],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     opts = {
-        'cohosted': True,
-        'affiliate': True,
-        'noncountrytld': True,
-        'similardomain': False,
+        "cohosted": True,
+        "affiliate": True,
+        "noncountrytld": True,
+        "similardomain": False,
     }
 
     optdescs = {
-        'cohosted': "Obtain country name from co-hosted sites",
-        'affiliate': "Obtain country name from affiliate sites",
-        'noncountrytld': "Parse TLDs not associated with any country as default country domains",
-        'similardomain': "Obtain country name from similar domains"
+        "cohosted": "Obtain country name from co-hosted sites",
+        "affiliate": "Obtain country name from affiliate sites",
+        "noncountrytld": "Parse TLDs not associated with any country as default country domains",
+        "similardomain": "Obtain country name from similar domains",
     }
 
     results = None
@@ -77,7 +77,9 @@ class sfp_countryname(SpiderFootPlugin):
         try:
             countryCode = region_code_for_country_code(phoneNumber.country_code)
         except Exception:
-            self.debug(f"Lookup of region code failed for phone number: {srcPhoneNumber}")
+            self.debug(
+                f"Lookup of region code failed for phone number: {srcPhoneNumber}"
+            )
             return None
 
         if not countryCode:
@@ -148,7 +150,13 @@ class sfp_countryname(SpiderFootPlugin):
             # Look for country name in source data
             # Spaces are not included since "New Jersey" and others
             # will get interpreted as "Jersey", etc.
-            matchCountries = re.findall(r"[,'\"\:\=\[\(\[\n\t\r\.] ?" + countryName + r"[,'\"\:\=\[\(\[\n\t\r\.]", srcData, re.IGNORECASE)
+            matchCountries = re.findall(
+                r"[,'\"\:\=\[\(\[\n\t\r\.] ?"
+                + countryName
+                + r"[,'\"\:\=\[\(\[\n\t\r\.]",
+                srcData,
+                re.IGNORECASE,
+            )
 
             if matchCountries:
                 countries.append(countryName)
@@ -167,10 +175,19 @@ class sfp_countryname(SpiderFootPlugin):
 
     # What events is this module interested in for input
     def watchedEvents(self):
-        return ["IBAN_NUMBER", "PHONE_NUMBER", "AFFILIATE_DOMAIN_NAME",
-                "CO_HOSTED_SITE_DOMAIN", "DOMAIN_NAME", "SIMILARDOMAIN",
-                "AFFILIATE_DOMAIN_WHOIS", "CO_HOSTED_SITE_DOMAIN_WHOIS",
-                "DOMAIN_WHOIS", "GEOINFO", "PHYSICAL_ADDRESS"]
+        return [
+            "IBAN_NUMBER",
+            "PHONE_NUMBER",
+            "AFFILIATE_DOMAIN_NAME",
+            "CO_HOSTED_SITE_DOMAIN",
+            "DOMAIN_NAME",
+            "SIMILARDOMAIN",
+            "AFFILIATE_DOMAIN_WHOIS",
+            "CO_HOSTED_SITE_DOMAIN_WHOIS",
+            "DOMAIN_WHOIS",
+            "GEOINFO",
+            "PHYSICAL_ADDRESS",
+        ]
 
     # What events this module produces
     def producedEvents(self):
@@ -220,7 +237,9 @@ class sfp_countryname(SpiderFootPlugin):
             countryNames.extend(self.detectCountryFromData(eventData))
 
         if not countryNames:
-            self.debug(f"Found no country names associated with {eventName}: {eventData}")
+            self.debug(
+                f"Found no country names associated with {eventName}: {eventData}"
+            )
             return
 
         for countryName in set(countryNames):
@@ -232,5 +251,6 @@ class sfp_countryname(SpiderFootPlugin):
             evt = SpiderFootEvent("COUNTRY_NAME", countryName, self.__name__, event)
             evt.moduleDataSource = moduleDataSource
             self.notifyListeners(evt)
+
 
 # End of sfp_countryname class

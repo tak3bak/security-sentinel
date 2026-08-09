@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_bingsharedip
@@ -19,28 +20,28 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_bingsharedip(SpiderFootPlugin):
 
     meta = {
-        'name': "Bing (Shared IPs)",
-        'summary': "Search Bing for hosts sharing the same IP.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Search Engines"],
-        'dataSource': {
-            'website': "https://www.bing.com/",
-            'model': "FREE_AUTH_LIMITED",
-            'references': [
+        "name": "Bing (Shared IPs)",
+        "summary": "Search Bing for hosts sharing the same IP.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Search Engines"],
+        "dataSource": {
+            "website": "https://www.bing.com/",
+            "model": "FREE_AUTH_LIMITED",
+            "references": [
                 "https://docs.microsoft.com/en-us/azure/cognitive-services/bing-web-search/"
             ],
-            'apiKeyInstructions': [
+            "apiKeyInstructions": [
                 "Visit https://azure.microsoft.com/en-in/services/cognitive-services/bing-web-search-api/",
                 "Register a free account",
                 "Select on Bing Custom Search",
-                "The API keys are listed under 'Key1' and 'Key2' (both should work)"
+                "The API keys are listed under 'Key1' and 'Key2' (both should work)",
             ],
-            'favIcon': "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
-            'logo': "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
-            'description': "The Bing Search APIs let you build web-connected apps and services that "
+            "favIcon": "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
+            "logo": "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
+            "description": "The Bing Search APIs let you build web-connected apps and services that "
             "find webpages, images, news, locations, and more without advertisements.",
-        }
+        },
     }
 
     # Default options
@@ -49,7 +50,7 @@ class sfp_bingsharedip(SpiderFootPlugin):
         "pages": 20,
         "verify": True,
         "maxcohost": 100,
-        "api_key": ""
+        "api_key": "",
     }
 
     # Option descriptions
@@ -58,7 +59,7 @@ class sfp_bingsharedip(SpiderFootPlugin):
         "pages": "Number of max bing results to request from API.",
         "verify": "Verify co-hosts are valid by checking if they still resolve to the shared IP.",
         "maxcohost": "Stop reporting co-hosted sites after this many are found, as it would likely indicate web hosting.",
-        "api_key": "Bing API Key for shared IP search."
+        "api_key": "Bing API Key for shared IP search.",
     }
 
     results = None
@@ -97,7 +98,7 @@ class sfp_bingsharedip(SpiderFootPlugin):
 
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
-        if self.opts['api_key'] == "" and self.opts['api_key'] == "":
+        if self.opts["api_key"] == "" and self.opts["api_key"] == "":
             self.error("You enabled sfp_bingsharedip but did not set a Bing API key!")
             self.errorState = True
             return
@@ -177,9 +178,8 @@ class sfp_bingsharedip(SpiderFootPlugin):
                     myres.append(site)
 
             if urls:
-                evt = SpiderFootEvent(
-                    "RAW_RIR_DATA", str(res), self.__name__, event
-                )
+                evt = SpiderFootEvent("RAW_RIR_DATA", str(res), self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_bingsharedip class

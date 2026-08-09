@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleTwitter(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_twitter()
@@ -26,14 +29,16 @@ class TestModuleTwitter(unittest.TestCase):
         module = sfp_twitter()
         self.assertIsInstance(module.producedEvents(), list)
 
-    def test_handleEvent_event_data_social_media_not_twitter_profile_should_not_return_event(self):
+    def test_handleEvent_event_data_social_media_not_twitter_profile_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_twitter()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -42,15 +47,15 @@ class TestModuleTwitter(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_twitter)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'SOCIAL_MEDIA'
-        event_data = 'Not Twitter: example_username'
-        event_module = 'example module'
+        event_type = "SOCIAL_MEDIA"
+        event_data = "Not Twitter: example_username"
+        event_module = "example module"
         source_event = evt
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)

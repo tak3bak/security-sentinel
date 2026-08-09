@@ -20,21 +20,19 @@ class sfp_textmagic(SpiderFootPlugin):
     meta = {
         "name": "TextMagic",
         "summary": "Obtain phone number type from TextMagic API",
-        'flags': ["apikey"],
+        "flags": ["apikey"],
         "useCases": ["Passive"],
         "categories": ["Search Engines"],
         "dataSource": {
             "website": "https://www.textmagic.com/",
             "model": "FREE_AUTH_LIMITED",
-            "references": [
-                "https://docs.textmagic.com/"
-            ],
+            "references": ["https://docs.textmagic.com/"],
             "apiKeyInstructions": [
                 "Visit https://textmagic.com",
                 "Register a free trial account",
                 "Visit https://my.textmagic.com/online/api/rest-api/keys",
                 "Click on 'Add new API Key'",
-                "Your API key will be listed beside 'The new API Key is'"
+                "Your API key will be listed beside 'The new API Key is'",
             ],
             "favIcon": "https://www.textmagic.com/wp-content/themes/textmagic-genesis/assets/app/images/favicon.png",
             "logo": "https://www.textmagic.com/wp-content/uploads/2015/04/logo.png",
@@ -63,15 +61,10 @@ class sfp_textmagic(SpiderFootPlugin):
         self.opts.update(userOpts)
 
     def watchedEvents(self):
-        return [
-            "PHONE_NUMBER"
-        ]
+        return ["PHONE_NUMBER"]
 
     def producedEvents(self):
-        return [
-            "PHONE_NUMBER_TYPE",
-            "RAW_RIR_DATA"
-        ]
+        return ["PHONE_NUMBER_TYPE", "RAW_RIR_DATA"]
 
     def handle_error_response(self, qry, res):
         try:
@@ -90,8 +83,8 @@ class sfp_textmagic(SpiderFootPlugin):
 
     def queryPhoneNumber(self, qry):
         headers = {
-            'X-TM-Username': self.opts['api_key_username'],
-            'X-TM-Key': self.opts['api_key']
+            "X-TM-Username": self.opts["api_key_username"],
+            "X-TM-Key": self.opts["api_key"],
         }
 
         res = self.sf.fetchUrl(
@@ -105,12 +98,12 @@ class sfp_textmagic(SpiderFootPlugin):
             self.handle_error_response(qry, res)
             return None
 
-        if res['content'] is None:
+        if res["content"] is None:
             self.info(f"No TextMagic info found for {qry}")
             return None
 
         try:
-            return json.loads(res['content'])
+            return json.loads(res["content"])
         except Exception as e:
             self.error(f"Error processing JSON response from TextMagic: {e}")
 
@@ -145,7 +138,10 @@ class sfp_textmagic(SpiderFootPlugin):
             evt = SpiderFootEvent("RAW_RIR_DATA", str(data), self.__name__, event)
             self.notifyListeners(evt)
 
-            evt = SpiderFootEvent("PHONE_NUMBER_TYPE", phoneNumberType, self.__name__, event)
+            evt = SpiderFootEvent(
+                "PHONE_NUMBER_TYPE", phoneNumberType, self.__name__, event
+            )
             self.notifyListeners(evt)
+
 
 # End of sfp_textmagic class

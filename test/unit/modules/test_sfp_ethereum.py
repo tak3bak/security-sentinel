@@ -26,23 +26,25 @@ class TestModuleEthereum(unittest.TestCase):
         module = sfp_ethereum()
         self.assertIsInstance(module.producedEvents(), list)
 
-    def test_handleEvent_event_data_containing_ethereum_string_should_return_event(self):
+    def test_handleEvent_event_data_containing_ethereum_string_should_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_ethereum()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
         def new_notifyListeners(self, event):
-            expected = 'ETHEREUM_ADDRESS'
+            expected = "ETHEREUM_ADDRESS"
             if str(event.eventType) != expected:
                 raise Exception(f"{event.eventType} != {expected}")
 
-            expected = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
+            expected = "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
             if str(event.data) != expected:
                 raise Exception(f"{event.data} != {expected}")
 
@@ -50,10 +52,12 @@ class TestModuleEthereum(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_ethereum)
 
-        event_type = 'ROOT'
-        event_data = 'example data 0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7 example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = (
+            "example data 0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7 example data"
+        )
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
@@ -62,14 +66,16 @@ class TestModuleEthereum(unittest.TestCase):
 
         self.assertEqual("OK", str(cm.exception))
 
-    def test_handleEvent_event_data_not_containing_ethereum_string_should_not_return_event(self):
+    def test_handleEvent_event_data_not_containing_ethereum_string_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_ethereum()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -78,10 +84,10 @@ class TestModuleEthereum(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_ethereum)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         result = module.handleEvent(evt)

@@ -1,13 +1,19 @@
 # compliance_utils.py
 from weasyprint import HTML
 
+
 def generate_gap_analysis_pdf(client_name, findings):
     """
-    Generates a PDF gap analysis report. 
+    Generates a PDF gap analysis report.
     Findings should be a list of dictionaries: [{'domain': '...', 'status': '...', 'fix': '...'}]
     """
-    rows = "".join([f"<tr><td>{f['domain']}</td><td>{f['status']}</td><td>{f['fix']}</td></tr>" for f in findings])
-    
+    rows = "".join(
+        [
+            f"<tr><td>{f['domain']}</td><td>{f['status']}</td><td>{f['fix']}</td></tr>"
+            for f in findings
+        ]
+    )
+
     html_content = f"""
     <html>
     <style>

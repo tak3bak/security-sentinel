@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 class Remediator:
     def __init__(self, quarantine_dir):
         self.quarantine_dir = quarantine_dir

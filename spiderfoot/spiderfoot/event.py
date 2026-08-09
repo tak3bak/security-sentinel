@@ -3,7 +3,7 @@ import random
 import time
 
 
-class SpiderFootEvent():
+class SpiderFootEvent:
     """SpiderFootEvent object representing identified data and associated meta data.
 
     Attributes:
@@ -35,7 +35,9 @@ class SpiderFootEvent():
     _actualSource = None
     __id = None
 
-    def __init__(self, eventType: str, data: str, module: str, sourceEvent: 'SpiderFootEvent') -> None:
+    def __init__(
+        self, eventType: str, data: str, module: str, sourceEvent: "SpiderFootEvent"
+    ) -> None:
         """Initialize SpiderFoot event object.
 
         Args:
@@ -108,7 +110,7 @@ class SpiderFootEvent():
         return self._data
 
     @property
-    def sourceEvent(self) -> 'SpiderFootEvent':
+    def sourceEvent(self) -> "SpiderFootEvent":
         return self._sourceEvent
 
     @property
@@ -133,7 +135,7 @@ class SpiderFootEvent():
         if self.eventType == "ROOT":
             return "ROOT"
 
-        digestStr = self.__id.encode('raw_unicode_escape')
+        digestStr = self.__id.encode("raw_unicode_escape")
         return hashlib.sha256(digestStr).hexdigest()
 
     @eventType.setter
@@ -251,7 +253,7 @@ class SpiderFootEvent():
         self._data = data
 
     @sourceEvent.setter
-    def sourceEvent(self, sourceEvent: 'SpiderFootEvent') -> None:
+    def sourceEvent(self, sourceEvent: "SpiderFootEvent") -> None:
         """Source event which lead to this event.
 
         Args:
@@ -268,7 +270,9 @@ class SpiderFootEvent():
             return
 
         if not isinstance(sourceEvent, SpiderFootEvent):
-            raise TypeError(f"sourceEvent is {type(sourceEvent)}; expected SpiderFootEvent()")
+            raise TypeError(
+                f"sourceEvent is {type(sourceEvent)}; expected SpiderFootEvent()"
+            )
 
         self._sourceEvent = sourceEvent
         self._sourceEventHash = self.sourceEvent.hash
@@ -288,16 +292,17 @@ class SpiderFootEvent():
             dict: event as dictionary
         """
         evtDict = {
-            'generated': int(self.generated),
-            'type': self.eventType,
-            'data': self.data,
-            'module': self.module,
-            'source': ''
+            "generated": int(self.generated),
+            "type": self.eventType,
+            "data": self.data,
+            "module": self.module,
+            "source": "",
         }
 
         if self.sourceEvent is not None and self.sourceEvent.data is not None:
-            evtDict['source'] = self.sourceEvent.data
+            evtDict["source"] = self.sourceEvent.data
 
         return evtDict
+
 
 # end of SpiderFootEvent class

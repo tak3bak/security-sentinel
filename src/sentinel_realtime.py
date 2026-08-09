@@ -6,6 +6,7 @@ from sentinel_domain_score import DomainReputationScorer
 from sentinel_osint import SentinelOSINT
 from audit_writer import AuditWriter
 
+
 class RealTimeSentinel:
     def __init__(self):
         self.event_queue = queue.Queue()

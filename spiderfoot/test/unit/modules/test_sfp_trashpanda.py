@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleTrashpanda(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_trashpanda()
@@ -32,15 +35,15 @@ class TestModuleTrashpanda(unittest.TestCase):
         module = sfp_trashpanda()
         module.setup(sf, dict())
 
-        target_value = 'example target value'
-        target_type = 'EMAILADDR'
+        target_value = "example target value"
+        target_type = "EMAILADDR"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
         result = module.handleEvent(evt)

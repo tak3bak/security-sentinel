@@ -6,13 +6,16 @@ from security_sentinel.config import SPIDERFOOT_API
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class SpiderfootClient:
     def __init__(self, api_url=SPIDERFOOT_API):
         self.api_url = api_url
 
     def trigger_scan(self, target):
         try:
-            response = requests.post(f"{self.api_url}/api/scan/start", data={'target': target, 'type': 'IP'})
+            response = requests.post(
+                f"{self.api_url}/api/scan/start", data={"target": target, "type": "IP"}
+            )
             response.raise_for_status()
             logger.info(f"Triggered OSINT scan for IP: {target}")
             return response.json()

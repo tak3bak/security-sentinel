@@ -2,6 +2,7 @@ from datetime import datetime
 from sentinel_domain_intel import DomainIntelProcessor
 from sentinel_domain_osint import SentinelDomainOSINT
 
+
 class DomainReputationScorer:
     def __init__(self):
         self.osint = SentinelDomainOSINT()
@@ -17,7 +18,9 @@ class DomainReputationScorer:
         # Age scoring
         if intel["creation_date"]:
             try:
-                created = datetime.fromisoformat(intel["creation_date"].replace("Z", "+00:00"))
+                created = datetime.fromisoformat(
+                    intel["creation_date"].replace("Z", "+00:00")
+                )
                 age_days = (datetime.utcnow() - created).days
 
                 if age_days < 30:
@@ -82,7 +85,7 @@ class DomainReputationScorer:
             "score": score,
             "risk_level": self.risk_label(score),
             "factors": factors,
-            "intel": intel
+            "intel": intel,
         }
 
     def risk_label(self, score):

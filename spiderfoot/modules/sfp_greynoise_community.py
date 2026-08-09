@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_greynoise_community
@@ -31,7 +32,10 @@ class sfp_greynoise_community(SpiderFootPlugin):
         "dataSource": {
             "website": "https://greynoise.io/",
             "model": "FREE_AUTH_LIMITED",
-            "references": ["https://docs.greynoise.io/reference/get_v3-community-ip", "https://viz.greynoise.io/signup"],
+            "references": [
+                "https://docs.greynoise.io/reference/get_v3-community-ip",
+                "https://viz.greynoise.io/signup",
+            ],
             "apiKeyInstructions": [
                 "Visit https://viz.greynoise.io/signup",
                 "Sign up for a free account",
@@ -107,7 +111,9 @@ class sfp_greynoise_community(SpiderFootPlugin):
                 res = ip_res
 
         if not res:
-            self.error("Greynoise API key seems to have been rejected or you have exceeded usage limits.")
+            self.error(
+                "Greynoise API key seems to have been rejected or you have exceeded usage limits."
+            )
             self.errorState = True
             return None
 
@@ -125,7 +131,9 @@ class sfp_greynoise_community(SpiderFootPlugin):
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if self.opts["api_key"] == "":
-            self.error("You enabled sfp_greynoise_community but did not set an API key!")
+            self.error(
+                "You enabled sfp_greynoise_community but did not set an API key!"
+            )
             self.errorState = True
             return
 
@@ -150,7 +158,9 @@ class sfp_greynoise_community(SpiderFootPlugin):
         if "data" not in ret and "noise" not in ret:
             return
 
-        if urlparse(ret).netloc.lower() == "noise" or urlparse(ret).netloc.lower().endswith(".noise"):
+        if urlparse(ret).netloc.lower() == "noise" or urlparse(
+            ret
+        ).netloc.lower().endswith(".noise"):
             if ret.get("noise", None):
                 lastseen = ret.get("last_seen", "1970-01-01")
                 lastseen_dt = datetime.strptime(lastseen, "%Y-%m-%d")
@@ -164,7 +174,9 @@ class sfp_greynoise_community(SpiderFootPlugin):
 
                 # Only report meta data about the target, not affiliates
                 if ret.get("name", "unknown") != "unknown":
-                    e = SpiderFootEvent("COMPANY_NAME", ret.get("name"), self.__name__, event)
+                    e = SpiderFootEvent(
+                        "COMPANY_NAME", ret.get("name"), self.__name__, event
+                    )
                     self.notifyListeners(e)
 
                 if ret.get("classification"):
@@ -174,8 +186,13 @@ class sfp_greynoise_community(SpiderFootPlugin):
                         + "]\n - Classification: "
                         + ret.get("classification")
                     )
-                    descr += "\n<SFURL>https://viz.greynoise.io/ip/" + ret.get("ip") + "</SFURL>"
+                    descr += (
+                        "\n<SFURL>https://viz.greynoise.io/ip/"
+                        + ret.get("ip")
+                        + "</SFURL>"
+                    )
                     e = SpiderFootEvent(evtType, descr, self.__name__, event)
                     self.notifyListeners(e)
+
 
 # End of sfp_greynoise_community class

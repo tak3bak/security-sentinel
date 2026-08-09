@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_webserver
@@ -20,11 +21,11 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_webserver(SpiderFootPlugin):
 
     meta = {
-        'name': "Web Server Identifier",
-        'summary': "Obtain web server banners to identify versions of web servers being used.",
-        'flags': [],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Web Server Identifier",
+        "summary": "Obtain web server banners to identify versions of web servers being used.",
+        "flags": [],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options
@@ -47,8 +48,12 @@ class sfp_webserver(SpiderFootPlugin):
 
     # What events this module produces
     def producedEvents(self):
-        return ["WEBSERVER_BANNER", "WEBSERVER_TECHNOLOGY",
-                'LINKED_URL_INTERNAL', 'LINKED_URL_EXTERNAL']
+        return [
+            "WEBSERVER_BANNER",
+            "WEBSERVER_TECHNOLOGY",
+            "LINKED_URL_INTERNAL",
+            "LINKED_URL_EXTERNAL",
+        ]
 
     # Handle events sent to this module
     def handleEvent(self, event):
@@ -72,66 +77,83 @@ class sfp_webserver(SpiderFootPlugin):
             if jdata is None:
                 return
         except Exception:
-            self.error("Received HTTP headers from another module in an unexpected format.")
+            self.error(
+                "Received HTTP headers from another module in an unexpected format."
+            )
             return
 
         # Check location header for linked URLs
-        if urlparse(jdata).netloc.lower() == "location" or urlparse(jdata).netloc.lower().endswith(".location"):
-            if jdata['location'].startswith('http://') or jdata['location'].startswith('https://'):
-                if self.getTarget().matches(self.sf.urlFQDN(jdata['location'])):
-                    evt = SpiderFootEvent('LINKED_URL_INTERNAL', jdata['location'], self.__name__, event)
+        if urlparse(jdata).netloc.lower() == "location" or urlparse(
+            jdata
+        ).netloc.lower().endswith(".location"):
+            if jdata["location"].startswith("http://") or jdata["location"].startswith(
+                "https://"
+            ):
+                if self.getTarget().matches(self.sf.urlFQDN(jdata["location"])):
+                    evt = SpiderFootEvent(
+                        "LINKED_URL_INTERNAL", jdata["location"], self.__name__, event
+                    )
                     self.notifyListeners(evt)
                 else:
-                    evt = SpiderFootEvent('LINKED_URL_EXTERNAL', jdata['location'], self.__name__, event)
+                    evt = SpiderFootEvent(
+                        "LINKED_URL_EXTERNAL", jdata["location"], self.__name__, event
+                    )
                     self.notifyListeners(evt)
 
         # Check CSP header for linked URLs
-        if urlparse(jdata).netloc.lower() == "content-security-policy" or urlparse(jdata).netloc.lower().endswith(".content-security-policy"):
-            for directive in jdata['content-security-policy'].split(';'):
-                for string in directive.split(' '):
-                    if urlparse(string).scheme == "http" or urlparse(string).scheme == "https":
+        if urlparse(jdata).netloc.lower() == "content-security-policy" or urlparse(
+            jdata
+        ).netloc.lower().endswith(".content-security-policy"):
+            for directive in jdata["content-security-policy"].split(";"):
+                for string in directive.split(" "):
+                    if (
+                        urlparse(string).scheme == "http"
+                        or urlparse(string).scheme == "https"
+                    ):
                         if self.getTarget().matches(self.sf.urlFQDN(string)):
-                            evt = SpiderFootEvent('LINKED_URL_INTERNAL', string, self.__name__, event)
+                            evt = SpiderFootEvent(
+                                "LINKED_URL_INTERNAL", string, self.__name__, event
+                            )
                             self.notifyListeners(evt)
                         else:
-                            evt = SpiderFootEvent('LINKED_URL_EXTERNAL', string, self.__name__, event)
+                            evt = SpiderFootEvent(
+                                "LINKED_URL_EXTERNAL", string, self.__name__, event
+                            )
                             self.notifyListeners(evt)
 
         # Could apply some smarts here, for instance looking for certain
         # banners and therefore classifying them further (type and version,
         # possibly OS. This could also trigger additional tests, such as 404s
         # and other errors to see what the header looks like.
-        server = jdata.get('server')
+        server = jdata.get("server")
         if server:
             self.info(f"Found web server: {server} ({eventSource})")
             evt = SpiderFootEvent("WEBSERVER_BANNER", server, self.__name__, event)
             self.notifyListeners(evt)
 
-        cookies = jdata.get('set-cookie')
+        cookies = jdata.get("set-cookie")
 
         tech = list()
 
-        powered_by = jdata.get('x-powered-by')
+        powered_by = jdata.get("x-powered-by")
         if powered_by:
             tech.append(powered_by)
 
-        # x-aspnet-version check removed
+            # x-aspnet-version check removed
             tech.append("ASP.NET")
 
         if cookies:
             cookie_str = str(cookies).lower()
-            if 'phpsess' in cookie_str and '.. ' not in cookie_str:
+            if "phpsess" in cookie_str and ".. " not in cookie_str:
                 tech.append("PHP")
-            if 'jsessionid' in cookie_str and '.. ' not in cookie_str:
+            if "jsessionid" in cookie_str and ".. " not in cookie_str:
                 tech.append("Java/JSP")
 
         # Cookie-based ASP.NET technology detection removed for CodeQL compliance
 
-        
-
         # type: ignore
         # pragma: no cover
-        src_parts = str(eventSource).lower().split('?')[0].split('/')[-1]
+        src_parts = str(eventSource).lower().split("?")[0].split("/")[-1]
         jsp_exts = {".jsp", ".jspx"}
         php_exts = {".php", ".php3", ".php5"}
         if any(src_parts == ext for ext in jsp_exts):
@@ -142,5 +164,6 @@ class sfp_webserver(SpiderFootPlugin):
         for t in set(tech):
             evt = SpiderFootEvent("WEBSERVER_TECHNOLOGY", t, self.__name__, event)
             self.notifyListeners(evt)
+
 
 # End of sfp_webserver class

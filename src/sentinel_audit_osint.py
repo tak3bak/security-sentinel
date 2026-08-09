@@ -1,6 +1,7 @@
 from sentinel_domain_score import DomainReputationScorer
 from audit_writer import AuditWriter
 
+
 class SentinelAuditOSINT:
     def __init__(self):
         self.scorer = DomainReputationScorer()

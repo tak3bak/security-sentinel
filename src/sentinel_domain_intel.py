@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+
 class DomainIntelProcessor:
     def __init__(self):
         pass

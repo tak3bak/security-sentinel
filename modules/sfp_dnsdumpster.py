@@ -29,7 +29,7 @@ class sfp_dnsdumpster(SpiderFootPlugin):
             "website": "https://dnsdumpster.com/",
             "model": "FREE_NOAUTH_UNLIMITED",
             "description": "DNSdumpster.com is a FREE domain research tool that can discover hosts related to a domain.",
-        }
+        },
     }
 
     # Default options
@@ -55,8 +55,7 @@ class sfp_dnsdumpster(SpiderFootPlugin):
         # first, get the CSRF tokens
         url = "https://dnsdumpster.com"
         res1 = self.sf.fetchUrl(
-            url,
-            useragent=self.opts.get("_useragent", "Spiderfoot")
+            url, useragent=self.opts.get("_useragent", "Spiderfoot")
         )
         if res1["code"] not in ["200"]:
             self.error(f"Bad response code \"{res1['code']}\" from DNSDumpster")
@@ -67,10 +66,12 @@ class sfp_dnsdumpster(SpiderFootPlugin):
         csrfmiddlewaretoken = None
         try:
             for cookie in res1["headers"].get("set-cookie", "").split(";"):
-                k, v = cookie.split('=', 1)
+                k, v = cookie.split("=", 1)
                 if k == "csrftoken":
                     csrftoken = str(v)
-            csrfmiddlewaretoken = html.find("input", {"name": "csrfmiddlewaretoken"}).attrs.get("value", None)
+            csrfmiddlewaretoken = html.find(
+                "input", {"name": "csrfmiddlewaretoken"}
+            ).attrs.get("value", None)
         except Exception:
             pass
 
@@ -87,19 +88,17 @@ class sfp_dnsdumpster(SpiderFootPlugin):
         subdomains = set()
         res2 = self.sf.fetchUrl(
             url,
-            cookies={
-                "csrftoken": csrftoken
-            },
+            cookies={"csrftoken": csrftoken},
             postData={
                 "csrfmiddlewaretoken": csrfmiddlewaretoken,
                 "targetip": str(domain).lower(),
-                "user": "free"
+                "user": "free",
             },
             headers={
                 "origin": "https://dnsdumpster.com",
-                "referer": "https://dnsdumpster.com/"
+                "referer": "https://dnsdumpster.com/",
             },
-            useragent=self.opts.get("_useragent", "Spiderfoot")
+            useragent=self.opts.get("_useragent", "Spiderfoot"),
         )
         if res2["code"] not in ["200"]:
             self.error(f"Bad response code \"{res2['code']}\" from DNSDumpster")
@@ -128,16 +127,20 @@ class sfp_dnsdumpster(SpiderFootPlugin):
         # skip if we've already processed this event (or its parent domain/subdomain)
         target = self.getTarget()
         eventDataHash = self.sf.hashstring(query)
-        if eventDataHash in self.results or \
-                (target.matches(query, includeParents=True) and not
-                 target.matches(query, includeChildren=False)):
-            self.debug(f"Skipping already-processed event, {event.eventType}, from {event.module}")
+        if eventDataHash in self.results or (
+            target.matches(query, includeParents=True)
+            and not target.matches(query, includeChildren=False)
+        ):
+            self.debug(
+                f"Skipping already-processed event, {event.eventType}, from {event.module}"
+            )
             return
         self.results[eventDataHash] = True
 
         for hostname in self.query(query):
-            if target.matches(hostname, includeParents=True) and not \
-                    target.matches(hostname, includeChildren=False):
+            if target.matches(hostname, includeParents=True) and not target.matches(
+                hostname, includeChildren=False
+            ):
                 self.sendEvent(event, hostname)
             else:
                 self.debug(f"Invalid subdomain: {hostname}")

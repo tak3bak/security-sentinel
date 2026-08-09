@@ -8,19 +8,14 @@ URL = "http://localhost:4242/create-checkout-session"
 YOUR_PRICE_ID = "price_1TtvhCDyViH34HKwQ5bAlMj4"
 TEST_EMAIL = "nomadik_test@example.com"
 
-payload = {
-    "price_id": YOUR_PRICE_ID,
-    "email": TEST_EMAIL
-}
+payload = {"price_id": YOUR_PRICE_ID, "email": TEST_EMAIL}
 
-headers = {
-    "Content-Type": "application/json"
-}
+headers = {"Content-Type": "application/json"}
 
 try:
     print(f"📡 Sending checkout request for price: {YOUR_PRICE_ID}...")
     response = requests.post(URL, data=json.dumps(payload), headers=headers)
-    
+
     if response.status_code == 200:
         data = response.json()
         print("\n✅ Checkout Session Created Successfully!")

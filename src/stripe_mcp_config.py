@@ -6,9 +6,7 @@ MCP_CONFIG = {
         "stripe": {
             "command": "npx",
             "args": ["-y", "@stripe/mcp"],
-            "env": {
-                "STRIPE_SECRET_KEY": "YOUR_STRIPE_SECRET_KEY"
-            }
+            "env": {"STRIPE_SECRET_KEY": "YOUR_STRIPE_SECRET_KEY"},
         }
     }
 }

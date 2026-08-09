@@ -25,7 +25,9 @@ class TestModuleCrt(unittest.TestCase):
         module = sfp_crt()
         self.assertIsInstance(module.producedEvents(), list)
 
-    def test_parseApiResponse_nonfatal_http_response_code_should_not_set_errorState(self):
+    def test_parseApiResponse_nonfatal_http_response_code_should_not_set_errorState(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         http_codes = ["200", "404"]
@@ -37,7 +39,9 @@ class TestModuleCrt(unittest.TestCase):
                 self.assertIsNone(result)
                 self.assertFalse(module.errorState)
 
-    def test_parseApiResponse_fatal_http_response_error_code_should_set_errorState(self):
+    def test_parseApiResponse_fatal_http_response_error_code_should_set_errorState(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         http_codes = ["401", "403", "429", "500", "502", "503"]

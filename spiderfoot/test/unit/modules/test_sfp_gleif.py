@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleGleif(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_gleif()
@@ -32,8 +35,8 @@ class TestModuleGleif(unittest.TestCase):
         module = sfp_gleif()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -42,15 +45,15 @@ class TestModuleGleif(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_gleif)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'LEI'
-        event_data = 'invalid LEI'
-        event_module = 'example module'
+        event_type = "LEI"
+        event_data = "invalid LEI"
+        event_module = "example module"
         source_event = evt
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         result = module.handleEvent(evt)

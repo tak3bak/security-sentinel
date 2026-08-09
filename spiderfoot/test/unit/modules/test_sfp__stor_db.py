@@ -7,6 +7,9 @@ from sflib import SpiderFoot
 
 @pytest.mark.usefixtures
 class TestModuleStor_db(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     @unittest.skip("This module contains an extra private option")
     def test_opts(self):

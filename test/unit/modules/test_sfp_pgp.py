@@ -32,21 +32,21 @@ class TestModulePgp(unittest.TestCase):
         module = sfp_pgp()
         module.setup(sf, dict())
 
-        target_value = 'example target value'
-        target_type = 'IP_ADDRESS'
+        target_value = "example target value"
+        target_type = "IP_ADDRESS"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        module.opts['keyserver_search1'] = ''
-        module.opts['keyserver_search2'] = ''
-        module.opts['keyserver_fetch1'] = ''
-        module.opts['keyserver_fetch2'] = ''
+        module.opts["keyserver_search1"] = ""
+        module.opts["keyserver_search2"] = ""
+        module.opts["keyserver_fetch1"] = ""
+        module.opts["keyserver_fetch2"] = ""
 
         result = module.handleEvent(evt)
 

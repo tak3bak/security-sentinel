@@ -6,7 +6,15 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Optional, AsyncGenerator
 
-from fastapi import FastAPI, Depends, Header, HTTPException, BackgroundTasks, status, Request
+from fastapi import (
+    FastAPI,
+    Depends,
+    Header,
+    HTTPException,
+    BackgroundTasks,
+    status,
+    Request,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
@@ -22,35 +30,41 @@ LOG_FILE = os.path.join(LOG_DIR, "packet_telemetry.log")
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
     format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_FILE),
-        logging.StreamHandler()
-    ]
+    handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler()],
 )
 logger = logging.getLogger("sentinel")
 
 # Database Configuration
-RAW_DB_URL = os.getenv("DATABASE_URL", "postgresql://sentinel_admin:secure_sentinel_password@sentinel-db:5432/security_sentinel")
+RAW_DB_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://sentinel_admin:secure_sentinel_password@sentinel-db:5432/security_sentinel",
+)
 if RAW_DB_URL.startswith("postgresql://"):
     ASYNC_DB_URL = RAW_DB_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 else:
     ASYNC_DB_URL = RAW_DB_URL
 
 engine = create_async_engine(ASYNC_DB_URL, echo=False, pool_pre_ping=True)
-AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+AsyncSessionLocal = async_sessionmaker(
+    engine, expire_on_commit=False, class_=AsyncSession
+)
 
 # Global set of active SSE subscribers
 event_subscribers: set[asyncio.Queue] = set()
+
 
 # SQLAlchemy Models
 class Base(DeclarativeBase):
     pass
 
+
 class TelemetryEvent(Base):
     __tablename__ = "telemetry_events"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, index=True
+    )
     source_ip: Mapped[str] = mapped_column(String(45), index=True)
     destination_ip: Mapped[str] = mapped_column(String(45))
     source_port: Mapped[int] = mapped_column(Integer)
@@ -59,6 +73,7 @@ class TelemetryEvent(Base):
     packet_length: Mapped[int] = mapped_column(Integer)
     event_type: Mapped[str] = mapped_column(String(50), default="packet_capture")
     info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
 
 # Telemetry Persistence & Broadcaster Helper
 async def record_telemetry_event(event_data: dict):
@@ -82,7 +97,7 @@ async def record_telemetry_event(event_data: dict):
                     protocol=event_data.get("protocol", "Unknown"),
                     packet_length=int(event_data.get("packet_length", 0)),
                     event_type=event_data.get("event_type", "packet_capture"),
-                    info=event_data.get("info", "")
+                    info=event_data.get("info", ""),
                 )
                 session.add(db_event)
     except Exception as e:
@@ -95,6 +110,7 @@ async def record_telemetry_event(event_data: dict):
         except Exception:
             pass
 
+
 # Application Lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -105,10 +121,11 @@ async def lifespan(app: FastAPI):
     yield
     await engine.dispose()
 
+
 app = FastAPI(
     title="Nomadik Security Sentinel Analysis Engine",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS Configuration
@@ -131,7 +148,10 @@ app.add_middleware(
 # Authentication Dependency
 SENTINEL_API_KEY = os.getenv("SENTINEL_API_KEY", "default-secret-change-me")
 
-async def verify_api_key(x_api_key: Optional[str] = Header(None), background_tasks: BackgroundTasks = None):
+
+async def verify_api_key(
+    x_api_key: Optional[str] = Header(None), background_tasks: BackgroundTasks = None
+):
     if not x_api_key or x_api_key != SENTINEL_API_KEY:
         event = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -142,7 +162,7 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None), background_tas
             "protocol": "HTTP",
             "packet_length": 0,
             "event_type": "auth_failure",
-            "info": "Unauthorized API attempt"
+            "info": "Unauthorized API attempt",
         }
         if background_tasks:
             background_tasks.add_task(record_telemetry_event, event)
@@ -153,15 +173,16 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None), background_tas
         )
     return x_api_key
 
+
 # Endpoints
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "Nomadik Security Sentinel"}
 
+
 @app.get("/api/v1/sentinel/status")
 async def get_sentinel_status(
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
+    background_tasks: BackgroundTasks, api_key: str = Depends(verify_api_key)
 ):
     event = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -172,15 +193,16 @@ async def get_sentinel_status(
         "protocol": "HTTP",
         "packet_length": 0,
         "event_type": "status_check",
-        "info": "Authenticated status query"
+        "info": "Authenticated status query",
     }
     background_tasks.add_task(record_telemetry_event, event)
     return {
         "status": "active",
         "packet_monitor": "running",
         "database": "postgresql_async_active",
-        "security": "authenticated"
+        "security": "authenticated",
     }
+
 
 # SSE Telemetry Generator
 async def telemetry_event_generator(request: Request) -> AsyncGenerator[dict, None]:
@@ -190,7 +212,12 @@ async def telemetry_event_generator(request: Request) -> AsyncGenerator[dict, No
         # Send initial connected ping
         yield {
             "event": "connected",
-            "data": json.dumps({"status": "connected", "timestamp": datetime.utcnow().isoformat() + "Z"})
+            "data": json.dumps(
+                {
+                    "status": "connected",
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                }
+            ),
         }
         while True:
             if await request.is_disconnected():
@@ -198,22 +225,24 @@ async def telemetry_event_generator(request: Request) -> AsyncGenerator[dict, No
             try:
                 # Wait for next telemetry event with a 15-second heartbeat ping
                 event_data = await asyncio.wait_for(queue.get(), timeout=15.0)
-                yield {
-                    "event": "telemetry",
-                    "data": json.dumps(event_data)
-                }
+                yield {"event": "telemetry", "data": json.dumps(event_data)}
             except asyncio.TimeoutError:
                 yield {
                     "event": "ping",
-                    "data": json.dumps({"heartbeat": datetime.utcnow().isoformat() + "Z"})
+                    "data": json.dumps(
+                        {"heartbeat": datetime.utcnow().isoformat() + "Z"}
+                    ),
                 }
     finally:
         event_subscribers.remove(queue)
+
 
 @app.get("/api/v1/sentinel/stream")
 async def stream_telemetry(request: Request):
     return EventSourceResponse(telemetry_event_generator(request))
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

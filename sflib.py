@@ -6,6 +6,7 @@ import logging
 import hashlib
 import re
 
+
 class SpiderFootLib:
     def __init__(self, opts, config=None):
         self.opts = opts
@@ -25,7 +26,9 @@ class SpiderFootLib:
         self.log.error(self._sanitize_log_data(message), extra={"scanId": self._scanId})
 
     def fatal(self, error: str) -> None:
-        self.log.critical(self._sanitize_log_data(error), extra={"scanId": self._scanId})
+        self.log.critical(
+            self._sanitize_log_data(error), extra={"scanId": self._scanId}
+        )
 
     def info(self, message: str) -> None:
         if not self.opts.get("__logging", True):

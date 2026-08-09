@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleBase64(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_base64()
@@ -26,19 +29,21 @@ class TestModuleBase64(unittest.TestCase):
         module = sfp_base64()
         self.assertIsInstance(module.producedEvents(), list)
 
-    def test_handleEvent_event_data_url_containing_base64_string_should_return_event(self):
+    def test_handleEvent_event_data_url_containing_base64_string_should_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_base64()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
         def new_notifyListeners(self, event):
-            expected = 'BASE64_DATA'
+            expected = "BASE64_DATA"
             if str(event.eventType) != expected:
                 raise Exception(f"{event.eventType} != {expected}")
 
@@ -50,10 +55,10 @@ class TestModuleBase64(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_base64)
 
-        event_type = 'ROOT'
-        event_data = 'https://spiderfoot.net/path?param=example%20data%20U3BpZGVyRm9vdA%3d%3d%20example%20data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "https://spiderfoot.net/path?param=example%20data%20U3BpZGVyRm9vdA%3d%3d%20example%20data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
@@ -62,14 +67,16 @@ class TestModuleBase64(unittest.TestCase):
 
         self.assertEqual("OK", str(cm.exception))
 
-    def test_handleEvent_event_data_not_containing_base64_string_should_not_return_event(self):
+    def test_handleEvent_event_data_not_containing_base64_string_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_base64()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -78,10 +85,10 @@ class TestModuleBase64(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_base64)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         result = module.handleEvent(evt)

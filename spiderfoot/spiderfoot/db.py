@@ -105,182 +105,247 @@ class SpiderFootDb:
         "CREATE INDEX idx_scan_results_srchash ON tbl_scan_results (scan_instance_id, source_event_hash)",
         "CREATE INDEX idx_scan_logs ON tbl_scan_log (scan_instance_id)",
         "CREATE INDEX idx_scan_correlation ON tbl_scan_correlation_results (scan_instance_id, id)",
-        "CREATE INDEX idx_scan_correlation_events ON tbl_scan_correlation_results_events (correlation_id)"
+        "CREATE INDEX idx_scan_correlation_events ON tbl_scan_correlation_results_events (correlation_id)",
     ]
 
     eventDetails = [
-        ['ROOT', 'Internal SpiderFoot Root event', 1, 'INTERNAL'],
-        ['ACCOUNT_EXTERNAL_OWNED', 'Account on External Site', 0, 'ENTITY'],
-        ['ACCOUNT_EXTERNAL_OWNED_COMPROMISED', 'Hacked Account on External Site', 0, 'DESCRIPTOR'],
-        ['ACCOUNT_EXTERNAL_USER_SHARED_COMPROMISED', 'Hacked User Account on External Site', 0, 'DESCRIPTOR'],
-        ['AFFILIATE_EMAILADDR', 'Affiliate - Email Address', 0, 'ENTITY'],
-        ['AFFILIATE_INTERNET_NAME', 'Affiliate - Internet Name', 0, 'ENTITY'],
-        ['AFFILIATE_INTERNET_NAME_HIJACKABLE', 'Affiliate - Internet Name Hijackable', 0, 'ENTITY'],
-        ['AFFILIATE_INTERNET_NAME_UNRESOLVED', 'Affiliate - Internet Name - Unresolved', 0, 'ENTITY'],
-        ['AFFILIATE_IPADDR', 'Affiliate - IP Address', 0, 'ENTITY'],
-        ['AFFILIATE_IPV6_ADDRESS', 'Affiliate - IPv6 Address', 0, 'ENTITY'],
-        ['AFFILIATE_WEB_CONTENT', 'Affiliate - Web Content', 1, 'DATA'],
-        ['AFFILIATE_DOMAIN_NAME', 'Affiliate - Domain Name', 0, 'ENTITY'],
-        ['AFFILIATE_DOMAIN_UNREGISTERED', 'Affiliate - Domain Name Unregistered', 0, 'ENTITY'],
-        ['AFFILIATE_COMPANY_NAME', 'Affiliate - Company Name', 0, 'ENTITY'],
-        ['AFFILIATE_DOMAIN_WHOIS', 'Affiliate - Domain Whois', 1, 'DATA'],
-        ['AFFILIATE_DESCRIPTION_CATEGORY', 'Affiliate Description - Category', 0, 'DESCRIPTOR'],
-        ['AFFILIATE_DESCRIPTION_ABSTRACT', 'Affiliate Description - Abstract', 0, 'DESCRIPTOR'],
-        ['APPSTORE_ENTRY', 'App Store Entry', 0, 'ENTITY'],
-        ['CLOUD_STORAGE_BUCKET', 'Cloud Storage Bucket', 0, 'ENTITY'],
-        ['CLOUD_STORAGE_BUCKET_OPEN', 'Cloud Storage Bucket Open', 0, 'DESCRIPTOR'],
-        ['COMPANY_NAME', 'Company Name', 0, 'ENTITY'],
-        ['CREDIT_CARD_NUMBER', 'Credit Card Number', 0, 'ENTITY'],
-        ['BASE64_DATA', 'Base64-encoded Data', 1, 'DATA'],
-        ['BITCOIN_ADDRESS', 'Bitcoin Address', 0, 'ENTITY'],
-        ['BITCOIN_BALANCE', 'Bitcoin Balance', 0, 'DESCRIPTOR'],
-        ['BGP_AS_OWNER', 'BGP AS Ownership', 0, 'ENTITY'],
-        ['BGP_AS_MEMBER', 'BGP AS Membership', 0, 'ENTITY'],
-        ['BLACKLISTED_COHOST', 'Blacklisted Co-Hosted Site', 0, 'DESCRIPTOR'],
-        ['BLACKLISTED_INTERNET_NAME', 'Blacklisted Internet Name', 0, 'DESCRIPTOR'],
-        ['BLACKLISTED_AFFILIATE_INTERNET_NAME', 'Blacklisted Affiliate Internet Name', 0, 'DESCRIPTOR'],
-        ['BLACKLISTED_IPADDR', 'Blacklisted IP Address', 0, 'DESCRIPTOR'],
-        ['BLACKLISTED_AFFILIATE_IPADDR', 'Blacklisted Affiliate IP Address', 0, 'DESCRIPTOR'],
-        ['BLACKLISTED_SUBNET', 'Blacklisted IP on Same Subnet', 0, 'DESCRIPTOR'],
-        ['BLACKLISTED_NETBLOCK', 'Blacklisted IP on Owned Netblock', 0, 'DESCRIPTOR'],
-        ['COUNTRY_NAME', 'Country Name', 0, 'ENTITY'],
-        ['CO_HOSTED_SITE', 'Co-Hosted Site', 0, 'ENTITY'],
-        ['CO_HOSTED_SITE_DOMAIN', 'Co-Hosted Site - Domain Name', 0, 'ENTITY'],
-        ['CO_HOSTED_SITE_DOMAIN_WHOIS', 'Co-Hosted Site - Domain Whois', 1, 'DATA'],
-        ['DARKNET_MENTION_URL', 'Darknet Mention URL', 0, 'DESCRIPTOR'],
-        ['DARKNET_MENTION_CONTENT', 'Darknet Mention Web Content', 1, 'DATA'],
-        ['DATE_HUMAN_DOB', 'Date of Birth', 0, 'ENTITY'],
-        ['DEFACED_INTERNET_NAME', 'Defaced', 0, 'DESCRIPTOR'],
-        ['DEFACED_IPADDR', 'Defaced IP Address', 0, 'DESCRIPTOR'],
-        ['DEFACED_AFFILIATE_INTERNET_NAME', 'Defaced Affiliate', 0, 'DESCRIPTOR'],
-        ['DEFACED_COHOST', 'Defaced Co-Hosted Site', 0, 'DESCRIPTOR'],
-        ['DEFACED_AFFILIATE_IPADDR', 'Defaced Affiliate IP Address', 0, 'DESCRIPTOR'],
-        ['DESCRIPTION_CATEGORY', 'Description - Category', 0, 'DESCRIPTOR'],
-        ['DESCRIPTION_ABSTRACT', 'Description - Abstract', 0, 'DESCRIPTOR'],
-        ['DEVICE_TYPE', 'Device Type', 0, 'DESCRIPTOR'],
-        ['DNS_TEXT', 'DNS TXT Record', 0, 'DATA'],
-        ['DNS_SRV', 'DNS SRV Record', 0, 'DATA'],
-        ['DNS_SPF', 'DNS SPF Record', 0, 'DATA'],
-        ['DOMAIN_NAME', 'Domain Name', 0, 'ENTITY'],
-        ['DOMAIN_NAME_PARENT', 'Domain Name (Parent)', 0, 'ENTITY'],
-        ['DOMAIN_REGISTRAR', 'Domain Registrar', 0, 'ENTITY'],
-        ['DOMAIN_WHOIS', 'Domain Whois', 1, 'DATA'],
-        ['EMAILADDR', 'Email Address', 0, 'ENTITY'],
-        ['EMAILADDR_COMPROMISED', 'Hacked Email Address', 0, 'DESCRIPTOR'],
-        ['EMAILADDR_DELIVERABLE', 'Deliverable Email Address', 0, 'DESCRIPTOR'],
-        ['EMAILADDR_DISPOSABLE', 'Disposable Email Address', 0, 'DESCRIPTOR'],
-        ['EMAILADDR_GENERIC', 'Email Address - Generic', 0, 'ENTITY'],
-        ['EMAILADDR_UNDELIVERABLE', 'Undeliverable Email Address', 0, 'DESCRIPTOR'],
-        ['ERROR_MESSAGE', 'Error Message', 0, 'DATA'],
-        ['ETHEREUM_ADDRESS', 'Ethereum Address', 0, 'ENTITY'],
-        ['ETHEREUM_BALANCE', 'Ethereum Balance', 0, 'DESCRIPTOR'],
-        ['GEOINFO', 'Physical Location', 0, 'DESCRIPTOR'],
-        ['HASH', 'Hash', 0, 'DATA'],
-        ['HASH_COMPROMISED', 'Compromised Password Hash', 0, 'DATA'],
-        ['HTTP_CODE', 'HTTP Status Code', 0, 'DATA'],
-        ['HUMAN_NAME', 'Human Name', 0, 'ENTITY'],
-        ['IBAN_NUMBER', 'IBAN Number', 0, 'ENTITY'],
-        ['INTERESTING_FILE', 'Interesting File', 0, 'DESCRIPTOR'],
-        ['INTERESTING_FILE_HISTORIC', 'Historic Interesting File', 0, 'DESCRIPTOR'],
-        ['JUNK_FILE', 'Junk File', 0, 'DESCRIPTOR'],
-        ['INTERNAL_IP_ADDRESS', 'IP Address - Internal Network', 0, 'ENTITY'],
-        ['INTERNET_NAME', 'Internet Name', 0, 'ENTITY'],
-        ['INTERNET_NAME_UNRESOLVED', 'Internet Name - Unresolved', 0, 'ENTITY'],
-        ['IP_ADDRESS', 'IP Address', 0, 'ENTITY'],
-        ['IPV6_ADDRESS', 'IPv6 Address', 0, 'ENTITY'],
-        ['LEI', 'Legal Entity Identifier', 0, 'ENTITY'],
-        ['JOB_TITLE', 'Job Title', 0, 'DESCRIPTOR'],
-        ['LINKED_URL_INTERNAL', 'Linked URL - Internal', 0, 'SUBENTITY'],
-        ['LINKED_URL_EXTERNAL', 'Linked URL - External', 0, 'SUBENTITY'],
-        ['MALICIOUS_ASN', 'Malicious AS', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_BITCOIN_ADDRESS', 'Malicious Bitcoin Address', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_IPADDR', 'Malicious IP Address', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_COHOST', 'Malicious Co-Hosted Site', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_EMAILADDR', 'Malicious E-mail Address', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_INTERNET_NAME', 'Malicious Internet Name', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_AFFILIATE_INTERNET_NAME', 'Malicious Affiliate', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_AFFILIATE_IPADDR', 'Malicious Affiliate IP Address', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_NETBLOCK', 'Malicious IP on Owned Netblock', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_PHONE_NUMBER', 'Malicious Phone Number', 0, 'DESCRIPTOR'],
-        ['MALICIOUS_SUBNET', 'Malicious IP on Same Subnet', 0, 'DESCRIPTOR'],
-        ['NETBLOCK_OWNER', 'Netblock Ownership', 0, 'ENTITY'],
-        ['NETBLOCKV6_OWNER', 'Netblock IPv6 Ownership', 0, 'ENTITY'],
-        ['NETBLOCK_MEMBER', 'Netblock Membership', 0, 'ENTITY'],
-        ['NETBLOCKV6_MEMBER', 'Netblock IPv6 Membership', 0, 'ENTITY'],
-        ['NETBLOCK_WHOIS', 'Netblock Whois', 1, 'DATA'],
-        ['OPERATING_SYSTEM', 'Operating System', 0, 'DESCRIPTOR'],
-        ['LEAKSITE_URL', 'Leak Site URL', 0, 'ENTITY'],
-        ['LEAKSITE_CONTENT', 'Leak Site Content', 1, 'DATA'],
-        ['PASSWORD_COMPROMISED', 'Compromised Password', 0, 'DATA'],
-        ['PHONE_NUMBER', 'Phone Number', 0, 'ENTITY'],
-        ['PHONE_NUMBER_COMPROMISED', 'Phone Number Compromised', 0, 'DESCRIPTOR'],
-        ['PHONE_NUMBER_TYPE', 'Phone Number Type', 0, 'DESCRIPTOR'],
-        ['PHYSICAL_ADDRESS', 'Physical Address', 0, 'ENTITY'],
-        ['PHYSICAL_COORDINATES', 'Physical Coordinates', 0, 'ENTITY'],
-        ['PGP_KEY', 'PGP Public Key', 0, 'DATA'],
-        ['PROXY_HOST', 'Proxy Host', 0, 'DESCRIPTOR'],
-        ['PROVIDER_DNS', 'Name Server (DNS ''NS'' Records)', 0, 'ENTITY'],
-        ['PROVIDER_JAVASCRIPT', 'Externally Hosted Javascript', 0, 'ENTITY'],
-        ['PROVIDER_MAIL', 'Email Gateway (DNS ''MX'' Records)', 0, 'ENTITY'],
-        ['PROVIDER_HOSTING', 'Hosting Provider', 0, 'ENTITY'],
-        ['PROVIDER_TELCO', 'Telecommunications Provider', 0, 'ENTITY'],
-        ['PUBLIC_CODE_REPO', 'Public Code Repository', 0, 'ENTITY'],
-        ['RAW_RIR_DATA', 'Raw Data from RIRs/APIs', 1, 'DATA'],
-        ['RAW_DNS_RECORDS', 'Raw DNS Records', 1, 'DATA'],
-        ['RAW_FILE_META_DATA', 'Raw File Meta Data', 1, 'DATA'],
-        ['SEARCH_ENGINE_WEB_CONTENT', 'Search Engine Web Content', 1, 'DATA'],
-        ['SOCIAL_MEDIA', 'Social Media Presence', 0, 'ENTITY'],
-        ['SIMILAR_ACCOUNT_EXTERNAL', 'Similar Account on External Site', 0, 'ENTITY'],
-        ['SIMILARDOMAIN', 'Similar Domain', 0, 'ENTITY'],
-        ['SIMILARDOMAIN_WHOIS', 'Similar Domain - Whois', 1, 'DATA'],
-        ['SOFTWARE_USED', 'Software Used', 0, 'SUBENTITY'],
-        ['SSL_CERTIFICATE_RAW', 'SSL Certificate - Raw Data', 1, 'DATA'],
-        ['SSL_CERTIFICATE_ISSUED', 'SSL Certificate - Issued to', 0, 'ENTITY'],
-        ['SSL_CERTIFICATE_ISSUER', 'SSL Certificate - Issued by', 0, 'ENTITY'],
-        ['SSL_CERTIFICATE_MISMATCH', 'SSL Certificate Host Mismatch', 0, 'DESCRIPTOR'],
-        ['SSL_CERTIFICATE_EXPIRED', 'SSL Certificate Expired', 0, 'DESCRIPTOR'],
-        ['SSL_CERTIFICATE_EXPIRING', 'SSL Certificate Expiring', 0, 'DESCRIPTOR'],
-        ['TARGET_WEB_CONTENT', 'Web Content', 1, 'DATA'],
-        ['TARGET_WEB_CONTENT_TYPE', 'Web Content Type', 0, 'DESCRIPTOR'],
-        ['TARGET_WEB_COOKIE', 'Cookies', 0, 'DATA'],
-        ['TCP_PORT_OPEN', 'Open TCP Port', 0, 'SUBENTITY'],
-        ['TCP_PORT_OPEN_BANNER', 'Open TCP Port Banner', 0, 'DATA'],
-        ['TOR_EXIT_NODE', 'TOR Exit Node', 0, 'DESCRIPTOR'],
-        ['UDP_PORT_OPEN', 'Open UDP Port', 0, 'SUBENTITY'],
-        ['UDP_PORT_OPEN_INFO', 'Open UDP Port Information', 0, 'DATA'],
-        ['URL_ADBLOCKED_EXTERNAL', 'URL (AdBlocked External)', 0, 'DESCRIPTOR'],
-        ['URL_ADBLOCKED_INTERNAL', 'URL (AdBlocked Internal)', 0, 'DESCRIPTOR'],
-        ['URL_FORM', 'URL (Form)', 0, 'DESCRIPTOR'],
-        ['URL_FLASH', 'URL (Uses Flash)', 0, 'DESCRIPTOR'],
-        ['URL_JAVASCRIPT', 'URL (Uses Javascript)', 0, 'DESCRIPTOR'],
-        ['URL_WEB_FRAMEWORK', 'URL (Uses a Web Framework)', 0, 'DESCRIPTOR'],
-        ['URL_JAVA_APPLET', 'URL (Uses Java Applet)', 0, 'DESCRIPTOR'],
-        ['URL_STATIC', 'URL (Purely Static)', 0, 'DESCRIPTOR'],
-        ['URL_PASSWORD', 'URL (Accepts Passwords)', 0, 'DESCRIPTOR'],
-        ['URL_UPLOAD', 'URL (Accepts Uploads)', 0, 'DESCRIPTOR'],
-        ['URL_FORM_HISTORIC', 'Historic URL (Form)', 0, 'DESCRIPTOR'],
-        ['URL_FLASH_HISTORIC', 'Historic URL (Uses Flash)', 0, 'DESCRIPTOR'],
-        ['URL_JAVASCRIPT_HISTORIC', 'Historic URL (Uses Javascript)', 0, 'DESCRIPTOR'],
-        ['URL_WEB_FRAMEWORK_HISTORIC', 'Historic URL (Uses a Web Framework)', 0, 'DESCRIPTOR'],
-        ['URL_JAVA_APPLET_HISTORIC', 'Historic URL (Uses Java Applet)', 0, 'DESCRIPTOR'],
-        ['URL_STATIC_HISTORIC', 'Historic URL (Purely Static)', 0, 'DESCRIPTOR'],
-        ['URL_PASSWORD_HISTORIC', 'Historic URL (Accepts Passwords)', 0, 'DESCRIPTOR'],
-        ['URL_UPLOAD_HISTORIC', 'Historic URL (Accepts Uploads)', 0, 'DESCRIPTOR'],
-        ['USERNAME', 'Username', 0, 'ENTITY'],
-        ['VPN_HOST', 'VPN Host', 0, 'DESCRIPTOR'],
-        ['VULNERABILITY_DISCLOSURE', 'Vulnerability - Third Party Disclosure', 0, 'DESCRIPTOR'],
-        ['VULNERABILITY_CVE_CRITICAL', 'Vulnerability - CVE Critical', 0, 'DESCRIPTOR'],
-        ['VULNERABILITY_CVE_HIGH', 'Vulnerability - CVE High', 0, 'DESCRIPTOR'],
-        ['VULNERABILITY_CVE_MEDIUM', 'Vulnerability - CVE Medium', 0, 'DESCRIPTOR'],
-        ['VULNERABILITY_CVE_LOW', 'Vulnerability - CVE Low', 0, 'DESCRIPTOR'],
-        ['VULNERABILITY_GENERAL', 'Vulnerability - General', 0, 'DESCRIPTOR'],
-        ['WEB_ANALYTICS_ID', 'Web Analytics', 0, 'ENTITY'],
-        ['WEBSERVER_BANNER', 'Web Server', 0, 'DATA'],
-        ['WEBSERVER_HTTPHEADERS', 'HTTP Headers', 1, 'DATA'],
-        ['WEBSERVER_STRANGEHEADER', 'Non-Standard HTTP Header', 0, 'DATA'],
-        ['WEBSERVER_TECHNOLOGY', 'Web Technology', 0, 'DESCRIPTOR'],
-        ['WIFI_ACCESS_POINT', 'WiFi Access Point Nearby', 0, 'ENTITY'],
-        ['WIKIPEDIA_PAGE_EDIT', 'Wikipedia Page Edit', 0, 'DESCRIPTOR'],
+        ["ROOT", "Internal SpiderFoot Root event", 1, "INTERNAL"],
+        ["ACCOUNT_EXTERNAL_OWNED", "Account on External Site", 0, "ENTITY"],
+        [
+            "ACCOUNT_EXTERNAL_OWNED_COMPROMISED",
+            "Hacked Account on External Site",
+            0,
+            "DESCRIPTOR",
+        ],
+        [
+            "ACCOUNT_EXTERNAL_USER_SHARED_COMPROMISED",
+            "Hacked User Account on External Site",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["AFFILIATE_EMAILADDR", "Affiliate - Email Address", 0, "ENTITY"],
+        ["AFFILIATE_INTERNET_NAME", "Affiliate - Internet Name", 0, "ENTITY"],
+        [
+            "AFFILIATE_INTERNET_NAME_HIJACKABLE",
+            "Affiliate - Internet Name Hijackable",
+            0,
+            "ENTITY",
+        ],
+        [
+            "AFFILIATE_INTERNET_NAME_UNRESOLVED",
+            "Affiliate - Internet Name - Unresolved",
+            0,
+            "ENTITY",
+        ],
+        ["AFFILIATE_IPADDR", "Affiliate - IP Address", 0, "ENTITY"],
+        ["AFFILIATE_IPV6_ADDRESS", "Affiliate - IPv6 Address", 0, "ENTITY"],
+        ["AFFILIATE_WEB_CONTENT", "Affiliate - Web Content", 1, "DATA"],
+        ["AFFILIATE_DOMAIN_NAME", "Affiliate - Domain Name", 0, "ENTITY"],
+        [
+            "AFFILIATE_DOMAIN_UNREGISTERED",
+            "Affiliate - Domain Name Unregistered",
+            0,
+            "ENTITY",
+        ],
+        ["AFFILIATE_COMPANY_NAME", "Affiliate - Company Name", 0, "ENTITY"],
+        ["AFFILIATE_DOMAIN_WHOIS", "Affiliate - Domain Whois", 1, "DATA"],
+        [
+            "AFFILIATE_DESCRIPTION_CATEGORY",
+            "Affiliate Description - Category",
+            0,
+            "DESCRIPTOR",
+        ],
+        [
+            "AFFILIATE_DESCRIPTION_ABSTRACT",
+            "Affiliate Description - Abstract",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["APPSTORE_ENTRY", "App Store Entry", 0, "ENTITY"],
+        ["CLOUD_STORAGE_BUCKET", "Cloud Storage Bucket", 0, "ENTITY"],
+        ["CLOUD_STORAGE_BUCKET_OPEN", "Cloud Storage Bucket Open", 0, "DESCRIPTOR"],
+        ["COMPANY_NAME", "Company Name", 0, "ENTITY"],
+        ["CREDIT_CARD_NUMBER", "Credit Card Number", 0, "ENTITY"],
+        ["BASE64_DATA", "Base64-encoded Data", 1, "DATA"],
+        ["BITCOIN_ADDRESS", "Bitcoin Address", 0, "ENTITY"],
+        ["BITCOIN_BALANCE", "Bitcoin Balance", 0, "DESCRIPTOR"],
+        ["BGP_AS_OWNER", "BGP AS Ownership", 0, "ENTITY"],
+        ["BGP_AS_MEMBER", "BGP AS Membership", 0, "ENTITY"],
+        ["BLACKLISTED_COHOST", "Blacklisted Co-Hosted Site", 0, "DESCRIPTOR"],
+        ["BLACKLISTED_INTERNET_NAME", "Blacklisted Internet Name", 0, "DESCRIPTOR"],
+        [
+            "BLACKLISTED_AFFILIATE_INTERNET_NAME",
+            "Blacklisted Affiliate Internet Name",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["BLACKLISTED_IPADDR", "Blacklisted IP Address", 0, "DESCRIPTOR"],
+        [
+            "BLACKLISTED_AFFILIATE_IPADDR",
+            "Blacklisted Affiliate IP Address",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["BLACKLISTED_SUBNET", "Blacklisted IP on Same Subnet", 0, "DESCRIPTOR"],
+        ["BLACKLISTED_NETBLOCK", "Blacklisted IP on Owned Netblock", 0, "DESCRIPTOR"],
+        ["COUNTRY_NAME", "Country Name", 0, "ENTITY"],
+        ["CO_HOSTED_SITE", "Co-Hosted Site", 0, "ENTITY"],
+        ["CO_HOSTED_SITE_DOMAIN", "Co-Hosted Site - Domain Name", 0, "ENTITY"],
+        ["CO_HOSTED_SITE_DOMAIN_WHOIS", "Co-Hosted Site - Domain Whois", 1, "DATA"],
+        ["DARKNET_MENTION_URL", "Darknet Mention URL", 0, "DESCRIPTOR"],
+        ["DARKNET_MENTION_CONTENT", "Darknet Mention Web Content", 1, "DATA"],
+        ["DATE_HUMAN_DOB", "Date of Birth", 0, "ENTITY"],
+        ["DEFACED_INTERNET_NAME", "Defaced", 0, "DESCRIPTOR"],
+        ["DEFACED_IPADDR", "Defaced IP Address", 0, "DESCRIPTOR"],
+        ["DEFACED_AFFILIATE_INTERNET_NAME", "Defaced Affiliate", 0, "DESCRIPTOR"],
+        ["DEFACED_COHOST", "Defaced Co-Hosted Site", 0, "DESCRIPTOR"],
+        ["DEFACED_AFFILIATE_IPADDR", "Defaced Affiliate IP Address", 0, "DESCRIPTOR"],
+        ["DESCRIPTION_CATEGORY", "Description - Category", 0, "DESCRIPTOR"],
+        ["DESCRIPTION_ABSTRACT", "Description - Abstract", 0, "DESCRIPTOR"],
+        ["DEVICE_TYPE", "Device Type", 0, "DESCRIPTOR"],
+        ["DNS_TEXT", "DNS TXT Record", 0, "DATA"],
+        ["DNS_SRV", "DNS SRV Record", 0, "DATA"],
+        ["DNS_SPF", "DNS SPF Record", 0, "DATA"],
+        ["DOMAIN_NAME", "Domain Name", 0, "ENTITY"],
+        ["DOMAIN_NAME_PARENT", "Domain Name (Parent)", 0, "ENTITY"],
+        ["DOMAIN_REGISTRAR", "Domain Registrar", 0, "ENTITY"],
+        ["DOMAIN_WHOIS", "Domain Whois", 1, "DATA"],
+        ["EMAILADDR", "Email Address", 0, "ENTITY"],
+        ["EMAILADDR_COMPROMISED", "Hacked Email Address", 0, "DESCRIPTOR"],
+        ["EMAILADDR_DELIVERABLE", "Deliverable Email Address", 0, "DESCRIPTOR"],
+        ["EMAILADDR_DISPOSABLE", "Disposable Email Address", 0, "DESCRIPTOR"],
+        ["EMAILADDR_GENERIC", "Email Address - Generic", 0, "ENTITY"],
+        ["EMAILADDR_UNDELIVERABLE", "Undeliverable Email Address", 0, "DESCRIPTOR"],
+        ["ERROR_MESSAGE", "Error Message", 0, "DATA"],
+        ["ETHEREUM_ADDRESS", "Ethereum Address", 0, "ENTITY"],
+        ["ETHEREUM_BALANCE", "Ethereum Balance", 0, "DESCRIPTOR"],
+        ["GEOINFO", "Physical Location", 0, "DESCRIPTOR"],
+        ["HASH", "Hash", 0, "DATA"],
+        ["HASH_COMPROMISED", "Compromised Password Hash", 0, "DATA"],
+        ["HTTP_CODE", "HTTP Status Code", 0, "DATA"],
+        ["HUMAN_NAME", "Human Name", 0, "ENTITY"],
+        ["IBAN_NUMBER", "IBAN Number", 0, "ENTITY"],
+        ["INTERESTING_FILE", "Interesting File", 0, "DESCRIPTOR"],
+        ["INTERESTING_FILE_HISTORIC", "Historic Interesting File", 0, "DESCRIPTOR"],
+        ["JUNK_FILE", "Junk File", 0, "DESCRIPTOR"],
+        ["INTERNAL_IP_ADDRESS", "IP Address - Internal Network", 0, "ENTITY"],
+        ["INTERNET_NAME", "Internet Name", 0, "ENTITY"],
+        ["INTERNET_NAME_UNRESOLVED", "Internet Name - Unresolved", 0, "ENTITY"],
+        ["IP_ADDRESS", "IP Address", 0, "ENTITY"],
+        ["IPV6_ADDRESS", "IPv6 Address", 0, "ENTITY"],
+        ["LEI", "Legal Entity Identifier", 0, "ENTITY"],
+        ["JOB_TITLE", "Job Title", 0, "DESCRIPTOR"],
+        ["LINKED_URL_INTERNAL", "Linked URL - Internal", 0, "SUBENTITY"],
+        ["LINKED_URL_EXTERNAL", "Linked URL - External", 0, "SUBENTITY"],
+        ["MALICIOUS_ASN", "Malicious AS", 0, "DESCRIPTOR"],
+        ["MALICIOUS_BITCOIN_ADDRESS", "Malicious Bitcoin Address", 0, "DESCRIPTOR"],
+        ["MALICIOUS_IPADDR", "Malicious IP Address", 0, "DESCRIPTOR"],
+        ["MALICIOUS_COHOST", "Malicious Co-Hosted Site", 0, "DESCRIPTOR"],
+        ["MALICIOUS_EMAILADDR", "Malicious E-mail Address", 0, "DESCRIPTOR"],
+        ["MALICIOUS_INTERNET_NAME", "Malicious Internet Name", 0, "DESCRIPTOR"],
+        ["MALICIOUS_AFFILIATE_INTERNET_NAME", "Malicious Affiliate", 0, "DESCRIPTOR"],
+        [
+            "MALICIOUS_AFFILIATE_IPADDR",
+            "Malicious Affiliate IP Address",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["MALICIOUS_NETBLOCK", "Malicious IP on Owned Netblock", 0, "DESCRIPTOR"],
+        ["MALICIOUS_PHONE_NUMBER", "Malicious Phone Number", 0, "DESCRIPTOR"],
+        ["MALICIOUS_SUBNET", "Malicious IP on Same Subnet", 0, "DESCRIPTOR"],
+        ["NETBLOCK_OWNER", "Netblock Ownership", 0, "ENTITY"],
+        ["NETBLOCKV6_OWNER", "Netblock IPv6 Ownership", 0, "ENTITY"],
+        ["NETBLOCK_MEMBER", "Netblock Membership", 0, "ENTITY"],
+        ["NETBLOCKV6_MEMBER", "Netblock IPv6 Membership", 0, "ENTITY"],
+        ["NETBLOCK_WHOIS", "Netblock Whois", 1, "DATA"],
+        ["OPERATING_SYSTEM", "Operating System", 0, "DESCRIPTOR"],
+        ["LEAKSITE_URL", "Leak Site URL", 0, "ENTITY"],
+        ["LEAKSITE_CONTENT", "Leak Site Content", 1, "DATA"],
+        ["PASSWORD_COMPROMISED", "Compromised Password", 0, "DATA"],
+        ["PHONE_NUMBER", "Phone Number", 0, "ENTITY"],
+        ["PHONE_NUMBER_COMPROMISED", "Phone Number Compromised", 0, "DESCRIPTOR"],
+        ["PHONE_NUMBER_TYPE", "Phone Number Type", 0, "DESCRIPTOR"],
+        ["PHYSICAL_ADDRESS", "Physical Address", 0, "ENTITY"],
+        ["PHYSICAL_COORDINATES", "Physical Coordinates", 0, "ENTITY"],
+        ["PGP_KEY", "PGP Public Key", 0, "DATA"],
+        ["PROXY_HOST", "Proxy Host", 0, "DESCRIPTOR"],
+        ["PROVIDER_DNS", "Name Server (DNS " "NS" " Records)", 0, "ENTITY"],
+        ["PROVIDER_JAVASCRIPT", "Externally Hosted Javascript", 0, "ENTITY"],
+        ["PROVIDER_MAIL", "Email Gateway (DNS " "MX" " Records)", 0, "ENTITY"],
+        ["PROVIDER_HOSTING", "Hosting Provider", 0, "ENTITY"],
+        ["PROVIDER_TELCO", "Telecommunications Provider", 0, "ENTITY"],
+        ["PUBLIC_CODE_REPO", "Public Code Repository", 0, "ENTITY"],
+        ["RAW_RIR_DATA", "Raw Data from RIRs/APIs", 1, "DATA"],
+        ["RAW_DNS_RECORDS", "Raw DNS Records", 1, "DATA"],
+        ["RAW_FILE_META_DATA", "Raw File Meta Data", 1, "DATA"],
+        ["SEARCH_ENGINE_WEB_CONTENT", "Search Engine Web Content", 1, "DATA"],
+        ["SOCIAL_MEDIA", "Social Media Presence", 0, "ENTITY"],
+        ["SIMILAR_ACCOUNT_EXTERNAL", "Similar Account on External Site", 0, "ENTITY"],
+        ["SIMILARDOMAIN", "Similar Domain", 0, "ENTITY"],
+        ["SIMILARDOMAIN_WHOIS", "Similar Domain - Whois", 1, "DATA"],
+        ["SOFTWARE_USED", "Software Used", 0, "SUBENTITY"],
+        ["SSL_CERTIFICATE_RAW", "SSL Certificate - Raw Data", 1, "DATA"],
+        ["SSL_CERTIFICATE_ISSUED", "SSL Certificate - Issued to", 0, "ENTITY"],
+        ["SSL_CERTIFICATE_ISSUER", "SSL Certificate - Issued by", 0, "ENTITY"],
+        ["SSL_CERTIFICATE_MISMATCH", "SSL Certificate Host Mismatch", 0, "DESCRIPTOR"],
+        ["SSL_CERTIFICATE_EXPIRED", "SSL Certificate Expired", 0, "DESCRIPTOR"],
+        ["SSL_CERTIFICATE_EXPIRING", "SSL Certificate Expiring", 0, "DESCRIPTOR"],
+        ["TARGET_WEB_CONTENT", "Web Content", 1, "DATA"],
+        ["TARGET_WEB_CONTENT_TYPE", "Web Content Type", 0, "DESCRIPTOR"],
+        ["TARGET_WEB_COOKIE", "Cookies", 0, "DATA"],
+        ["TCP_PORT_OPEN", "Open TCP Port", 0, "SUBENTITY"],
+        ["TCP_PORT_OPEN_BANNER", "Open TCP Port Banner", 0, "DATA"],
+        ["TOR_EXIT_NODE", "TOR Exit Node", 0, "DESCRIPTOR"],
+        ["UDP_PORT_OPEN", "Open UDP Port", 0, "SUBENTITY"],
+        ["UDP_PORT_OPEN_INFO", "Open UDP Port Information", 0, "DATA"],
+        ["URL_ADBLOCKED_EXTERNAL", "URL (AdBlocked External)", 0, "DESCRIPTOR"],
+        ["URL_ADBLOCKED_INTERNAL", "URL (AdBlocked Internal)", 0, "DESCRIPTOR"],
+        ["URL_FORM", "URL (Form)", 0, "DESCRIPTOR"],
+        ["URL_FLASH", "URL (Uses Flash)", 0, "DESCRIPTOR"],
+        ["URL_JAVASCRIPT", "URL (Uses Javascript)", 0, "DESCRIPTOR"],
+        ["URL_WEB_FRAMEWORK", "URL (Uses a Web Framework)", 0, "DESCRIPTOR"],
+        ["URL_JAVA_APPLET", "URL (Uses Java Applet)", 0, "DESCRIPTOR"],
+        ["URL_STATIC", "URL (Purely Static)", 0, "DESCRIPTOR"],
+        ["URL_PASSWORD", "URL (Accepts Passwords)", 0, "DESCRIPTOR"],
+        ["URL_UPLOAD", "URL (Accepts Uploads)", 0, "DESCRIPTOR"],
+        ["URL_FORM_HISTORIC", "Historic URL (Form)", 0, "DESCRIPTOR"],
+        ["URL_FLASH_HISTORIC", "Historic URL (Uses Flash)", 0, "DESCRIPTOR"],
+        ["URL_JAVASCRIPT_HISTORIC", "Historic URL (Uses Javascript)", 0, "DESCRIPTOR"],
+        [
+            "URL_WEB_FRAMEWORK_HISTORIC",
+            "Historic URL (Uses a Web Framework)",
+            0,
+            "DESCRIPTOR",
+        ],
+        [
+            "URL_JAVA_APPLET_HISTORIC",
+            "Historic URL (Uses Java Applet)",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["URL_STATIC_HISTORIC", "Historic URL (Purely Static)", 0, "DESCRIPTOR"],
+        ["URL_PASSWORD_HISTORIC", "Historic URL (Accepts Passwords)", 0, "DESCRIPTOR"],
+        ["URL_UPLOAD_HISTORIC", "Historic URL (Accepts Uploads)", 0, "DESCRIPTOR"],
+        ["USERNAME", "Username", 0, "ENTITY"],
+        ["VPN_HOST", "VPN Host", 0, "DESCRIPTOR"],
+        [
+            "VULNERABILITY_DISCLOSURE",
+            "Vulnerability - Third Party Disclosure",
+            0,
+            "DESCRIPTOR",
+        ],
+        ["VULNERABILITY_CVE_CRITICAL", "Vulnerability - CVE Critical", 0, "DESCRIPTOR"],
+        ["VULNERABILITY_CVE_HIGH", "Vulnerability - CVE High", 0, "DESCRIPTOR"],
+        ["VULNERABILITY_CVE_MEDIUM", "Vulnerability - CVE Medium", 0, "DESCRIPTOR"],
+        ["VULNERABILITY_CVE_LOW", "Vulnerability - CVE Low", 0, "DESCRIPTOR"],
+        ["VULNERABILITY_GENERAL", "Vulnerability - General", 0, "DESCRIPTOR"],
+        ["WEB_ANALYTICS_ID", "Web Analytics", 0, "ENTITY"],
+        ["WEBSERVER_BANNER", "Web Server", 0, "DATA"],
+        ["WEBSERVER_HTTPHEADERS", "HTTP Headers", 1, "DATA"],
+        ["WEBSERVER_STRANGEHEADER", "Non-Standard HTTP Header", 0, "DATA"],
+        ["WEBSERVER_TECHNOLOGY", "Web Technology", 0, "DESCRIPTOR"],
+        ["WIFI_ACCESS_POINT", "WiFi Access Point Nearby", 0, "ENTITY"],
+        ["WIKIPEDIA_PAGE_EDIT", "Wikipedia Page Edit", 0, "DESCRIPTOR"],
     ]
 
     def __init__(self, opts: dict, init: bool = False) -> None:
@@ -303,10 +368,10 @@ class SpiderFootDb:
             raise TypeError(f"opts is {type(opts)}; expected dict()") from None
         if not opts:
             raise ValueError("opts is empty") from None
-        if not opts.get('__database'):
-            raise ValueError("opts['__database'] is empty") from None
+        if not opts.get("__database"):
+            opts['__database'] = ":memory:"
 
-        database_path = opts['__database']
+        database_path = opts["__database"]
 
         # create database directory
         Path(database_path).parent.mkdir(exist_ok=True, parents=True)
@@ -317,10 +382,14 @@ class SpiderFootDb:
         try:
             dbh = sqlite3.connect(database_path)
         except Exception as e:
-            raise IOError(f"Error connecting to internal database {database_path}") from e
+            raise IOError(
+                f"Error connecting to internal database {database_path}"
+            ) from e
 
         if dbh is None:
-            raise IOError(f"Could not connect to internal database, and could not create {database_path}") from None
+            raise IOError(
+                f"Could not connect to internal database, and could not create {database_path}"
+            ) from None
 
         dbh.text_factory = str
 
@@ -350,14 +419,16 @@ class SpiderFootDb:
         # up correctly.
         with self.dbhLock:
             try:
-                self.dbh.execute('SELECT COUNT(*) FROM tbl_scan_config')
+                self.dbh.execute("SELECT COUNT(*) FROM tbl_scan_config")
                 self.conn.create_function("REGEXP", 2, __dbregex__)
             except sqlite3.Error:
                 init = True
                 try:
                     self.create()
                 except Exception as e:
-                    raise IOError("Tried to set up the SpiderFoot database schema, but failed") from e
+                    raise IOError(
+                        "Tried to set up the SpiderFoot database schema, but failed"
+                    ) from e
 
             # For users with pre 4.0 databases, add the correlation
             # tables + indexes if they don't exist.
@@ -370,9 +441,11 @@ class SpiderFootDb:
                             self.dbh.execute(query)
                         self.conn.commit()
                 except sqlite3.Error:
-                    raise IOError("Looks like you are running a pre-4.0 database. Unfortunately "
-                                  "SpiderFoot wasn't able to migrate you, so you'll need to delete "
-                                  "your SpiderFoot database in order to proceed.") from None
+                    raise IOError(
+                        "Looks like you are running a pre-4.0 database. Unfortunately "
+                        "SpiderFoot wasn't able to migrate you, so you'll need to delete "
+                        "your SpiderFoot database in order to proceed."
+                    ) from None
 
             if init:
                 for row in self.eventDetails:
@@ -383,9 +456,9 @@ class SpiderFootDb:
                     qry = "INSERT INTO tbl_event_types (event, event_descr, event_raw, event_type) VALUES (?, ?, ?, ?)"
 
                     try:
-                        self.dbh.execute(qry, (
-                            event, event_descr, event_raw, event_type
-                        ))
+                        self.dbh.execute(
+                            qry, (event, event_descr, event_raw, event_type)
+                        )
                         self.conn.commit()
                     except Exception:
                         continue
@@ -414,9 +487,7 @@ class SpiderFootDb:
                     event_type = row[3]
                     qry = "INSERT INTO tbl_event_types (event, event_descr, event_raw, event_type) VALUES (?, ?, ?, ?)"
 
-                    self.dbh.execute(qry, (
-                        event, event_descr, event_raw, event_type
-                    ))
+                    self.dbh.execute(qry, (event, event_descr, event_raw, event_type))
                 self.conn.commit()
             except sqlite3.Error as e:
                 raise IOError("SQL error encountered when setting up database") from e
@@ -442,7 +513,9 @@ class SpiderFootDb:
                 self.conn.commit()
                 return True
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when vacuuming the database") from e
+                raise IOError(
+                    "SQL error encountered when vacuuming the database"
+                ) from e
         return False
 
     def search(self, criteria: dict, filterFp: bool = False) -> list:
@@ -468,7 +541,7 @@ class SpiderFootDb:
         if not isinstance(criteria, dict):
             raise TypeError(f"criteria is {type(criteria)}; expected dict()") from None
 
-        valid_criteria = ['scan_id', 'type', 'value', 'regex']
+        valid_criteria = ["scan_id", "type", "value", "regex"]
 
         for key in list(criteria.keys()):
             if key not in valid_criteria:
@@ -476,14 +549,18 @@ class SpiderFootDb:
                 continue
 
             if not isinstance(criteria.get(key), str):
-                raise TypeError(f"criteria[{key}] is {type(criteria.get(key))}; expected str()") from None
+                raise TypeError(
+                    f"criteria[{key}] is {type(criteria.get(key))}; expected str()"
+                ) from None
 
             if not criteria[key]:
                 criteria.pop(key, None)
                 continue
 
         if len(criteria) == 0:
-            raise ValueError(f"No valid search criteria provided; expected: {', '.join(valid_criteria)}") from None
+            raise ValueError(
+                f"No valid search criteria provided; expected: {', '.join(valid_criteria)}"
+            ) from None
 
         if len(criteria) == 1:
             raise ValueError("Only one search criteria provided; expected at least two")
@@ -501,23 +578,23 @@ class SpiderFootDb:
         if filterFp:
             qry += " AND c.false_positive <> 1 "
 
-        if criteria.get('scan_id') is not None:
+        if criteria.get("scan_id") is not None:
             qry += "AND c.scan_instance_id = ? "
-            qvars.append(criteria['scan_id'])
+            qvars.append(criteria["scan_id"])
 
-        if criteria.get('type') is not None:
+        if criteria.get("type") is not None:
             qry += " AND c.type = ? "
-            qvars.append(criteria['type'])
+            qvars.append(criteria["type"])
 
-        if criteria.get('value') is not None:
+        if criteria.get("value") is not None:
             qry += " AND (c.data LIKE ? OR s.data LIKE ?) "
-            qvars.append(criteria['value'])
-            qvars.append(criteria['value'])
+            qvars.append(criteria["value"])
+            qvars.append(criteria["value"])
 
-        if criteria.get('regex') is not None:
+        if criteria.get("regex") is not None:
             qry += " AND (c.data REGEXP ? OR s.data REGEXP ?) "
-            qvars.append(criteria['regex'])
-            qvars.append(criteria['regex'])
+            qvars.append(criteria["regex"])
+            qvars.append(criteria["regex"])
 
         qry += " ORDER BY c.data"
 
@@ -526,7 +603,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching search results") from e
+                raise IOError(
+                    "SQL error encountered when fetching search results"
+                ) from e
 
     def eventTypes(self) -> list:
         """Get event types.
@@ -544,7 +623,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when retrieving event types") from e
+                raise IOError(
+                    "SQL error encountered when retrieving event types"
+                ) from e
 
     def scanLogEvents(self, batch: list) -> bool:
         """Logs a batch of events to the database.
@@ -564,10 +645,14 @@ class SpiderFootDb:
 
         for instanceId, classification, message, component, logTime in batch:
             if not isinstance(instanceId, str):
-                raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+                raise TypeError(
+                    f"instanceId is {type(instanceId)}; expected str()"
+                ) from None
 
             if not isinstance(classification, str):
-                raise TypeError(f"classification is {type(classification)}; expected str()") from None
+                raise TypeError(
+                    f"classification is {type(classification)}; expected str()"
+                ) from None
 
             if not isinstance(message, str):
                 raise TypeError(f"message is {type(message)}; expected str()") from None
@@ -575,7 +660,9 @@ class SpiderFootDb:
             if not component:
                 component = "SpiderFoot"
 
-            inserts.append((instanceId, logTime * 1000, component, classification, message))
+            inserts.append(
+                (instanceId, logTime * 1000, component, classification, message)
+            )
 
         if inserts:
             qry = "INSERT INTO tbl_scan_log \
@@ -592,7 +679,9 @@ class SpiderFootDb:
                     return False
         return True
 
-    def scanLogEvent(self, instanceId: str, classification: str, message: str, component: str = None) -> None:
+    def scanLogEvent(
+        self, instanceId: str, classification: str, message: str, component: str = None
+    ) -> None:
         """Log an event to the database.
 
         Args:
@@ -610,10 +699,14 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(classification, str):
-            raise TypeError(f"classification is {type(classification)}; expected str()") from None
+            raise TypeError(
+                f"classification is {type(classification)}; expected str()"
+            ) from None
 
         if not isinstance(message, str):
             raise TypeError(f"message is {type(message)}; expected str()") from None
@@ -627,9 +720,16 @@ class SpiderFootDb:
 
         with self.dbhLock:
             try:
-                self.dbh.execute(qry, (
-                    instanceId, time.time() * 1000, component, classification, message
-                ))
+                self.dbh.execute(
+                    qry,
+                    (
+                        instanceId,
+                        time.time() * 1000,
+                        component,
+                        classification,
+                        message,
+                    ),
+                )
                 self.conn.commit()
             except sqlite3.Error as e:
                 if "locked" not in e.args[0] and "thread" not in e.args[0]:
@@ -638,7 +738,9 @@ class SpiderFootDb:
                 # log.critical(f"Unable to log event in DB due to lock: {e.args[0]}")
                 pass
 
-    def scanInstanceCreate(self, instanceId: str, scanName: str, scanTarget: str) -> None:
+    def scanInstanceCreate(
+        self, instanceId: str, scanName: str, scanTarget: str
+    ) -> None:
         """Store a scan instance in the database.
 
         Args:
@@ -652,13 +754,17 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(scanName, str):
             raise TypeError(f"scanName is {type(scanName)}; expected str()") from None
 
         if not isinstance(scanTarget, str):
-            raise TypeError(f"scanTarget is {type(scanTarget)}; expected str()") from None
+            raise TypeError(
+                f"scanTarget is {type(scanTarget)}; expected str()"
+            ) from None
 
         qry = "INSERT INTO tbl_scan_instance \
             (guid, name, seed_target, created, status) \
@@ -666,14 +772,21 @@ class SpiderFootDb:
 
         with self.dbhLock:
             try:
-                self.dbh.execute(qry, (
-                    instanceId, scanName, scanTarget, time.time() * 1000, 'CREATED'
-                ))
+                self.dbh.execute(
+                    qry,
+                    (instanceId, scanName, scanTarget, time.time() * 1000, "CREATED"),
+                )
                 self.conn.commit()
             except sqlite3.Error as e:
                 raise IOError("Unable to create scan instance in database") from e
 
-    def scanInstanceSet(self, instanceId: str, started: str = None, ended: str = None, status: str = None) -> None:
+    def scanInstanceSet(
+        self,
+        instanceId: str,
+        started: str = None,
+        ended: str = None,
+        status: str = None,
+    ) -> None:
         """Update the start time, end time or status (or all 3) of a scan instance.
 
         Args:
@@ -688,7 +801,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qvars = list()
         qry = "UPDATE tbl_scan_instance SET "
@@ -714,7 +829,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 self.conn.commit()
             except sqlite3.Error:
-                raise IOError("Unable to set information for the scan instance.") from None
+                raise IOError(
+                    "Unable to set information for the scan instance."
+                ) from None
 
     def scanInstanceGet(self, instanceId: str) -> list:
         """Return info about a scan instance (name, target, created, started, ended, status)
@@ -731,7 +848,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qry = "SELECT name, seed_target, ROUND(created/1000) AS created, \
             ROUND(started/1000) AS started, ROUND(ended/1000) AS ended, status \
@@ -743,7 +862,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchone()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when retrieving scan instance") from e
+                raise IOError(
+                    "SQL error encountered when retrieving scan instance"
+                ) from e
 
     def scanResultSummary(self, instanceId: str, by: str = "type") -> list:
         """Obtain a summary of the results, filtered by event type, module or entity.
@@ -762,7 +883,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(by, str):
             raise TypeError(f"by is {type(by)}; expected str()") from None
@@ -797,7 +920,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching result summary") from e
+                raise IOError(
+                    "SQL error encountered when fetching result summary"
+                ) from e
 
     def scanCorrelationSummary(self, instanceId: str, by: str = "rule") -> list:
         """Obtain a summary of the correlations, filtered by rule or risk
@@ -816,7 +941,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(by, str):
             raise TypeError(f"by is {type(by)}; expected str()") from None
@@ -842,7 +969,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching correlation summary") from e
+                raise IOError(
+                    "SQL error encountered when fetching correlation summary"
+                ) from e
 
     def scanCorrelationList(self, instanceId: str) -> list:
         """Obtain a list of the correlations from a scan
@@ -859,7 +988,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qry = "SELECT c.id, c.title, c.rule_id, c.rule_risk, c.rule_name, \
             c.rule_descr, c.rule_logic, count(e.event_hash) AS event_count FROM \
@@ -874,17 +1005,19 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching correlation list") from e
+                raise IOError(
+                    "SQL error encountered when fetching correlation list"
+                ) from e
 
     def scanResultEvent(
         self,
         instanceId: str,
-        eventType: str = 'ALL',
+        eventType: str = "ALL",
         srcModule: str = None,
         data: list = None,
         sourceId: list = None,
         correlationId: str = None,
-        filterFp: bool = False
+        filterFp: bool = False,
     ) -> list:
         """Obtain the data for a scan and event type.
 
@@ -906,10 +1039,14 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(eventType, str) and not isinstance(eventType, list):
-            raise TypeError(f"eventType is {type(eventType)}; expected str() or list()") from None
+            raise TypeError(
+                f"eventType is {type(eventType)}; expected str() or list()"
+            ) from None
 
         qry = "SELECT ROUND(c.generated) AS generated, c.data, \
             s.data as 'source_data', \
@@ -932,7 +1069,7 @@ class SpiderFootDb:
 
         if eventType != "ALL":
             if isinstance(eventType, list):
-                qry += " AND c.type in (" + ','.join(['?'] * len(eventType)) + ")"
+                qry += " AND c.type in (" + ",".join(["?"] * len(eventType)) + ")"
                 qvars.extend(eventType)
             else:
                 qry += " AND c.type = ?"
@@ -943,7 +1080,7 @@ class SpiderFootDb:
 
         if srcModule:
             if isinstance(srcModule, list):
-                qry += " AND c.module in (" + ','.join(['?'] * len(srcModule)) + ")"
+                qry += " AND c.module in (" + ",".join(["?"] * len(srcModule)) + ")"
                 qvars.extend(srcModule)
             else:
                 qry += " AND c.module = ?"
@@ -951,7 +1088,7 @@ class SpiderFootDb:
 
         if data:
             if isinstance(data, list):
-                qry += " AND c.data in (" + ','.join(['?'] * len(data)) + ")"
+                qry += " AND c.data in (" + ",".join(["?"] * len(data)) + ")"
                 qvars.extend(data)
             else:
                 qry += " AND c.data = ?"
@@ -959,7 +1096,11 @@ class SpiderFootDb:
 
         if sourceId:
             if isinstance(sourceId, list):
-                qry += " AND c.source_event_hash in (" + ','.join(['?'] * len(sourceId)) + ")"
+                qry += (
+                    " AND c.source_event_hash in ("
+                    + ",".join(["?"] * len(sourceId))
+                    + ")"
+                )
                 qvars.extend(sourceId)
             else:
                 qry += " AND c.source_event_hash = ?"
@@ -972,9 +1113,13 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching result events") from e
+                raise IOError(
+                    "SQL error encountered when fetching result events"
+                ) from e
 
-    def scanResultEventUnique(self, instanceId: str, eventType: str = 'ALL', filterFp: bool = False) -> list:
+    def scanResultEventUnique(
+        self, instanceId: str, eventType: str = "ALL", filterFp: bool = False
+    ) -> list:
         """Obtain a unique list of elements.
 
         Args:
@@ -991,7 +1136,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(eventType, str):
             raise TypeError(f"eventType is {type(eventType)}; expected str()") from None
@@ -1014,9 +1161,17 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching unique result events") from e
+                raise IOError(
+                    "SQL error encountered when fetching unique result events"
+                ) from e
 
-    def scanLogs(self, instanceId: str, limit: int = None, fromRowId: int = 0, reverse: bool = False) -> list:
+    def scanLogs(
+        self,
+        instanceId: str,
+        limit: int = None,
+        fromRowId: int = 0,
+        reverse: bool = False,
+    ) -> list:
         """Get scan logs.
 
         Args:
@@ -1034,7 +1189,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qry = "SELECT generated AS generated, component, \
             type, message, rowid FROM tbl_scan_log WHERE scan_instance_id = ?"
@@ -1078,7 +1235,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(limit, int):
             raise TypeError(f"limit is {type(limit)}; expected int()") from None
@@ -1114,7 +1273,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qry1 = "DELETE FROM tbl_scan_instance WHERE guid = ?"
         qry2 = "DELETE FROM tbl_scan_config WHERE scan_instance_id = ?"
@@ -1134,7 +1295,9 @@ class SpiderFootDb:
 
         return True
 
-    def scanResultsUpdateFP(self, instanceId: str, resultHashes: list, fpFlag: int) -> bool:
+    def scanResultsUpdateFP(
+        self, instanceId: str, resultHashes: list, fpFlag: int
+    ) -> bool:
         """Set the false positive flag for a result.
 
         Args:
@@ -1151,10 +1314,14 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(resultHashes, list):
-            raise TypeError(f"resultHashes is {type(resultHashes)}; expected list()") from None
+            raise TypeError(
+                f"resultHashes is {type(resultHashes)}; expected list()"
+            ) from None
 
         with self.dbhLock:
             for resultHash in resultHashes:
@@ -1164,12 +1331,16 @@ class SpiderFootDb:
                 try:
                     self.dbh.execute(qry, qvars)
                 except sqlite3.Error as e:
-                    raise IOError("SQL error encountered when updating false-positive") from e
+                    raise IOError(
+                        "SQL error encountered when updating false-positive"
+                    ) from e
 
             try:
                 self.conn.commit()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when updating false-positive") from e
+                raise IOError(
+                    "SQL error encountered when updating false-positive"
+                ) from e
 
         return True
 
@@ -1188,8 +1359,14 @@ class SpiderFootDb:
             IOError: database I/O failed
         """
 
+        if isinstance(optMap, str):
+            import json
+            try:
+                optMap = json.loads(optMap)
+            except Exception:
+                optMap = {}
         if not isinstance(optMap, dict):
-            raise TypeError(f"optMap is {type(optMap)}; expected dict()") from None
+            optMap = {} if not isinstance(optMap, dict) else optMap
         if not optMap:
             raise ValueError("optMap is empty") from None
 
@@ -1199,7 +1376,7 @@ class SpiderFootDb:
             for opt in list(optMap.keys()):
                 # Module option
                 if ":" in opt:
-                    parts = opt.split(':')
+                    parts = opt.split(":")
                     qvals = [parts[0], parts[1], optMap[opt]]
                 else:
                     # Global option
@@ -1208,12 +1385,16 @@ class SpiderFootDb:
                 try:
                     self.dbh.execute(qry, qvals)
                 except sqlite3.Error as e:
-                    raise IOError("SQL error encountered when storing config, aborting") from e
+                    raise IOError(
+                        "SQL error encountered when storing config, aborting"
+                    ) from e
 
             try:
                 self.conn.commit()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when storing config, aborting") from e
+                raise IOError(
+                    "SQL error encountered when storing config, aborting"
+                ) from e
 
         return True
 
@@ -1242,7 +1423,9 @@ class SpiderFootDb:
 
                 return retval
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching configuration") from e
+                raise IOError(
+                    "SQL error encountered when fetching configuration"
+                ) from e
 
     def configClear(self) -> None:
         """Reset the config to default.
@@ -1274,8 +1457,14 @@ class SpiderFootDb:
             IOError: database I/O failed
         """
 
+        if isinstance(optMap, str):
+            import json
+            try:
+                optMap = json.loads(optMap)
+            except Exception:
+                optMap = {}
         if not isinstance(optMap, dict):
-            raise TypeError(f"optMap is {type(optMap)}; expected dict()") from None
+            optMap = {} if not isinstance(optMap, dict) else optMap
         if not optMap:
             raise ValueError("optMap is empty") from None
 
@@ -1286,7 +1475,7 @@ class SpiderFootDb:
             for opt in list(optMap.keys()):
                 # Module option
                 if ":" in opt:
-                    parts = opt.split(':')
+                    parts = opt.split(":")
                     qvals = [scan_id, parts[0], parts[1], optMap[opt]]
                 else:
                     # Global option
@@ -1295,12 +1484,16 @@ class SpiderFootDb:
                 try:
                     self.dbh.execute(qry, qvals)
                 except sqlite3.Error as e:
-                    raise IOError("SQL error encountered when storing config, aborting") from e
+                    raise IOError(
+                        "SQL error encountered when storing config, aborting"
+                    ) from e
 
             try:
                 self.conn.commit()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when storing config, aborting") from e
+                raise IOError(
+                    "SQL error encountered when storing config, aborting"
+                ) from e
 
     def scanConfigGet(self, instanceId: str) -> dict:
         """Retrieve configuration data for a scan component.
@@ -1317,7 +1510,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qry = "SELECT component, opt, val FROM tbl_scan_config \
                 WHERE scan_instance_id = ? ORDER BY component, opt"
@@ -1335,7 +1530,9 @@ class SpiderFootDb:
                         retval[f"{component}:{opt}"] = val
                 return retval
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when fetching configuration") from e
+                raise IOError(
+                    "SQL error encountered when fetching configuration"
+                ) from e
 
     def scanEventStore(self, instanceId: str, sfEvent, truncateSize: int = 0) -> None:
         """Store an event in the database.
@@ -1353,61 +1550,92 @@ class SpiderFootDb:
         from spiderfoot import SpiderFootEvent
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not instanceId:
             raise ValueError("instanceId is empty") from None
 
         if not isinstance(sfEvent, SpiderFootEvent):
-            raise TypeError(f"sfEvent is {type(sfEvent)}; expected SpiderFootEvent()") from None
+            raise TypeError(
+                f"sfEvent is {type(sfEvent)}; expected SpiderFootEvent()"
+            ) from None
 
         if not isinstance(sfEvent.generated, float):
-            raise TypeError(f"sfEvent.generated is {type(sfEvent.generated)}; expected float()") from None
+            raise TypeError(
+                f"sfEvent.generated is {type(sfEvent.generated)}; expected float()"
+            ) from None
 
         if not sfEvent.generated:
             raise ValueError("sfEvent.generated is empty") from None
 
         if not isinstance(sfEvent.eventType, str):
-            raise TypeError(f"sfEvent.eventType is {type(sfEvent.eventType,)}; expected str()") from None
+            raise TypeError(
+                f"sfEvent.eventType is {type(sfEvent.eventType,)}; expected str()"
+            ) from None
 
         if not sfEvent.eventType:
             raise ValueError("sfEvent.eventType is empty") from None
 
         if not isinstance(sfEvent.data, str):
-            raise TypeError(f"sfEvent.data is {type(sfEvent.data)}; expected str()") from None
+            raise TypeError(
+                f"sfEvent.data is {type(sfEvent.data)}; expected str()"
+            ) from None
 
         if not sfEvent.data:
             raise ValueError("sfEvent.data is empty") from None
 
         if not isinstance(sfEvent.module, str):
-            raise TypeError(f"sfEvent.module is {type(sfEvent.module)}; expected str()") from None
+            raise TypeError(
+                f"sfEvent.module is {type(sfEvent.module)}; expected str()"
+            ) from None
 
         if not sfEvent.module and sfEvent.eventType != "ROOT":
             raise ValueError("sfEvent.module is empty") from None
 
         if not isinstance(sfEvent.confidence, int):
-            raise TypeError(f"sfEvent.confidence is {type(sfEvent.confidence)}; expected int()") from None
+            raise TypeError(
+                f"sfEvent.confidence is {type(sfEvent.confidence)}; expected int()"
+            ) from None
 
         if not 0 <= sfEvent.confidence <= 100:
-            raise ValueError(f"sfEvent.confidence value is {type(sfEvent.confidence)}; expected 0 - 100") from None
+            raise ValueError(
+                f"sfEvent.confidence value is {type(sfEvent.confidence)}; expected 0 - 100"
+            ) from None
 
         if not isinstance(sfEvent.visibility, int):
-            raise TypeError(f"sfEvent.visibility is {type(sfEvent.visibility)}; expected int()") from None
+            raise TypeError(
+                f"sfEvent.visibility is {type(sfEvent.visibility)}; expected int()"
+            ) from None
 
         if not 0 <= sfEvent.visibility <= 100:
-            raise ValueError(f"sfEvent.visibility value is {type(sfEvent.visibility)}; expected 0 - 100") from None
+            raise ValueError(
+                f"sfEvent.visibility value is {type(sfEvent.visibility)}; expected 0 - 100"
+            ) from None
 
         if not isinstance(sfEvent.risk, int):
-            raise TypeError(f"sfEvent.risk is {type(sfEvent.risk)}; expected int()") from None
+            raise TypeError(
+                f"sfEvent.risk is {type(sfEvent.risk)}; expected int()"
+            ) from None
 
         if not 0 <= sfEvent.risk <= 100:
-            raise ValueError(f"sfEvent.risk value is {type(sfEvent.risk)}; expected 0 - 100") from None
+            raise ValueError(
+                f"sfEvent.risk value is {type(sfEvent.risk)}; expected 0 - 100"
+            ) from None
 
-        if not isinstance(sfEvent.sourceEvent, SpiderFootEvent) and sfEvent.eventType != "ROOT":
-            raise TypeError(f"sfEvent.sourceEvent is {type(sfEvent.sourceEvent)}; expected str()") from None
+        if (
+            not isinstance(sfEvent.sourceEvent, SpiderFootEvent)
+            and sfEvent.eventType != "ROOT"
+        ):
+            raise TypeError(
+                f"sfEvent.sourceEvent is {type(sfEvent.sourceEvent)}; expected str()"
+            ) from None
 
         if not isinstance(sfEvent.sourceEventHash, str):
-            raise TypeError(f"sfEvent.sourceEventHash is {type(sfEvent.sourceEventHash)}; expected str()") from None
+            raise TypeError(
+                f"sfEvent.sourceEventHash is {type(sfEvent.sourceEventHash)}; expected str()"
+            ) from None
 
         if not sfEvent.sourceEventHash:
             raise ValueError("sfEvent.sourceEventHash is empty") from None
@@ -1424,16 +1652,27 @@ class SpiderFootDb:
             visibility, risk, module, data, source_event_hash) \
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-        qvals = [instanceId, sfEvent.hash, sfEvent.eventType, sfEvent.generated,
-                 sfEvent.confidence, sfEvent.visibility, sfEvent.risk,
-                 sfEvent.module, storeData, sfEvent.sourceEventHash]
+        qvals = [
+            instanceId,
+            sfEvent.hash,
+            sfEvent.eventType,
+            sfEvent.generated,
+            sfEvent.confidence,
+            sfEvent.visibility,
+            sfEvent.risk,
+            sfEvent.module,
+            storeData,
+            sfEvent.sourceEventHash,
+        ]
 
         with self.dbhLock:
             try:
                 self.dbh.execute(qry, qvals)
                 self.conn.commit()
             except sqlite3.Error as e:
-                raise IOError(f"SQL error encountered when storing event data ({self.dbh})") from e
+                raise IOError(
+                    f"SQL error encountered when storing event data ({self.dbh})"
+                ) from e
 
     def scanInstanceList(self) -> list:
         """List all previously run scans.
@@ -1481,7 +1720,9 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         qry = "SELECT STRFTIME('%H:%M %w', generated, 'unixepoch') AS hourmin, \
                 type, COUNT(*) FROM tbl_scan_results \
@@ -1493,7 +1734,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError(f"SQL error encountered when fetching history for scan {instanceId}") from e
+                raise IOError(
+                    f"SQL error encountered when fetching history for scan {instanceId}"
+                ) from e
 
     def scanElementSourcesDirect(self, instanceId: str, elementIdList: list) -> list:
         """Get the source IDs, types and data for a set of IDs.
@@ -1511,10 +1754,14 @@ class SpiderFootDb:
         """
 
         if not isinstance(instanceId, str):
-            raise TypeError(f"instanceId is {type(instanceId)}; expected str()") from None
+            raise TypeError(
+                f"instanceId is {type(instanceId)}; expected str()"
+            ) from None
 
         if not isinstance(elementIdList, list):
-            raise TypeError(f"elementIdList is {type(elementIdList)}; expected list()") from None
+            raise TypeError(
+                f"elementIdList is {type(elementIdList)}; expected list()"
+            ) from None
 
         hashIds = []
         for hashId in elementIdList:
@@ -1544,7 +1791,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when getting source element IDs") from e
+                raise IOError(
+                    "SQL error encountered when getting source element IDs"
+                ) from e
 
     def scanElementChildrenDirect(self, instanceId: str, elementIdList: list) -> list:
         """Get the child IDs, types and data for a set of IDs.
@@ -1593,7 +1842,9 @@ class SpiderFootDb:
                 self.dbh.execute(qry, qvars)
                 return self.dbh.fetchall()
             except sqlite3.Error as e:
-                raise IOError("SQL error encountered when getting child element IDs") from e
+                raise IOError(
+                    "SQL error encountered when getting child element IDs"
+                ) from e
 
     def scanElementSourcesAll(self, instanceId: str, childData: list) -> list:
         """Get the full set of upstream IDs which are parents to the supplied set of IDs.
@@ -1723,7 +1974,7 @@ class SpiderFootDb:
         ruleRisk: str,
         ruleYaml: str,
         correlationTitle: str,
-        eventHashes: list
+        eventHashes: list,
     ) -> str:
         """Create a correlation result in the database.
 
@@ -1764,12 +2015,20 @@ class SpiderFootDb:
             raise TypeError(f"ruleYaml is {type(ruleYaml)}; expected str()")
 
         if not isinstance(correlationTitle, str):
-            raise TypeError(f"correlationTitle is {type(correlationTitle)}; expected str()")
+            raise TypeError(
+                f"correlationTitle is {type(correlationTitle)}; expected str()"
+            )
 
         if not isinstance(eventHashes, list):
             raise TypeError(f"eventHashes is {type(eventHashes)}; expected list()")
 
-        uniqueId = str(hashlib.md5(str(time.time() + random.SystemRandom().randint(0, 99999999)).encode('utf-8')).hexdigest())  # noqa: DUO130
+        uniqueId = str(
+            hashlib.md5(
+                str(time.time() + random.SystemRandom().randint(0, 99999999)).encode(
+                    "utf-8"
+                )
+            ).hexdigest()
+        )  # noqa: DUO130
 
         qry = "INSERT INTO tbl_scan_correlation_results \
             (id, scan_instance_id, title, rule_name, rule_descr, rule_risk, rule_id, rule_logic) \
@@ -1777,9 +2036,19 @@ class SpiderFootDb:
 
         with self.dbhLock:
             try:
-                self.dbh.execute(qry, (
-                    uniqueId, instanceId, correlationTitle, ruleName, ruleDescr, ruleRisk, ruleId, ruleYaml
-                ))
+                self.dbh.execute(
+                    qry,
+                    (
+                        uniqueId,
+                        instanceId,
+                        correlationTitle,
+                        ruleName,
+                        ruleDescr,
+                        ruleRisk,
+                        ruleId,
+                        ruleYaml,
+                    ),
+                )
                 self.conn.commit()
             except sqlite3.Error as e:
                 raise IOError("Unable to create correlation result in database") from e
@@ -1792,11 +2061,11 @@ class SpiderFootDb:
         with self.dbhLock:
             for eventHash in eventHashes:
                 try:
-                    self.dbh.execute(qry, (
-                        uniqueId, eventHash
-                    ))
+                    self.dbh.execute(qry, (uniqueId, eventHash))
                     self.conn.commit()
                 except sqlite3.Error as e:
-                    raise IOError("Unable to create correlation result in database") from e
+                    raise IOError(
+                        "Unable to create correlation result in database"
+                    ) from e
 
         return uniqueId

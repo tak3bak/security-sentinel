@@ -17,18 +17,16 @@ from spiderfoot import SpiderFootEvent, SpiderFootHelpers, SpiderFootPlugin
 class sfp_iban(SpiderFootPlugin):
 
     meta = {
-        'name': "IBAN Number Extractor",
-        'summary': "Identify International Bank Account Numbers (IBANs) in any data.",
-        'flags': ["errorprone"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "IBAN Number Extractor",
+        "summary": "Identify International Bank Account Numbers (IBANs) in any data.",
+        "flags": ["errorprone"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
-    opts = {
-    }
+    opts = {}
 
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -44,8 +42,7 @@ class sfp_iban(SpiderFootPlugin):
 
     # What events is this module interested in for input
     def watchedEvents(self):
-        return ["TARGET_WEB_CONTENT", "DARKNET_MENTION_CONTENT",
-                "LEAKSITE_CONTENT"]
+        return ["TARGET_WEB_CONTENT", "DARKNET_MENTION_CONTENT", "LEAKSITE_CONTENT"]
 
     # What events this module produces
     def producedEvents(self):
@@ -68,5 +65,6 @@ class sfp_iban(SpiderFootPlugin):
             else:
                 evt.moduleDataSource = "Unknown"
             self.notifyListeners(evt)
+
 
 # End of sfp_iban class

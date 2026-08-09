@@ -19,7 +19,7 @@ class sfp_hostio(SpiderFootPlugin):
     meta = {
         "name": "Host.io",
         "summary": "Obtain information about domain names from host.io.",
-        'flags': ["apikey"],
+        "flags": ["apikey"],
         "useCases": ["Passive"],
         "categories": ["Passive DNS"],
         "dataSource": {
@@ -162,7 +162,11 @@ class sfp_hostio(SpiderFootPlugin):
                     self.notifyListeners(loc_evt)
                     found = True
 
-                geo_info = ', '.join(filter(None, (ip_data.get(k) for k in ("city", "region", "country"))))
+                geo_info = ", ".join(
+                    filter(
+                        None, (ip_data.get(k) for k in ("city", "region", "country"))
+                    )
+                )
                 if geo_info:
                     geo_info_evt = SpiderFootEvent(
                         "GEOINFO", geo_info, self.__name__, evt
@@ -178,8 +182,8 @@ class sfp_hostio(SpiderFootPlugin):
                     if isinstance(email_data, dict):
                         value = email_data["value"]
                         if value and isinstance(value, str):
-                            for email in value.split(','):
-                                email = email.strip('.')
+                            for email in value.split(","):
+                                email = email.strip(".")
                                 evt = SpiderFootEvent(
                                     "EMAILADDR", email, self.__name__, event
                                 )

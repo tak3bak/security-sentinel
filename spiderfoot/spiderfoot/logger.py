@@ -24,14 +24,14 @@ class SpiderFootSqliteLogHandler(logging.Handler):
         self.opts = opts
         self.dbh = None
         self.batch = []
-        if self.opts.get('_debug', False):
+        if self.opts.get("_debug", False):
             self.batch_size = 100
         else:
             self.batch_size = 5
         self.shutdown_hook = False
         super().__init__()
 
-    def emit(self, record: 'logging.LogRecord') -> None:
+    def emit(self, record: "logging.LogRecord") -> None:
         """TBD
 
         Args:
@@ -43,8 +43,10 @@ class SpiderFootSqliteLogHandler(logging.Handler):
         scanId = getattr(record, "scanId", None)
         component = getattr(record, "module", None)
         if scanId:
-            level = ("STATUS" if record.levelname == "INFO" else record.levelname)
-            self.batch.append((scanId, level, record.getMessage(), component, time.time()))
+            level = "STATUS" if record.levelname == "INFO" else record.levelname
+            self.batch.append(
+                (scanId, level, record.getMessage(), component, time.time())
+            )
             if len(self.batch) >= self.batch_size:
                 self.logBatch()
 
@@ -65,7 +67,9 @@ class SpiderFootSqliteLogHandler(logging.Handler):
         self.dbh = SpiderFootDb(self.opts)
 
 
-def logListenerSetup(loggingQueue, opts: dict = None) -> 'logging.handlers.QueueListener':
+def logListenerSetup(
+    loggingQueue, opts: dict = None
+) -> "logging.handlers.QueueListener":
     """Create and start a SpiderFoot log listener in its own thread.
 
     This function should be called as soon as possible in the main
@@ -83,7 +87,7 @@ def logListenerSetup(loggingQueue, opts: dict = None) -> 'logging.handlers.Queue
         opts = dict()
     doLogging = opts.get("__logging", True)
     debug = opts.get("_debug", False)
-    logLevel = (logging.DEBUG if debug else logging.INFO)
+    logLevel = logging.DEBUG if debug else logging.INFO
 
     # Log to terminal
     console_handler = logging.StreamHandler(sys.stderr)
@@ -91,18 +95,12 @@ def logListenerSetup(loggingQueue, opts: dict = None) -> 'logging.handlers.Queue
     # Log debug messages to file
     log_dir = SpiderFootHelpers.logPath()
     debug_handler = logging.handlers.TimedRotatingFileHandler(
-        f"{log_dir}/spiderfoot.debug.log",
-        when="d",
-        interval=1,
-        backupCount=30
+        f"{log_dir}/spiderfoot.debug.log", when="d", interval=1, backupCount=30
     )
 
     # Log error messages to file
     error_handler = logging.handlers.TimedRotatingFileHandler(
-        f"{log_dir}/spiderfoot.error.log",
-        when="d",
-        interval=1,
-        backupCount=30
+        f"{log_dir}/spiderfoot.error.log", when="d", interval=1, backupCount=30
     )
 
     # Filter by log level
@@ -111,8 +109,12 @@ def logListenerSetup(loggingQueue, opts: dict = None) -> 'logging.handlers.Queue
     error_handler.addFilter(lambda x: x.levelno >= logging.WARN)
 
     # Set log format
-    log_format = logging.Formatter("%(asctime)s [%(levelname)s] %(module)s : %(message)s")
-    debug_format = logging.Formatter("%(asctime)s [%(levelname)s] %(filename)s:%(lineno)s : %(message)s")
+    log_format = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(module)s : %(message)s"
+    )
+    debug_format = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(filename)s:%(lineno)s : %(message)s"
+    )
     console_handler.setFormatter(log_format)
     debug_handler.setFormatter(debug_format)
     error_handler.setFormatter(debug_format)
@@ -133,7 +135,7 @@ def logListenerSetup(loggingQueue, opts: dict = None) -> 'logging.handlers.Queue
     return spiderFootLogListener
 
 
-def logWorkerSetup(loggingQueue) -> 'logging.Logger':
+def logWorkerSetup(loggingQueue) -> "logging.Logger":
     """Root SpiderFoot logger.
 
     Args:
@@ -151,7 +153,7 @@ def logWorkerSetup(loggingQueue) -> 'logging.Logger':
     return log
 
 
-def stop_listener(listener: 'logging.handlers.QueueListener') -> None:
+def stop_listener(listener: "logging.handlers.QueueListener") -> None:
     """TBD.
 
     Args:

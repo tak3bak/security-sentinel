@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleClearbit(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_clearbit()
@@ -26,7 +29,9 @@ class TestModuleClearbit(unittest.TestCase):
         module = sfp_clearbit()
         self.assertIsInstance(module.producedEvents(), list)
 
-    def test_parseApiResponse_nonfatal_http_response_code_should_not_set_errorState(self):
+    def test_parseApiResponse_nonfatal_http_response_code_should_not_set_errorState(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         http_codes = ["200", "404", "429"]
@@ -38,7 +43,9 @@ class TestModuleClearbit(unittest.TestCase):
                 self.assertIsNone(result)
                 self.assertFalse(module.errorState)
 
-    def test_parseApiResponse_fatal_http_response_error_code_should_set_errorState(self):
+    def test_parseApiResponse_fatal_http_response_error_code_should_set_errorState(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         http_codes = ["401", "402", "403", "500", "502", "503"]
@@ -56,15 +63,15 @@ class TestModuleClearbit(unittest.TestCase):
         module = sfp_clearbit()
         module.setup(sf, dict())
 
-        target_value = 'example target value'
-        target_type = 'IP_ADDRESS'
+        target_value = "example target value"
+        target_type = "IP_ADDRESS"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
         result = module.handleEvent(evt)

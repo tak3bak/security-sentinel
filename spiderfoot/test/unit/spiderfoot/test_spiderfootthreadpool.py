@@ -7,6 +7,9 @@ from spiderfoot import SpiderFootThreadPool
 
 @pytest.mark.usefixtures
 class TestSpiderFootThreadPool(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
     """
     Test SpiderFoot
     """
@@ -26,19 +29,13 @@ class TestSpiderFootThreadPool(unittest.TestCase):
         expectedOutput = [
             ("a", ("arg1",), ("kwarg1", "kwarg1")),
             ("b", ("arg1",), ("kwarg1", "kwarg1")),
-            ("c", ("arg1",), ("kwarg1", "kwarg1"))
+            ("c", ("arg1",), ("kwarg1", "kwarg1")),
         ]
         # Example 1: using map()
         with SpiderFootThreadPool(threads) as pool:
             map_results = sorted(
-                list(pool.map(
-                    callback,
-                    iterable,
-                    *args,
-                    saveResult=True,
-                    **kwargs
-                )),
-                key=lambda x: x[0]
+                list(pool.map(callback, iterable, *args, saveResult=True, **kwargs)),
+                key=lambda x: x[0],
             )
         self.assertEqual(map_results, expectedOutput)
 
@@ -48,8 +45,7 @@ class TestSpiderFootThreadPool(unittest.TestCase):
             for i in iterable:
                 pool.submit(callback, *((i,) + args), saveResult=True, **kwargs)
             submit_results = sorted(
-                list(pool.shutdown()["default"]),
-                key=lambda x: x[0]
+                list(pool.shutdown()["default"]), key=lambda x: x[0]
             )
         self.assertEqual(submit_results, expectedOutput)
 
@@ -59,26 +55,31 @@ class TestSpiderFootThreadPool(unittest.TestCase):
         expectedOutput2 = [
             ("d", ("arg1",), ("kwarg1", "kwarg1")),
             ("e", ("arg1",), ("kwarg1", "kwarg1")),
-            ("f", ("arg1",), ("kwarg1", "kwarg1"))
+            ("f", ("arg1",), ("kwarg1", "kwarg1")),
         ]
         pool = SpiderFootThreadPool(threads)
         pool.start()
         for i in iterable2:
-            pool.submit(callback, *((i,) + args), taskName="submitTest", saveResult=True, **kwargs)
-        map_results = sorted(
-            list(pool.map(
+            pool.submit(
                 callback,
-                iterable,
-                *args,
-                taskName="mapTest",
+                *((i,) + args),
+                taskName="submitTest",
                 saveResult=True,
                 **kwargs
-            )),
-            key=lambda x: x[0]
+            )
+        map_results = sorted(
+            list(
+                pool.map(
+                    callback,
+                    iterable,
+                    *args,
+                    taskName="mapTest",
+                    saveResult=True,
+                    **kwargs
+                )
+            ),
+            key=lambda x: x[0],
         )
-        submit_results = sorted(
-            list(pool.shutdown()["submitTest"]),
-            key=lambda x: x[0]
-        )
+        submit_results = sorted(list(pool.shutdown()["submitTest"]), key=lambda x: x[0])
         self.assertEqual(map_results, expectedOutput)
         self.assertEqual(submit_results, expectedOutput2)

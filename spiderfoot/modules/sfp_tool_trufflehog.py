@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:        sfp_tool_trufflehog
@@ -23,31 +24,27 @@ from spiderfoot import SpiderFootPlugin, SpiderFootEvent
 class sfp_tool_trufflehog(SpiderFootPlugin):
 
     meta = {
-        'name': "Tool - TruffleHog",
-        'summary': "Searches through git repositories for high entropy strings and secrets, digging deep into commit history.",
-        'flags': ["tool", "slow"],
-        'useCases': ["Footprint", "Investigate"],
-        'categories': ["Crawling and Scanning"],
-        'toolDetails': {
-            'name': "TruffleHog",
-            'description': "TruffleHog searches through git repositories for secrets, "
-                "digging deep into commit history and branches. This is effective at "
-                "finding secrets accidentally committed.",
-            'website': "https://github.com/trufflesecurity/truffleHog",
-            'repository': "https://github.com/trufflesecurity/truffleHog",
+        "name": "Tool - TruffleHog",
+        "summary": "Searches through git repositories for high entropy strings and secrets, digging deep into commit history.",
+        "flags": ["tool", "slow"],
+        "useCases": ["Footprint", "Investigate"],
+        "categories": ["Crawling and Scanning"],
+        "toolDetails": {
+            "name": "TruffleHog",
+            "description": "TruffleHog searches through git repositories for secrets, "
+            "digging deep into commit history and branches. This is effective at "
+            "finding secrets accidentally committed.",
+            "website": "https://github.com/trufflesecurity/truffleHog",
+            "repository": "https://github.com/trufflesecurity/truffleHog",
         },
     }
 
-    opts = {
-        'entropy': False,
-        'allrepos': False,
-        'trufflehog_path': ''
-    }
+    opts = {"entropy": False, "allrepos": False, "trufflehog_path": ""}
 
     optdescs = {
-        'trufflehog_path': "Path to your trufflehog binary. Must be set.",
-        'entropy': "Enable entropy checks? If disabled, TruffleHog will solely rely on high-signal regular expressions to identify secrets.",
-        'allrepos': "Search all code repositories found. By default TruffleHog only searches those linked from the target website."
+        "trufflehog_path": "Path to your trufflehog binary. Must be set.",
+        "entropy": "Enable entropy checks? If disabled, TruffleHog will solely rely on high-signal regular expressions to identify secrets.",
+        "allrepos": "Search all code repositories found. By default TruffleHog only searches those linked from the target website.",
     }
 
     results = None
@@ -63,10 +60,10 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
             self.opts[opt] = userOpts[opt]
 
     def watchedEvents(self):
-        return ['SOCIAL_MEDIA', 'PUBLIC_CODE_REPO']
+        return ["SOCIAL_MEDIA", "PUBLIC_CODE_REPO"]
 
     def producedEvents(self):
-        return ['PASSWORD_COMPROMISED']
+        return ["PASSWORD_COMPROMISED"]
 
     def handleEvent(self, event):
         eventName = event.eventType
@@ -79,13 +76,15 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
         if self.errorState:
             return
 
-        if not self.opts['trufflehog_path']:
-            self.error("You enabled sfp_tool_trufflehog but did not set a path to the tool!")
+        if not self.opts["trufflehog_path"]:
+            self.error(
+                "You enabled sfp_tool_trufflehog but did not set a path to the tool!"
+            )
             self.errorState = True
             return
 
-        exe = self.opts['trufflehog_path']
-        if self.opts['trufflehog_path'].endswith('/'):
+        exe = self.opts["trufflehog_path"]
+        if self.opts["trufflehog_path"].endswith("/"):
             exe = f"{exe}trufflehog"
 
         if not os.path.isfile(exe):
@@ -94,17 +93,27 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
             return
 
         if eventName == "SOCIAL_MEDIA":
-            if any(domain in urlparse(eventData.lower()).netloc for domain in ["github.com", "gitlab.com", "bitbucket.org"]):
+            if any(
+                domain in urlparse(eventData.lower()).netloc
+                for domain in ["github.com", "gitlab.com", "bitbucket.org"]
+            ):
                 try:
-                    url = eventData.split(": ")[1].replace("<SFURL>", "").replace("</SFURL>", "")
+                    url = (
+                        eventData.split(": ")[1]
+                        .replace("<SFURL>", "")
+                        .replace("</SFURL>", "")
+                    )
                 except BaseException:
                     self.debug("Unable to extract repository URL, skipping.")
                     return
             else:
                 return
 
-        if eventName == "PUBLIC_CODE_REPO" and self.opts['allrepos']:
-            if any(domain in urlparse(eventData.lower()).netloc for domain in ["github.com", "gitlab.com", "bitbucket.org"]):
+        if eventName == "PUBLIC_CODE_REPO" and self.opts["allrepos"]:
+            if any(
+                domain in urlparse(eventData.lower()).netloc
+                for domain in ["github.com", "gitlab.com", "bitbucket.org"]
+            ):
                 try:
                     url = eventData.split("\n")[1].replace("URL: ", "")
                 except BaseException:
@@ -124,11 +133,11 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
 
         args = [
             exe,
-            '--json',
-            '--regex',
+            "--json",
+            "--regex",
         ]
 
-        if not self.opts['entropy']:
+        if not self.opts["entropy"]:
             args.append("--entropy=False")
         else:
             args.append("--entropy=True")
@@ -158,17 +167,18 @@ class sfp_tool_trufflehog(SpiderFootPlugin):
             try:
                 rowjson = json.loads(row)
             except BaseException as e:
-                self.error(f"Could not parse trufflehog output as JSON: {row}\nException: {e}")
+                self.error(
+                    f"Could not parse trufflehog output as JSON: {row}\nException: {e}"
+                )
                 continue
 
             descr = "\n".join(
-                f"{k}: {rowjson[k]}"
-                for k in rowjson
-                if k not in ["diff", "printDiff"]
+                f"{k}: {rowjson[k]}" for k in rowjson if k not in ["diff", "printDiff"]
             )
-            evt = SpiderFootEvent('PASSWORD_COMPROMISED', descr, self.__name__, event)
+            evt = SpiderFootEvent("PASSWORD_COMPROMISED", descr, self.__name__, event)
             self.notifyListeners(evt)
 
         return
+
 
 # End of sfp_tool_trufflehog class

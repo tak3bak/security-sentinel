@@ -30,23 +30,19 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
         "toolDetails": {
             "name": "snallygaster",
             "description": "snallygaster is a tool that looks for files accessible on "
-                           "web servers that shouldn't be public and can pose a security "
-                           "risk. Typical examples include publicly accessible git "
-                           "repositories, backup files potentially containing passwords "
-                           " or database dumps. In addition, it contains a few checks "
-                           " for other security vulnerabilities.",
+            "web servers that shouldn't be public and can pose a security "
+            "risk. Typical examples include publicly accessible git "
+            "repositories, backup files potentially containing passwords "
+            " or database dumps. In addition, it contains a few checks "
+            " for other security vulnerabilities.",
             "website": "https://github.com/hannob/snallygaster",
-            "repository": "https://github.com/hannob/snallygaster"
-        }
+            "repository": "https://github.com/hannob/snallygaster",
+        },
     }
 
-    opts = {
-        'snallygaster_path': ''
-    }
+    opts = {"snallygaster_path": ""}
 
-    optdescs = {
-        "snallygaster_path": "Path to your snallygaster binary. Must be set."
-    }
+    optdescs = {"snallygaster_path": "Path to your snallygaster binary. Must be set."}
 
     results = None
     errorState = False
@@ -61,15 +57,15 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
             self.opts[opt] = userOpts[opt]
 
     def watchedEvents(self):
-        return ['INTERNET_NAME']
+        return ["INTERNET_NAME"]
 
     def producedEvents(self):
         return [
-            'VULNERABILITY_GENERAL',
-            'VULNERABILITY_CVE_CRITICAL',
-            'VULNERABILITY_CVE_HIGH',
-            'VULNERABILITY_CVE_MEDIUM',
-            'VULNERABILITY_CVE_LOW'
+            "VULNERABILITY_GENERAL",
+            "VULNERABILITY_CVE_CRITICAL",
+            "VULNERABILITY_CVE_HIGH",
+            "VULNERABILITY_CVE_MEDIUM",
+            "VULNERABILITY_CVE_LOW",
         ]
 
     def handleEvent(self, event):
@@ -88,8 +84,10 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
 
         self.results[eventData] = True
 
-        if not self.opts['snallygaster_path']:
-            self.error("You enabled sfp_tool_snallygaster but did not set a path to the tool!")
+        if not self.opts["snallygaster_path"]:
+            self.error(
+                "You enabled sfp_tool_snallygaster but did not set a path to the tool!"
+            )
             self.errorState = True
             return
 
@@ -106,12 +104,7 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
             self.error("Invalid input, refusing to run.")
             return
 
-        args = [
-            exe,
-            '--nowww',
-            '-j',
-            eventData
-        ]
+        args = [exe, "--nowww", "-j", eventData]
         try:
             p = Popen(args, stdout=PIPE, stderr=PIPE)
             out, stderr = p.communicate(input=None, timeout=600)
@@ -126,7 +119,9 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
             return
 
         if p.returncode != 0:
-            self.error(f"Unable to read onesixtyone output\nstderr: {stderr}\nstdout: {stdout}")
+            self.error(
+                f"Unable to read onesixtyone output\nstderr: {stderr}\nstdout: {stdout}"
+            )
             return
 
         if not stdout:
@@ -136,7 +131,9 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
         try:
             result_json = json.loads(stdout)
         except Exception as e:
-            self.error(f"Could not parse snallygaster output as JSON: {e}\nstderr: {stderr}\nstdout: {stdout}")
+            self.error(
+                f"Could not parse snallygaster output as JSON: {e}\nstderr: {stderr}\nstdout: {stdout}"
+            )
             return
 
         if not result_json:
@@ -157,5 +154,6 @@ class sfp_tool_snallygaster(SpiderFootPlugin):
                 event,
             )
             self.notifyListeners(evt)
+
 
 # End of sfp_tool_snallygaster class

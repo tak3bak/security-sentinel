@@ -4,7 +4,10 @@ import os
 # Bypass dotenv file loading entirely and set the clean key directly
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-def create_quick_payment_link(amount_cents: int = 4900, name: str = "Nomadik Security Sentinel Tier"):
+
+def create_quick_payment_link(
+    amount_cents: int = 4900, name: str = "Nomadik Security Sentinel Tier"
+):
     try:
         product = stripe.Product.create(name=name)
         price = stripe.Price.create(
@@ -19,6 +22,7 @@ def create_quick_payment_link(amount_cents: int = 4900, name: str = "Nomadik Sec
         return payment_link.url
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     create_quick_payment_link()

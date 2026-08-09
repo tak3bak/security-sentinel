@@ -1,6 +1,7 @@
 import hashlib
 import os
 
+
 class FileIntegrityMonitor:
     def __init__(self, watch_list):
         self.watch_list = watch_list
@@ -8,7 +9,7 @@ class FileIntegrityMonitor:
 
     def calculate_hash(self, file_path):
         hasher = hashlib.sha256()
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             hasher.update(f.read())
         return hasher.hexdigest()
 

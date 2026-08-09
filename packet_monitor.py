@@ -6,49 +6,65 @@ from datetime import datetime
 CAPTURE_INTERFACE = os.getenv("CAPTURE_INTERFACE", "eth0")
 LOG_OUTPUT_PATH = "/var/log/nomadik_sentinel/packet_telemetry.log"
 
+
 def ensure_log_dir():
     os.makedirs(os.path.dirname(LOG_OUTPUT_PATH), exist_ok=True)
 
+
 def start_monitor():
     ensure_log_dir()
-    
+
     cmd = [
         "tshark",
-        "-i", CAPTURE_INTERFACE,
-        "-T", "json",
-        "-e", "frame.number",
-        "-e", "frame.len",
-        "-e", "ip.src",
-        "-e", "ip.dst",
-        "-e", "ipv6.src",
-        "-e", "ipv6.dst",
-        "-e", "tcp.srcport",
-        "-e", "tcp.dstport",
-        "-e", "udp.srcport",
-        "-e", "udp.dstport",
-        "-e", "_ws.col.Protocol",
-        "-e", "_ws.col.Info"
+        "-i",
+        CAPTURE_INTERFACE,
+        "-T",
+        "json",
+        "-e",
+        "frame.number",
+        "-e",
+        "frame.len",
+        "-e",
+        "ip.src",
+        "-e",
+        "ip.dst",
+        "-e",
+        "ipv6.src",
+        "-e",
+        "ipv6.dst",
+        "-e",
+        "tcp.srcport",
+        "-e",
+        "tcp.dstport",
+        "-e",
+        "udp.srcport",
+        "-e",
+        "udp.dstport",
+        "-e",
+        "_ws.col.Protocol",
+        "-e",
+        "_ws.col.Info",
     ]
-    
+
     print(f"[*] Starting Nomadik Packet Monitor on {CAPTURE_INTERFACE}")
-    
+
     while True:
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
-            universal_newlines=True
+            universal_newlines=True,
         )
-        
+
         buffer = []
         for line in process.stdout:
             buffer.append(line)
             if line.strip() in ["}", "},"]:
-                raw_data = "".join(buffer).strip().rstrip(',')
+                raw_data = "".join(buffer).strip().rstrip(",")
                 try:
                     packet_json = json.loads(raw_data)
                     layers = packet_json.get("_source", {}).get("layers", {})
-                    
+
                     def get_field(keys):
                         if isinstance(keys, str):
                             keys = [keys]
@@ -68,14 +84,14 @@ def start_monitor():
 
                     src_ip = get_field(["ip.src", "ipv6.src"])
                     dst_ip = get_field(["ip.dst", "ipv6.dst"])
-                    
+
                     if not src_ip or not dst_ip:
                         buffer = []
                         continue
 
                     src_port = get_field(["tcp.srcport", "udp.srcport"]) or "N/A"
                     dst_port = get_field(["tcp.dstport", "udp.dstport"]) or "N/A"
-                    
+
                     proto = get_field(["_ws.col.Protocol"])
                     if not proto or proto == "Unknown":
                         if src_port != "N/A" or dst_port != "N/A":
@@ -93,7 +109,7 @@ def start_monitor():
                         "destination_port": dst_port,
                         "protocol": proto,
                         "packet_length": length,
-                        "info": info
+                        "info": info,
                     }
 
                     with open(LOG_OUTPUT_PATH, "a") as f:
@@ -103,6 +119,7 @@ def start_monitor():
                     pass
                 finally:
                     buffer = []
+
 
 if __name__ == "__main__":
     start_monitor()

@@ -20,7 +20,7 @@ class sfp_ipregistry(SpiderFootPlugin):
     meta = {
         "name": "ipregistry",
         "summary": "Query the ipregistry.co database for reputation and geo-location.",
-        'flags': ["apikey"],
+        "flags": ["apikey"],
         "useCases": ["Passive", "Footprint", "Investigate"],
         "categories": ["Reputation Systems"],
         "dataSource": {
@@ -82,9 +82,7 @@ class sfp_ipregistry(SpiderFootPlugin):
         try:
             return json.loads(res["content"])
         except Exception as e:
-            self.error(
-                f"Error processing JSON response from {self.meta['name']}: {e}"
-            )
+            self.error(f"Error processing JSON response from {self.meta['name']}: {e}")
 
         return None
 
@@ -150,7 +148,9 @@ class sfp_ipregistry(SpiderFootPlugin):
         self.debug(f"Received event, {event.eventType}, from {event.module}")
 
         if self.opts["api_key"] == "":
-            self.error(f"You enabled {self.__class__.__name__} but did not set an API key!")
+            self.error(
+                f"You enabled {self.__class__.__name__} but did not set an API key!"
+            )
             self.errorState = True
             return
 

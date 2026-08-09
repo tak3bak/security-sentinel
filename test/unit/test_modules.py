@@ -16,8 +16,8 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
 
     @staticmethod
     def load_modules(sf):
-        mod_dir = os.path.dirname(os.path.abspath(__file__)) + '/../../modules/'
-        return SpiderFootHelpers.loadModulesAsDict(mod_dir, ['sfp_template.py'])
+        mod_dir = os.path.dirname(os.path.abspath(__file__)) + "/../../modules/"
+        return SpiderFootHelpers.loadModulesAsDict(mod_dir, ["sfp_template.py"])
 
     def test_module_use_cases_are_valid(self):
         sf = SpiderFoot(self.default_options)
@@ -27,7 +27,7 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            for group in m.get('group'):
+            for group in m.get("group"):
                 self.assertIn(group, valid_use_cases)
 
     def test_module_labels_are_valid(self):
@@ -38,27 +38,36 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            for label in m.get('labels'):
+            for label in m.get("labels"):
                 self.assertIn(label, valid_labels)
 
     def test_module_categories_are_valid(self):
         sf = SpiderFoot(self.default_options)
-        valid_categories = ["Content Analysis", "Crawling and Scanning", "DNS",
-                            "Leaks, Dumps and Breaches", "Passive DNS",
-                            "Public Registries", "Real World", "Reputation Systems",
-                            "Search Engines", "Secondary Networks", "Social Media"]
+        valid_categories = [
+            "Content Analysis",
+            "Crawling and Scanning",
+            "DNS",
+            "Leaks, Dumps and Breaches",
+            "Passive DNS",
+            "Public Registries",
+            "Real World",
+            "Reputation Systems",
+            "Search Engines",
+            "Secondary Networks",
+            "Social Media",
+        ]
 
         sfModules = self.load_modules(sf)
         for module in sfModules:
             m = sfModules[module]
 
-            self.assertIsInstance(m.get('cats'), list)
-            self.assertTrue(len(m.get('cats')) <= 1)
+            self.assertIsInstance(m.get("cats"), list)
+            self.assertTrue(len(m.get("cats")) <= 1)
 
             if module in ["sfp__stor_db", "sfp__stor_stdout"]:
                 continue
 
-            for cat in m.get('cats', list()):
+            for cat in m.get("cats", list()):
                 self.assertIn(cat, valid_categories)
 
     def test_module_model_is_valid(self):
@@ -76,18 +85,18 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            meta = m.get('meta')
+            meta = m.get("meta")
 
             self.assertTrue(meta)
             self.assertIsInstance(meta, dict)
 
-            data_source = meta.get('dataSource')
+            data_source = meta.get("dataSource")
 
             if not data_source:
                 continue
 
             self.assertIsInstance(data_source, dict)
-            model = data_source.get('model')
+            model = data_source.get("model")
             self.assertIsInstance(model, str)
             self.assertIn(model, valid_models)
 
@@ -97,15 +106,17 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            self.assertTrue(m.get('meta'))
-            self.assertIsInstance(m.get('meta'), dict)
+            self.assertTrue(m.get("meta"))
+            self.assertIsInstance(m.get("meta"), dict)
 
-            meta = m.get('meta')
+            meta = m.get("meta")
 
-            if 'apikey' in m.get('labels'):
-                self.assertIn('dataSource', meta)
-                self.assertIsInstance(meta.get('dataSource').get('apiKeyInstructions'), list)
-                self.assertTrue(meta.get('dataSource').get('apiKeyInstructions'))
+            if "apikey" in m.get("labels"):
+                self.assertIn("dataSource", meta)
+                self.assertIsInstance(
+                    meta.get("dataSource").get("apiKeyInstructions"), list
+                )
+                self.assertTrue(meta.get("dataSource").get("apiKeyInstructions"))
 
     def test_modules_with_api_key_options_have_apikey_label(self):
         sf = SpiderFoot(self.default_options)
@@ -113,9 +124,9 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            for opt in m.get('opts'):
+            for opt in m.get("opts"):
                 if "api_key" in opt:
-                    self.assertIn("apikey", m.get('labels'))
+                    self.assertIn("apikey", m.get("labels"))
 
     def test_modules_with_invasive_flag_are_not_in_passive_use_case(self):
         sf = SpiderFoot(self.default_options)
@@ -123,8 +134,8 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            if "Passive" in m.get('group'):
-                self.assertNotIn("invasive", m.get('labels', list()))
+            if "Passive" in m.get("group"):
+                self.assertNotIn("invasive", m.get("labels", list()))
 
     def test_module_watched_events_are_valid(self):
         sf = SpiderFoot(self.default_options)
@@ -138,8 +149,8 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            for watched_event in m.get('consumes'):
-                if watched_event == '*':
+            for watched_event in m.get("consumes"):
+                if watched_event == "*":
                     continue
                 self.assertIn(watched_event, valid_events)
 
@@ -155,7 +166,7 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            provides = m.get('provides')
+            provides = m.get("provides")
             if not provides:
                 continue
 
@@ -172,8 +183,11 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
                 continue
 
             # check len(options) == len(option descriptions)
-            if m.get('opts'):
-                self.assertEqual(f"{module} opts: {len(m.get('opts').keys())}", f"{module} opts: {len(m.get('optdescs').keys())}")
+            if m.get("opts"):
+                self.assertEqual(
+                    f"{module} opts: {len(m.get('opts').keys())}",
+                    f"{module} opts: {len(m.get('optdescs').keys())}",
+                )
 
     def test_required_module_properties_are_present_and_valid(self):
         sf = SpiderFoot(self.default_options)
@@ -181,40 +195,40 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
         for module in sfModules:
             m = sfModules[module]
 
-            self.assertTrue(m.get('object'))
-            self.assertTrue(m.get('name'))
-            self.assertTrue(m.get('meta'))
-            self.assertTrue(m.get('descr'))
-            self.assertTrue(m.get('consumes'))
-            self.assertIsInstance(m.get('cats'), list)
-            self.assertIsInstance(m.get('labels'), list)
-            self.assertIsInstance(m.get('provides'), list)
-            self.assertIsInstance(m.get('consumes'), list)
-            self.assertIsInstance(m.get('meta'), dict)
+            self.assertTrue(m.get("object"))
+            self.assertTrue(m.get("name"))
+            self.assertTrue(m.get("meta"))
+            self.assertTrue(m.get("descr"))
+            self.assertTrue(m.get("consumes"))
+            self.assertIsInstance(m.get("cats"), list)
+            self.assertIsInstance(m.get("labels"), list)
+            self.assertIsInstance(m.get("provides"), list)
+            self.assertIsInstance(m.get("consumes"), list)
+            self.assertIsInstance(m.get("meta"), dict)
 
             # output modules do not have use cases, categories, produced events, data source, etc
             if module in ["sfp__stor_db", "sfp__stor_stdout"]:
                 continue
 
-            self.assertTrue(m.get('cats'))
-            self.assertTrue(m.get('group'))
-            self.assertTrue(m.get('provides'))
+            self.assertTrue(m.get("cats"))
+            self.assertTrue(m.get("group"))
+            self.assertTrue(m.get("provides"))
 
-            meta = m.get('meta')
+            meta = m.get("meta")
 
             # not all modules will have a data source (sfp_dnsresolve, sfp_dnscommonsrv, etc)
-            if meta.get('dataSource'):
-                self.assertIsInstance(meta.get('dataSource'), dict)
-                self.assertTrue(meta.get('dataSource').get('website'))
-                self.assertTrue(meta.get('dataSource').get('model'))
+            if meta.get("dataSource"):
+                self.assertIsInstance(meta.get("dataSource"), dict)
+                self.assertTrue(meta.get("dataSource").get("website"))
+                self.assertTrue(meta.get("dataSource").get("model"))
                 # self.assertTrue(meta.get('dataSource').get('favIcon'))
                 # self.assertTrue(meta.get('dataSource').get('logo'))
                 # self.assertTrue(meta.get('dataSource').get('references'))
-                self.assertTrue(meta.get('dataSource').get('description'))
+                self.assertTrue(meta.get("dataSource").get("description"))
 
-            if module.startswith('sfp_tool_'):
-                self.assertIsInstance(meta.get('toolDetails'), dict)
-                self.assertTrue(meta.get('toolDetails').get('name'))
-                self.assertTrue(meta.get('toolDetails').get('description'))
-                self.assertTrue(meta.get('toolDetails').get('website'))
-                self.assertTrue(meta.get('toolDetails').get('repository'))
+            if module.startswith("sfp_tool_"):
+                self.assertIsInstance(meta.get("toolDetails"), dict)
+                self.assertTrue(meta.get("toolDetails").get("name"))
+                self.assertTrue(meta.get("toolDetails").get("description"))
+                self.assertTrue(meta.get("toolDetails").get("website"))
+                self.assertTrue(meta.get("toolDetails").get("repository"))

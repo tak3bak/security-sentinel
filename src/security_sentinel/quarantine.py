@@ -2,6 +2,7 @@ import os
 import shutil
 import logging
 
+
 class QuarantineManager:
     def __init__(self, quarantine_dir):
         self.quarantine_dir = quarantine_dir

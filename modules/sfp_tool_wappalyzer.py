@@ -31,15 +31,12 @@ class sfp_tool_wappalyzer(SpiderFootPlugin):
             "name": "Wappalyzer",
             "description": "Wappalyzer identifies technologies on websites, including content management systems, ecommerce platforms, JavaScript frameworks, analytics tools and much more.",
             "website": "https://www.wappalyzer.com/",
-            "repository": "https://github.com/AliasIO/Wappalyzer"
-        }
+            "repository": "https://github.com/AliasIO/Wappalyzer",
+        },
     }
 
     # Default options
-    opts = {
-        "node_path": "/usr/bin/node",
-        "wappalyzer_path": ""
-    }
+    opts = {"node_path": "/usr/bin/node", "wappalyzer_path": ""}
 
     # Option descriptions
     optdescs = {
@@ -75,13 +72,15 @@ class sfp_tool_wappalyzer(SpiderFootPlugin):
         if self.errorState:
             return
 
-        if not self.opts['wappalyzer_path']:
-            self.error("You enabled sfp_tool_wappalyzer but did not set a path to the tool!")
+        if not self.opts["wappalyzer_path"]:
+            self.error(
+                "You enabled sfp_tool_wappalyzer but did not set a path to the tool!"
+            )
             self.errorState = True
             return
 
-        exe = self.opts['wappalyzer_path']
-        if self.opts['wappalyzer_path'].endswith('/'):
+        exe = self.opts["wappalyzer_path"]
+        if self.opts["wappalyzer_path"].endswith("/"):
             exe = f"{exe}cli.js"
 
         if not os.path.isfile(exe):

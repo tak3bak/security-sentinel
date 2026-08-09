@@ -14,10 +14,10 @@ from .threadpool import SpiderFootThreadPool
 # these are copied from the python logging module
 # https://github.com/python/cpython/blob/main/Lib/logging/__init__.py
 
-if hasattr(sys, 'frozen'):  # support for py2exe
+if hasattr(sys, "frozen"):  # support for py2exe
     _srcfile = f"logging{os.sep}__init__{__file__[-4:]}"
-elif __file__[-4:].lower() in ['.pyc', '.pyo']:
-    _srcfile = __file__[:-4] + '.py'
+elif __file__[-4:].lower() in [".pyc", ".pyo"]:
+    _srcfile = __file__[:-4] + ".py"
 else:
     _srcfile = __file__
 _srcfile = os.path.normcase(_srcfile)
@@ -62,20 +62,21 @@ class SpiderFootPluginLogger(logging.Logger):
             sinfo = None
             if stack_info:
                 sio = io.StringIO()
-                sio.write('Stack (most recent call last):\n')
+                sio.write("Stack (most recent call last):\n")
                 traceback.print_stack(f, file=sio)
                 sinfo = sio.getvalue()
-                if sinfo[-1] == '\n':
+                if sinfo[-1] == "\n":
                     sinfo = sinfo[:-1]
                 sio.close()
             rv = (co.co_filename, f.f_lineno, co.co_name, sinfo)
             break
         return rv  # noqa R504
 
+
 # end of logging overrides
 
 
-class SpiderFootPlugin():
+class SpiderFootPlugin:
     """SpiderFootPlugin module object
 
     Attributes:
@@ -143,8 +144,12 @@ class SpiderFootPlugin():
     @property
     def log(self):
         if self._log is None:
-            logging.setLoggerClass(SpiderFootPluginLogger)  # temporarily set logger class
-            self._log = logging.getLogger(f"spiderfoot.{self.__name__}")  # init SpiderFootPluginLogger
+            logging.setLoggerClass(
+                SpiderFootPluginLogger
+            )  # temporarily set logger class
+            self._log = logging.getLogger(
+                f"spiderfoot.{self.__name__}"
+            )  # init SpiderFootPluginLogger
             logging.setLoggerClass(logging.Logger)  # reset logger class to default
         return self._log
 
@@ -181,7 +186,7 @@ class SpiderFootPlugin():
             *args: passed through to logging.debug()
             *kwargs: passed through to logging.debug()
         """
-        self.log.debug(*args, extra={'scanId': self.__scanId__}, **kwargs)
+        self.log.debug(*args, extra={"scanId": self.__scanId__}, **kwargs)
 
     def info(self, *args, **kwargs) -> None:
         """For logging.
@@ -191,7 +196,7 @@ class SpiderFootPlugin():
             *args: passed through to logging.info()
             *kwargs: passed through to logging.info()
         """
-        self.log.info(*args, extra={'scanId': self.__scanId__}, **kwargs)
+        self.log.info(*args, extra={"scanId": self.__scanId__}, **kwargs)
 
     def error(self, *args, **kwargs) -> None:
         """For logging.
@@ -201,7 +206,7 @@ class SpiderFootPlugin():
             *args: passed through to logging.error()
             *kwargs: passed through to logging.error()
         """
-        self.log.error(*args, extra={'scanId': self.__scanId__}, **kwargs)
+        self.log.error(*args, extra={"scanId": self.__scanId__}, **kwargs)
 
     def enrichTarget(self, target: str) -> None:
         """Find aliases for a target.
@@ -331,7 +336,11 @@ class SpiderFootPlugin():
 
         # Be strict about what events to pass on, unless they are
         # the ROOT event or the event type of the target.
-        if self.__outputFilter__ and eventName not in ['ROOT', self.getTarget().targetType, self.__outputFilter__]:
+        if self.__outputFilter__ and eventName not in [
+            "ROOT",
+            self.getTarget().targetType,
+            self.__outputFilter__,
+        ]:
             return
 
         storeOnly = False  # Under some conditions, only store and don't notify
@@ -358,7 +367,11 @@ class SpiderFootPlugin():
 
         prevEvent = sfEvent.sourceEvent
         while prevEvent is not None:
-            if prevEvent.sourceEvent is not None and prevEvent.sourceEvent.eventType == sfEvent.eventType and prevEvent.sourceEvent.data.lower() == eventData.lower():
+            if (
+                prevEvent.sourceEvent is not None
+                and prevEvent.sourceEvent.eventType == sfEvent.eventType
+                and prevEvent.sourceEvent.data.lower() == eventData.lower()
+            ):
                 storeOnly = True
                 break
             prevEvent = prevEvent.sourceEvent
@@ -371,7 +384,10 @@ class SpiderFootPlugin():
             self._listenerModules.sort(key=lambda m: m._priority)
 
             for listener in self._listenerModules:
-                if eventName not in listener.watchedEvents() and '*' not in listener.watchedEvents():
+                if (
+                    eventName not in listener.watchedEvents()
+                    and "*" not in listener.watchedEvents()
+                ):
                     continue
 
                 if storeOnly and "__stor" not in listener.__module__:
@@ -387,7 +403,9 @@ class SpiderFootPlugin():
                 try:
                     listener.handleEvent(sfEvent)
                 except Exception as e:
-                    self.sf.error(f"Module ({listener.__module__}) encountered an error: {e}")
+                    self.sf.error(
+                        f"Module ({listener.__module__}) encountered an error: {e}"
+                    )
                     # set errorState
                     self.errorState = True
                     # clear incoming queue
@@ -433,7 +451,9 @@ class SpiderFootPlugin():
         Returns:
             bool: True if the module is currently processing data.
         """
-        return self.sharedThreadPool.countQueuedTasks(f"{self.__name__}_threadWorker") > 0
+        return (
+            self.sharedThreadPool.countQueuedTasks(f"{self.__name__}_threadWorker") > 0
+        )
 
     def watchedEvents(self) -> list:
         """What events is this module interested in for input. The format is a list
@@ -446,7 +466,7 @@ class SpiderFootPlugin():
             list: list of events this modules watches
         """
 
-        return ['*']
+        return ["*"]
 
     def producedEvents(self) -> list:
         """What events this module produces
@@ -471,16 +491,16 @@ class SpiderFootPlugin():
 
     def asdict(self) -> dict:
         return {
-            'name': self.meta.get('name'),
-            'descr': self.meta.get('summary'),
-            'cats': self.meta.get('categories', []),
-            'group': self.meta.get('useCases', []),
-            'labels': self.meta.get('flags', []),
-            'provides': self.producedEvents(),
-            'consumes': self.watchedEvents(),
-            'meta': self.meta,
-            'opts': self.opts,
-            'optdescs': self.optdescs,
+            "name": self.meta.get("name"),
+            "descr": self.meta.get("summary"),
+            "cats": self.meta.get("categories", []),
+            "group": self.meta.get("useCases", []),
+            "labels": self.meta.get("flags", []),
+            "provides": self.producedEvents(),
+            "consumes": self.watchedEvents(),
+            "meta": self.meta,
+            "opts": self.opts,
+            "optdescs": self.optdescs,
         }
 
     def start(self) -> None:
@@ -499,6 +519,7 @@ class SpiderFootPlugin():
         try:
             # create new database handle since we're in our own thread
             from spiderfoot import SpiderFootDb
+
             self.setDbh(SpiderFootDb(self.opts))
             self.sf._dbh = self.__sfdb__
 
@@ -510,27 +531,36 @@ class SpiderFootPlugin():
                 try:
                     sfEvent = self.incomingEventQueue.get_nowait()
                 except queue.Empty:
-                    sleep(.3)
+                    sleep(0.3)
                     continue
-                if sfEvent == 'FINISHED':
-                    self.sf.debug(f"{self.__name__}.threadWorker() got \"FINISHED\" from incomingEventQueue.")
+                if sfEvent == "FINISHED":
+                    self.sf.debug(
+                        f'{self.__name__}.threadWorker() got "FINISHED" from incomingEventQueue.'
+                    )
                     self.poolExecute(self.finish)
                 else:
-                    self.sf.debug(f"{self.__name__}.threadWorker() got event, {sfEvent.eventType}, from incomingEventQueue.")
+                    self.sf.debug(
+                        f"{self.__name__}.threadWorker() got event, {sfEvent.eventType}, from incomingEventQueue."
+                    )
                     self.poolExecute(self.handleEvent, sfEvent)
         except KeyboardInterrupt:
             self.sf.debug(f"Interrupted module {self.__name__}.")
             self._stopScanning = True
         except Exception as e:
             import traceback
-            self.sf.error(f"Exception ({e.__class__.__name__}) in module {self.__name__}."
-                          + traceback.format_exc())
+
+            self.sf.error(
+                f"Exception ({e.__class__.__name__}) in module {self.__name__}."
+                + traceback.format_exc()
+            )
             # set errorState
             self.sf.debug(f"Setting errorState for module {self.__name__}.")
             self.errorState = True
             # clear incoming queue
             if self.incomingEventQueue:
-                self.sf.debug(f"Emptying incomingEventQueue for module {self.__name__}.")
+                self.sf.debug(
+                    f"Emptying incomingEventQueue for module {self.__name__}."
+                )
                 with suppress(queue.Empty):
                     while 1:
                         self.incomingEventQueue.get_nowait()
@@ -548,15 +578,22 @@ class SpiderFootPlugin():
             args: args (passed through to callback)
             kwargs: kwargs (passed through to callback)
         """
-        if self.__name__.startswith('sfp__stor_'):
+        if self.__name__.startswith("sfp__stor_"):
             callback(*args, **kwargs)
         else:
-            self.sharedThreadPool.submit(callback, *args, taskName=f"{self.__name__}_threadWorker", maxThreads=self.maxThreads, **kwargs)
+            self.sharedThreadPool.submit(
+                callback,
+                *args,
+                taskName=f"{self.__name__}_threadWorker",
+                maxThreads=self.maxThreads,
+                **kwargs,
+            )
 
     def threadPool(self, *args, **kwargs):
         return SpiderFootThreadPool(*args, **kwargs)
 
     def setSharedThreadPool(self, sharedThreadPool) -> None:
         self.sharedThreadPool = sharedThreadPool
+
 
 # end of SpiderFootPlugin class

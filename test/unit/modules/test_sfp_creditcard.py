@@ -32,17 +32,17 @@ class TestModuleCreditCard(unittest.TestCase):
         module = sfp_creditcard()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
         def new_notifyListeners(self, event):
-            expected = 'CREDIT_CARD_NUMBER'
+            expected = "CREDIT_CARD_NUMBER"
             if str(event.eventType) != expected:
                 raise Exception(f"{event.eventType} != {expected}")
 
-            expected = '4111111111111111'
+            expected = "4111111111111111"
             if str(event.data) != expected:
                 raise Exception(f"{event.data} != {expected}")
 
@@ -50,10 +50,10 @@ class TestModuleCreditCard(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_creditcard)
 
-        event_type = 'ROOT'
-        event_data = 'example data 4111 1111 1111 1111 example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data 4111 1111 1111 1111 example data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
@@ -62,14 +62,16 @@ class TestModuleCreditCard(unittest.TestCase):
 
         self.assertEqual("OK", str(cm.exception))
 
-    def test_handleEvent_event_data_not_containing_creditcard_string_should_not_return_event(self):
+    def test_handleEvent_event_data_not_containing_creditcard_string_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_creditcard()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -78,10 +80,10 @@ class TestModuleCreditCard(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_creditcard)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         result = module.handleEvent(evt)

@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleCookie(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_cookie()
@@ -32,17 +35,17 @@ class TestModuleCookie(unittest.TestCase):
         module = sfp_cookie()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
         def new_notifyListeners(self, event):
-            expected = 'TARGET_WEB_COOKIE'
+            expected = "TARGET_WEB_COOKIE"
             if str(event.eventType) != expected:
                 raise Exception(f"{event.eventType} != {expected}")
 
-            expected = 'example cookie'
+            expected = "example cookie"
             if str(event.data) != expected:
                 raise Exception(f"{event.data} != {expected}")
 
@@ -50,15 +53,15 @@ class TestModuleCookie(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_cookie)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'WEBSERVER_HTTPHEADERS'
+        event_type = "WEBSERVER_HTTPHEADERS"
         event_data = '{"cookie": "example cookie"}'
-        event_module = 'sfp_spider'
+        event_module = "sfp_spider"
         source_event = evt
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         evt.actualSource = "https://spiderfoot.net/example"
@@ -74,8 +77,8 @@ class TestModuleCookie(unittest.TestCase):
         module = sfp_cookie()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -84,15 +87,15 @@ class TestModuleCookie(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_cookie)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'WEBSERVER_HTTPHEADERS'
+        event_type = "WEBSERVER_HTTPHEADERS"
         event_data = '{"not cookie": "example cookie"}'
-        event_module = 'sfp_spider'
+        event_module = "sfp_spider"
         source_event = evt
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         evt.actualSource = "https://spiderfoot.net/example"

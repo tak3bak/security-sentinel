@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:        sfp_adguard_dns
@@ -20,30 +21,28 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_adguard_dns(SpiderFootPlugin):
 
     meta = {
-        'name': "AdGuard DNS",
-        'summary': "Check if a host would be blocked by AdGuard DNS.",
-        'flags': [],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://adguard.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
+        "name": "AdGuard DNS",
+        "summary": "Check if a host would be blocked by AdGuard DNS.",
+        "flags": [],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://adguard.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [
                 "https://adguard.com/en/adguard-dns/overview.html",
             ],
-            'favIcon': "https://adguard.com/img/favicons/favicon.ico",
-            'logo': "https://adguard.com/img/favicons/apple-touch-icon.png",
-            'description': "AdGuard DNS is a foolproof way to block Internet ads that does not require installing any applications. "
+            "favIcon": "https://adguard.com/img/favicons/favicon.ico",
+            "logo": "https://adguard.com/img/favicons/apple-touch-icon.png",
+            "description": "AdGuard DNS is a foolproof way to block Internet ads that does not require installing any applications. "
             "It is easy to use, absolutely free, easily set up on any device, and provides you with minimal necessary functions "
-            "to block ads, counters, malicious websites, and adult content."
-        }
+            "to block ads, counters, malicious websites, and adult content.",
+        },
     }
 
-    opts = {
-    }
+    opts = {}
 
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -55,11 +54,7 @@ class sfp_adguard_dns(SpiderFootPlugin):
             self.opts[opt] = userOpts[opt]
 
     def watchedEvents(self):
-        return [
-            "INTERNET_NAME",
-            "AFFILIATE_INTERNET_NAME",
-            "CO_HOSTED_SITE"
-        ]
+        return ["INTERNET_NAME", "AFFILIATE_INTERNET_NAME", "CO_HOSTED_SITE"]
 
     def producedEvents(self):
         return [
@@ -117,14 +112,29 @@ class sfp_adguard_dns(SpiderFootPlugin):
         if not family or not default:
             return
 
-        if urlparse(family).netloc.lower() == "94.140.14.35" or urlparse(family).netloc.lower().endswith(".94.140.14.35"):
+        if urlparse(family).netloc.lower() == "94.140.14.35" or urlparse(
+            family
+        ).netloc.lower().endswith(".94.140.14.35"):
             self.debug(f"{eventData} blocked by AdGuard Family DNS")
-            evt = SpiderFootEvent(blacklist_type, f"AdGuard - Family Filter [{eventData}]", self.__name__, event)
+            evt = SpiderFootEvent(
+                blacklist_type,
+                f"AdGuard - Family Filter [{eventData}]",
+                self.__name__,
+                event,
+            )
             self.notifyListeners(evt)
 
-        if urlparse(default).netloc.lower() == "94.140.14.35" or urlparse(default).netloc.lower().endswith(".94.140.14.35"):
+        if urlparse(default).netloc.lower() == "94.140.14.35" or urlparse(
+            default
+        ).netloc.lower().endswith(".94.140.14.35"):
             self.debug(f"{eventData} blocked by AdGuard Default DNS")
-            evt = SpiderFootEvent(blacklist_type, f"AdGuard - Default Filter [{eventData}]", self.__name__, event)
+            evt = SpiderFootEvent(
+                blacklist_type,
+                f"AdGuard - Default Filter [{eventData}]",
+                self.__name__,
+                event,
+            )
             self.notifyListeners(evt)
+
 
 # End of sfp_adguard_dns class

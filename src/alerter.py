@@ -1,10 +1,11 @@
 import os
 
+
 class Alerter:
     @staticmethod
     def send_alert(message):
         """
-        Sends an alert. 
+        Sends an alert.
         Replace the print statement with requests.post() to send to a Slack/Discord Webhook.
         """
         print(f"[ALERT] Security Sentinel Event: {message}")

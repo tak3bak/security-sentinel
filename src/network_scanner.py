@@ -1,5 +1,6 @@
 import subprocess
 
+
 class NetworkScanner:
     @staticmethod
     def get_listening_services():

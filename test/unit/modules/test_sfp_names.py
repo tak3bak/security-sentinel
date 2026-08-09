@@ -26,19 +26,21 @@ class TestModuleNames(unittest.TestCase):
         module = sfp_names()
         self.assertIsInstance(module.producedEvents(), list)
 
-    def test_handleEvent_event_data_email_address_containing_human_names_should_return_event(self):
+    def test_handleEvent_event_data_email_address_containing_human_names_should_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_names()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
         def new_notifyListeners(self, event):
-            expected = 'HUMAN_NAME'
+            expected = "HUMAN_NAME"
             if str(event.eventType) != expected:
                 raise Exception(f"{event.eventType} != {expected}")
 
@@ -50,15 +52,15 @@ class TestModuleNames(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_names)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'EMAILADDR'
-        event_data = 'firstname.lastname@spiderfoot.net'
-        event_module = 'example module'
+        event_type = "EMAILADDR"
+        event_data = "firstname.lastname@spiderfoot.net"
+        event_module = "example module"
         source_event = evt
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
@@ -67,14 +69,16 @@ class TestModuleNames(unittest.TestCase):
 
         self.assertEqual("OK", str(cm.exception))
 
-    def test_handleEvent_event_data_email_address_containing_human_names_containing_numbers_should_not_return_event(self):
+    def test_handleEvent_event_data_email_address_containing_human_names_containing_numbers_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_names()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -83,15 +87,15 @@ class TestModuleNames(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_names)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'EMAILADDR'
-        event_data = 'firstname.lastname1@spiderfoot.net'
-        event_module = 'example module'
+        event_type = "EMAILADDR"
+        event_data = "firstname.lastname1@spiderfoot.net"
+        event_module = "example module"
         source_event = evt
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
@@ -99,14 +103,16 @@ class TestModuleNames(unittest.TestCase):
 
         self.assertIsNone(result)
 
-    def test_handleEvent_event_data_email_address_not_containing_names_should_not_return_event(self):
+    def test_handleEvent_event_data_email_address_not_containing_names_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_names()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -115,15 +121,15 @@ class TestModuleNames(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_names)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
-        event_type = 'EMAILADDR'
-        event_data = 'lastname@spiderfoot.net'
-        event_module = 'example module'
+        event_type = "EMAILADDR"
+        event_data = "lastname@spiderfoot.net"
+        event_module = "example module"
         source_event = evt
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 

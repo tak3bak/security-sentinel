@@ -1,6 +1,7 @@
 from spiderfoot_client import SpiderFootClient
 import json
 
+
 class SentinelDomainOSINT:
     def __init__(self):
         self.sf = SpiderFootClient()
@@ -14,21 +15,15 @@ class SentinelDomainOSINT:
             "sfp_bingsearch",
             "sfp_sslcert",
             "sfp_whois",
-            "sfp_httphdrs"
+            "sfp_httphdrs",
         ]
 
     def enrich_domain(self, domain: str):
         try:
             results = self.sf.run_scan(domain, self.modules)
-            return {
-                "domain": domain,
-                "osint": results
-            }
+            return {"domain": domain, "osint": results}
         except Exception as e:
-            return {
-                "domain": domain,
-                "error": str(e)
-            }
+            return {"domain": domain, "error": str(e)}
 
 
 # Example usage
@@ -39,6 +34,7 @@ if __name__ == "__main__":
 from spiderfoot_client import SpiderFootClient
 import json
 
+
 class SentinelDomainOSINT:
     def __init__(self):
         self.sf = SpiderFootClient()
@@ -52,21 +48,15 @@ class SentinelDomainOSINT:
             "sfp_bingsearch",
             "sfp_sslcert",
             "sfp_whois",
-            "sfp_httphdrs"
+            "sfp_httphdrs",
         ]
 
     def enrich_domain(self, domain: str):
         try:
             results = self.sf.run_scan(domain, self.modules)
-            return {
-                "domain": domain,
-                "osint": results
-            }
+            return {"domain": domain, "osint": results}
         except Exception as e:
-            return {
-                "domain": domain,
-                "error": str(e)
-            }
+            return {"domain": domain, "error": str(e)}
 
 
 # Example usage

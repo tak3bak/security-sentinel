@@ -8,6 +8,9 @@ from spiderfoot import SpiderFootEvent, SpiderFootTarget
 
 @pytest.mark.usefixtures
 class TestModuleHashes(unittest.TestCase):
+    def setUp(self):
+        self.default_options = {}
+        self.cli_default_options = {}
 
     def test_opts(self):
         module = sfp_hashes()
@@ -32,13 +35,13 @@ class TestModuleHashes(unittest.TestCase):
         module = sfp_hashes()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
         def new_notifyListeners(self, event):
-            expected = 'HASH'
+            expected = "HASH"
             if str(event.eventType) != expected:
                 raise Exception(f"{event.eventType} != {expected}")
 
@@ -50,10 +53,10 @@ class TestModuleHashes(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_hashes)
 
-        event_type = 'ROOT'
-        event_data = 'example data e17cff4eb3e8fbe6ca3b83fb47532dba example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data e17cff4eb3e8fbe6ca3b83fb47532dba example data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
 
@@ -62,14 +65,16 @@ class TestModuleHashes(unittest.TestCase):
 
         self.assertEqual("OK", str(cm.exception))
 
-    def test_handleEvent_event_data_not_containing_hashes_string_should_not_return_event(self):
+    def test_handleEvent_event_data_not_containing_hashes_string_should_not_return_event(
+        self,
+    ):
         sf = SpiderFoot(self.default_options)
 
         module = sfp_hashes()
         module.setup(sf, dict())
 
-        target_value = 'spiderfoot.net'
-        target_type = 'INTERNET_NAME'
+        target_value = "spiderfoot.net"
+        target_type = "INTERNET_NAME"
         target = SpiderFootTarget(target_value, target_type)
         module.setTarget(target)
 
@@ -78,10 +83,10 @@ class TestModuleHashes(unittest.TestCase):
 
         module.notifyListeners = new_notifyListeners.__get__(module, sfp_hashes)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        event_module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        event_module = ""
+        source_event = ""
 
         evt = SpiderFootEvent(event_type, event_data, event_module, source_event)
         result = module.handleEvent(evt)

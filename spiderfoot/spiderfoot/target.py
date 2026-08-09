@@ -3,14 +3,13 @@ import typing
 
 import netaddr
 
-
 if sys.version_info >= (3, 8):  # PEP 589 support (TypedDict)
     TargetAlias = typing.TypedDict("TargetAlias", {"type": str, "value": str})
 else:
     TargetAlias = typing.Dict[str, str]
 
 
-class SpiderFootTarget():
+class SpiderFootTarget:
     """SpiderFoot target.
 
     Attributes:
@@ -20,9 +19,19 @@ class SpiderFootTarget():
         targetAliases (typing.List[TargetAlias]): target aliases
     """
 
-    _validTypes = ["IP_ADDRESS", 'IPV6_ADDRESS', "NETBLOCK_OWNER", "NETBLOCKV6_OWNER", "INTERNET_NAME",
-                   "EMAILADDR", "HUMAN_NAME", "BGP_AS_OWNER", 'PHONE_NUMBER', "USERNAME",
-                   "BITCOIN_ADDRESS"]
+    _validTypes = [
+        "IP_ADDRESS",
+        "IPV6_ADDRESS",
+        "NETBLOCK_OWNER",
+        "NETBLOCKV6_OWNER",
+        "INTERNET_NAME",
+        "EMAILADDR",
+        "HUMAN_NAME",
+        "BGP_AS_OWNER",
+        "PHONE_NUMBER",
+        "USERNAME",
+        "BITCOIN_ADDRESS",
+    ]
     _targetType: str
     _targetValue: str
     _targetAliases: typing.List[TargetAlias]
@@ -48,7 +57,9 @@ class SpiderFootTarget():
             raise TypeError(f"targetType is {type(targetType)}; expected str()")
 
         if targetType not in self._validTypes:
-            raise ValueError(f"targetType value is {targetType}; expected {self._validTypes}")
+            raise ValueError(
+                f"targetType value is {targetType}; expected {self._validTypes}"
+            )
 
         self._targetType = targetType
 
@@ -97,7 +108,7 @@ class SpiderFootTarget():
         if not typeName:
             return
 
-        alias: TargetAlias = {'type': typeName, 'value': value.lower()}
+        alias: TargetAlias = {"type": typeName, "value": value.lower()}
 
         if alias in self.targetAliases:
             return
@@ -115,8 +126,8 @@ class SpiderFootTarget():
         """
         ret: typing.List[str] = list()
         for item in self.targetAliases:
-            if item['type'] == typeName:
-                ret.append(item['value'].lower())
+            if item["type"] == typeName:
+                ret.append(item["value"].lower())
         return ret
 
     def getNames(self) -> typing.List[str]:
@@ -126,7 +137,10 @@ class SpiderFootTarget():
             typing.List[str]: domains associated with the target
         """
         e = self._getEquivalents("INTERNET_NAME")
-        if self.targetType in ["INTERNET_NAME", "EMAILADDR"] and self.targetValue.lower() not in e:
+        if (
+            self.targetType in ["INTERNET_NAME", "EMAILADDR"]
+            and self.targetValue.lower() not in e
+        ):
             e.append(self.targetValue.lower())
 
         names: typing.List[str] = list()
@@ -154,7 +168,9 @@ class SpiderFootTarget():
 
         return e
 
-    def matches(self, value: str, includeParents: bool = False, includeChildren: bool = True) -> bool:
+    def matches(
+        self, value: str, includeParents: bool = False, includeChildren: bool = True
+    ) -> bool:
         """Check whether the supplied value is "tightly" related to the original target.
 
         Tightly in this case means:
@@ -189,7 +205,12 @@ class SpiderFootTarget():
 
         # We can't really say anything about names, username, bitcoin addresses
         # or phone numbers, so everything matches
-        if self.targetType in ["HUMAN_NAME", "PHONE_NUMBER", "USERNAME", "BITCOIN_ADDRESS"]:
+        if self.targetType in [
+            "HUMAN_NAME",
+            "PHONE_NUMBER",
+            "USERNAME",
+            "BITCOIN_ADDRESS",
+        ]:
             return True
 
         # TODO: review handling of other potential self.targetType target types:
@@ -200,7 +221,12 @@ class SpiderFootTarget():
             if value in self.getAddresses():
                 return True
 
-            if self.targetType in ["IP_ADDRESS", "IPV6_ADDRESS", "NETBLOCK_OWNER", "NETBLOCKV6_OWNER"]:
+            if self.targetType in [
+                "IP_ADDRESS",
+                "IPV6_ADDRESS",
+                "NETBLOCK_OWNER",
+                "NETBLOCKV6_OWNER",
+            ]:
                 try:
                     if netaddr.IPAddress(value) in netaddr.IPNetwork(self.targetValue):
                         return True
@@ -219,5 +245,6 @@ class SpiderFootTarget():
                 return True
 
         return False
+
 
 # end of SpiderFootTarget class
