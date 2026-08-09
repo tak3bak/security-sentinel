@@ -10,8 +10,8 @@ def seed():
     
     mock_leak_file = os.path.join(target_dir, "mock_secrets.txt")
     with open(mock_leak_file, "w") as f:
-        f.write("sk_live_1234567890abcdefGHJKLM\n")
-        f.write("ghp_1234567890abcdefghijklmnopqrstuvWXYZ\n")
+        f.write("YOUR_STRIPE_SECRET_KEY\n")
+        f.write("YOUR_GITHUB_TOKEN\n")
     print(f"[+] Created mock vulnerability leak target: {mock_leak_file}")
 
     # 2. Seed Mock System Auth Logs

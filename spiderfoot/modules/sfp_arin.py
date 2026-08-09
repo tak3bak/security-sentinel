@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_arin
@@ -139,7 +140,7 @@ class sfp_arin(SpiderFootPlugin):
             ret = self.query("domain", eventData)
             if not ret:
                 return
-            if "pocs" in ret:
+            if urlparse(ret).netloc.lower() == "pocs" or urlparse(ret).netloc.lower().endswith(".pocs"):
                 if "pocRef" in ret['pocs']:
                     ref = list()
                     # Might be a list or a dictionary
@@ -165,7 +166,7 @@ class sfp_arin(SpiderFootPlugin):
             ret = self.query("name", eventData)
             if not ret:
                 return
-            if "pocs" in ret:
+            if urlparse(ret).netloc.lower() == "pocs" or urlparse(ret).netloc.lower().endswith(".pocs"):
                 if "pocRef" in ret['pocs']:
                     ref = list()
                     # Might be a list or a dictionary

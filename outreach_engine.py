@@ -8,7 +8,7 @@ from email.message import EmailMessage
 def send_outreach_email(recipient_email, client_name, company_name):
     # REPLACE THESE WITH YOUR ACTUAL CONFIGURATION
     sender_email = "your-email@example.com"
-    password = "your-app-password" 
+    password = os.getenv("SMTP_PASSWORD", "YOUR_APP_PASSWORD") 
     
     msg = EmailMessage()
     msg['Subject'] = f"Security Posture Check: {company_name}"

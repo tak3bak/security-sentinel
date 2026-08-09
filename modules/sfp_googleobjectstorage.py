@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_googleobjectstorage
@@ -162,7 +163,7 @@ class sfp_googleobjectstorage(SpiderFootPlugin):
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if eventName == "LINKED_URL_EXTERNAL":
-            if ".storage.googleapis.com" in eventData:
+            if urlparse(eventData).netloc.lower() == ".storage.googleapis.com" or urlparse(eventData).netloc.lower().endswith("..storage.googleapis.com"):
                 b = self.sf.urlFQDN(eventData)
                 evt = SpiderFootEvent("CLOUD_STORAGE_BUCKET", b, self.__name__, event)
                 self.notifyListeners(evt)

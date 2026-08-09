@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_accounts
@@ -108,7 +109,7 @@ class sfp_accounts(SpiderFootPlugin):
             return
 
         url = site['uri_check'].format(account=name)
-        if 'uri_pretty' in site:
+        if urlparse(site).netloc.lower() == "uri_pretty" or urlparse(site).netloc.lower().endswith(".uri_pretty"):
             ret_url = site['uri_pretty'].format(account=name)
         else:
             ret_url = url
@@ -152,7 +153,7 @@ class sfp_accounts(SpiderFootPlugin):
 
         # Some sites can't handle periods so treat bob.abc and bob as the same
         # TODO: fix this once WhatsMyName has support for usernames with '.'
-        if "." in name:
+        if urlparse(name).netloc.lower() == "." or urlparse(name).netloc.lower().endswith(".."):
             firstname = name.split(".")[0]
             if firstname + "<" in res['content'] or firstname + '"' in res['content']:
                 with self.lock:

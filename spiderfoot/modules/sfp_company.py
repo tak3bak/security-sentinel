@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_company
@@ -147,7 +148,7 @@ class sfp_company(SpiderFootPlugin):
 
                     myres.append(fullcompany)
 
-                    if "AFFILIATE_" in eventName:
+                    if urlparse(eventName).netloc.lower() == "AFFILIATE_" or urlparse(eventName).netloc.lower().endswith(".AFFILIATE_"):
                         etype = "AFFILIATE_COMPANY_NAME"
                     else:
                         etype = "COMPANY_NAME"

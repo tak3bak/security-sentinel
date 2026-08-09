@@ -17,7 +17,7 @@ from forensics_hunter import ForensicsHunter
 def run_audit(domain, email):
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     audit_base_dir = os.path.join(base_path, "audits")
-    client_dir = os.path.join(audit_base_dir, domain)
+    client_dir = os.path.join(audit_base_dir, os.path.basename(domain))
     quarantine_dir = os.path.join(base_path, "quarantine")
     os.makedirs(client_dir, exist_ok=True)
     

@@ -4,7 +4,7 @@ services:
     container_name: sentinel-db
     environment:
       POSTGRES_USER: sentinel_admin
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_sentinel_password}
+      POSTGRES_PASSWORD: secure_sentinel_password
       POSTGRES_DB: security_sentinel
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -18,8 +18,19 @@ services:
     build: .
     container_name: sentinel-analysis
     command: python main.py
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     environment:
-      - DATABASE_URL=postgresql://sentinel_admin:${DB_PASSWORD:-secure_sentinel_password}@sentinel-db:5432/security_sentinel
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://sentinel_admin:secure_sentinel_password@sentinel-db:5432/security_sentinel
+      - CAPTURE_INTERFACE=eth0
+      - SENTINEL_API_KEY=${SENTINEL_API_KEY:-default-secret-change-me}
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/var/log/nomadik_sentinel
     depends_on:
       - sentinel-db
     networks:

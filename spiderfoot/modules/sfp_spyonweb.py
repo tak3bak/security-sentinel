@@ -94,7 +94,7 @@ class sfp_spyonweb(SpiderFootPlugin):
     def query(self, endpoint, qry, limit=100):
         url = "https://api.spyonweb.com/v1/" + endpoint + "/" + qry
         url += "?limit=" + str(limit)
-        url += "&access_token=" + self.opts['api_key']
+        url += f"&access_token={self.opts['api_key']}"
 
         res = self.sf.fetchUrl(url, timeout=self.opts['timeout'], useragent=self.opts['_useragent'])
 

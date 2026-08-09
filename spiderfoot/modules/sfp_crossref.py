@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_crossref
@@ -70,7 +71,7 @@ class sfp_crossref(SpiderFootPlugin):
         # Assume HTTP.
         if eventName in ['SIMILARDOMAIN', 'CO_HOSTED_SITE']:
             url = 'http://' + eventData.lower()
-        elif 'URL' in eventName:
+        elif urlparse(eventName).netloc.lower() == "URL" or urlparse(eventName).netloc.lower().endswith(".URL"):
             url = eventData
         else:
             return

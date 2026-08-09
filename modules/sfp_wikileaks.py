@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_wikileaks
@@ -124,10 +125,11 @@ class sfp_wikileaks(SpiderFootPlugin):
 
             for link in links:
                 # We can safely skip search.wikileaks.org and others.
-                if "search.wikileaks.org/" in link:
+                netloc = urlparse(link).netloc.lower()
+                if netloc == "search.wikileaks.org":
                     continue
 
-                if "wikileaks.org/" not in link and "cryptome.org/" not in link:
+                if not (netloc == "wikileaks.org" or netloc.endswith(".wikileaks.org") or netloc == "cryptome.org" or netloc.endswith(".cryptome.org")):
                     continue
 
                 self.debug(f"Found a link: {link}")

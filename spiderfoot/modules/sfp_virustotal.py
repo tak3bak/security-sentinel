@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_virustotal
@@ -274,12 +275,12 @@ class sfp_virustotal(SpiderFootPlugin):
 
             # Treat siblings as affiliates if they are of the original target, otherwise
             # they are additional hosts within the target.
-            if 'domain_siblings' in info:
+            if urlparse(info).netloc.lower() == "domain_siblings" or urlparse(info).netloc.lower().endswith(".domain_siblings"):
                 if eventName in ["IP_ADDRESS", "INTERNET_NAME"]:
                     for domain in info['domain_siblings']:
                         domains.append(domain)
 
-            if 'subdomains' in info:
+            if urlparse(info).netloc.lower() == "subdomains" or urlparse(info).netloc.lower().endswith(".subdomains"):
                 if eventName == "INTERNET_NAME":
                     for domain in info['subdomains']:
                         domains.append(domain)

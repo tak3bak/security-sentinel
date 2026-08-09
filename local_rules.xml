@@ -1,17 +1,41 @@
-<group name="compliance_soc2_cc5_2,">
-  <rule id="100001" level="10">
-    <if_sid>5710, 5712</if_sid>
-    <description>SOC 2 CC5.2 - Incident Detection: SSH Brute Force Attempt Detected.</description>
-    <mitre><id>T1110</id></mitre>
-  </rule>
-  <rule id="100002" level="7">
-    <if_sid>550</if_sid>
-    <description>SOC 2 CC5.2 - Change Control: Critical System File Modified.</description>
-    <mitre><id>T1492</id></mitre>
-  </rule>
-  <rule id="100003" level="12">
-    <if_sid>5716</if_sid>
-    <description>SOC 2 CC5.2 - Unauthorized Access: Privilege Escalation Attempt Detected.</description>
-    <mitre><id>T1068</id></mitre>
-  </rule>
-</group>
+<ossec_config>
+  <group name="local,syslog,sshd,">
+
+    <!-- Example default local rule for SSH brute force or failed logins -->
+    <rule id="100001" level="5">
+      <if_sid>5716</if_sid>
+      <description>Nomadik Sentinel: SSH Authentication Failure threshold exceeded.</description>
+      <group>authentication_failures,</group>
+    </rule>
+
+  </group>
+
+  <!-- Nomadik Security Sentinel: Network Packet Telemetry & TShark Rules -->
+  <group name="nomadik, network_security, tshark">
+    
+    <!-- Base rule for catching any structured TCP packet telemetry logged by TShark -->
+    <rule id="100501" level="3">
+      <decoded_as>json</decoded_as>
+      <field name="protocol">TCP</field>
+      <description>Nomadik Sentinel: TCP packet stream observed on monitored interface.</description>
+      <options>no_log</options>
+    </rule>
+
+    <!-- High packet size anomaly rule (Potential Data Exfiltration) -->
+    <rule id="100502" level="10">
+      <if_sid>100501</if_sid>
+      <match>TCP</match>
+      <description>Nomadik Sentinel: Potential large payload packet detected (Possible data exfiltration vector).</description>
+      <group>network_anomaly,exfiltration,</group>
+    </rule>
+
+    <!-- General UDP telemetry rule -->
+    <rule id="100503" level="3">
+      <decoded_as>json</decoded_as>
+      <field name="protocol">UDP</field>
+      <description>Nomadik Sentinel: UDP packet stream observed on monitored interface.</description>
+      <options>no_log</options>
+    </rule>
+
+  </group>
+</ossec_config>

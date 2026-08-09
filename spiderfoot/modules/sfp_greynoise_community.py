@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_greynoise_community
@@ -149,7 +150,7 @@ class sfp_greynoise_community(SpiderFootPlugin):
         if "data" not in ret and "noise" not in ret:
             return
 
-        if "noise" in ret:
+        if urlparse(ret).netloc.lower() == "noise" or urlparse(ret).netloc.lower().endswith(".noise"):
             if ret.get("noise", None):
                 lastseen = ret.get("last_seen", "1970-01-01")
                 lastseen_dt = datetime.strptime(lastseen, "%Y-%m-%d")

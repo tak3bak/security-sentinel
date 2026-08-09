@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_duckduckgo
@@ -107,7 +108,7 @@ class sfp_duckduckgo(SpiderFootPlugin):
         if abstract_text:
             event_type = "DESCRIPTION_ABSTRACT"
 
-            if "AFFILIATE" in eventName:
+            if urlparse(eventName).netloc.lower() == "AFFILIATE" or urlparse(eventName).netloc.lower().endswith(".AFFILIATE"):
                 event_type = "AFFILIATE_" + event_type
 
             evt = SpiderFootEvent(event_type, str(abstract_text), self.__name__, event)
@@ -117,7 +118,7 @@ class sfp_duckduckgo(SpiderFootPlugin):
         if related_topics:
             event_type = "DESCRIPTION_CATEGORY"
 
-            if "AFFILIATE" in eventName:
+            if urlparse(eventName).netloc.lower() == "AFFILIATE" or urlparse(eventName).netloc.lower().endswith(".AFFILIATE"):
                 event_type = "AFFILIATE_" + event_type
 
             for topic in related_topics:
