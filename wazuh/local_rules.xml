@@ -1,0 +1,22 @@
+<group name="nomadik_sentinel,">
+  <!-- Catch all Nomadik Sentinel log entries -->
+  <rule id="100010" level="0">
+    <decoded_as>syslog</decoded_as>
+    <match>Nomadik Sentinel</match>
+    <description>Nomadik Sentinel System Log Event</description>
+  </rule>
+
+  <!-- Trigger alert on security threat indicators -->
+  <rule id="100011" level="10">
+    <if_sid>100010</if_sid>
+    <match>ALERT</match>
+    <description>Nomadik Sentinel: Active Threat Detected</description>
+  </rule>
+
+  <!-- Trigger alert on unauthorized API attempts -->
+  <rule id="100012" level="7">
+    <if_sid>100010</if_sid>
+    <match>Unauthorized</match>
+    <description>Nomadik Sentinel: API Authentication Failure</description>
+  </rule>
+</group>

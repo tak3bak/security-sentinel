@@ -10,7 +10,7 @@ class TestQuarantine(unittest.TestCase):
 
     def tearDown(self):
         for filename in os.listdir(self.quarantine_dir):
-            file_path = os.path.join(self.quarantine_dir, filename)
+            file_path = os.path.join(self.quarantine_dir, os.path.basename(filename))
             os.remove(file_path)
         os.rmdir(self.quarantine_dir)
 

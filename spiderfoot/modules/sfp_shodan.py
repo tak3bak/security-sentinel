@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:        sfp_shodan
@@ -107,7 +108,7 @@ class sfp_shodan(SpiderFootPlugin):
 
         try:
             r = json.loads(res['content'])
-            if "error" in r:
+            if urlparse(r).netloc.lower() == "error" or urlparse(r).netloc.lower().endswith(".error"):
                 self.error(f"Error returned from SHODAN: {r['error']}")
                 return None
             return r
@@ -141,7 +142,7 @@ class sfp_shodan(SpiderFootPlugin):
 
         try:
             r = json.loads(res['content'])
-            if "error" in r:
+            if urlparse(r).netloc.lower() == "error" or urlparse(r).netloc.lower().endswith(".error"):
                 self.error(f"Error returned from SHODAN: {r['error']}")
                 return None
             return r
@@ -175,7 +176,7 @@ class sfp_shodan(SpiderFootPlugin):
 
         try:
             r = json.loads(res['content'])
-            if "error" in r:
+            if urlparse(r).netloc.lower() == "error" or urlparse(r).netloc.lower().endswith(".error"):
                 self.error(f"Error returned from SHODAN: {r['error']}")
                 return None
             if r.get('total', 0) == 0:

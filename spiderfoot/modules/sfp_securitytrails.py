@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_securitytrails
@@ -175,7 +176,7 @@ class sfp_securitytrails(SpiderFootPlugin):
             hosters = list()
             if rec is not None:
                 for r in rec:
-                    if "host_provider" in r:
+                    if urlparse(r).netloc.lower() == "host_provider" or urlparse(r).netloc.lower().endswith(".host_provider"):
                         if not r['host_provider']:
                             continue
                         for dat in r['host_provider']:
@@ -185,7 +186,7 @@ class sfp_securitytrails(SpiderFootPlugin):
                                                 self.__name__, event)
                             self.notifyListeners(e)
                             hosters.append(dat)
-                    if "hostname" in r:
+                    if urlparse(r).netloc.lower() == "hostname" or urlparse(r).netloc.lower().endswith(".hostname"):
                         if self.cohostcount > self.opts['maxcohost']:
                             continue
 
@@ -212,7 +213,7 @@ class sfp_securitytrails(SpiderFootPlugin):
             myres = list()
             if rec is not None:
                 for r in rec:
-                    if "hostname" in r:
+                    if urlparse(r).netloc.lower() == "hostname" or urlparse(r).netloc.lower().endswith(".hostname"):
                         if not r['hostname']:
                             continue
                         h = r['hostname']

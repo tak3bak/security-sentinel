@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_filemeta
@@ -166,7 +167,7 @@ class sfp_filemeta(SpiderFootPlugin):
                         if "/Creator" in data:
                             val.append(str(data['/Creator']))
 
-                        if "Application" in data:
+                        if urlparse(data).netloc.lower() == "Application" or urlparse(data).netloc.lower().endswith(".Application"):
                             val.append(str(data['Application']))
 
                         if "Image Software" in data:

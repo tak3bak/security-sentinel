@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_azureblobstorage
@@ -145,7 +146,7 @@ class sfp_azureblobstorage(SpiderFootPlugin):
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if eventName == "LINKED_URL_EXTERNAL":
-            if ".blob.core.windows.net" in eventData:
+            if urlparse(eventData).netloc.lower() == ".blob.core.windows.net" or urlparse(eventData).netloc.lower().endswith("..blob.core.windows.net"):
                 b = self.sf.urlFQDN(eventData)
                 evt = SpiderFootEvent("CLOUD_STORAGE_BUCKET", b, self.__name__, event)
                 self.notifyListeners(evt)

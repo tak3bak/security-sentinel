@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:        sfp_adguard_dns
@@ -116,12 +117,12 @@ class sfp_adguard_dns(SpiderFootPlugin):
         if not family or not default:
             return
 
-        if '94.140.14.35' in family:
+        if urlparse(family).netloc.lower() == "94.140.14.35" or urlparse(family).netloc.lower().endswith(".94.140.14.35"):
             self.debug(f"{eventData} blocked by AdGuard Family DNS")
             evt = SpiderFootEvent(blacklist_type, f"AdGuard - Family Filter [{eventData}]", self.__name__, event)
             self.notifyListeners(evt)
 
-        if '94.140.14.35' in default:
+        if urlparse(default).netloc.lower() == "94.140.14.35" or urlparse(default).netloc.lower().endswith(".94.140.14.35"):
             self.debug(f"{eventData} blocked by AdGuard Default DNS")
             evt = SpiderFootEvent(blacklist_type, f"AdGuard - Default Filter [{eventData}]", self.__name__, event)
             self.notifyListeners(evt)

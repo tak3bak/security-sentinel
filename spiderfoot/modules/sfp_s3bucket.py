@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------------
 # Name:         sfp_s3bucket
@@ -159,7 +160,7 @@ class sfp_s3bucket(SpiderFootPlugin):
         self.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if eventName == "LINKED_URL_EXTERNAL":
-            if ".amazonaws.com" in eventData:
+            if urlparse(eventData).netloc.lower() == ".amazonaws.com" or urlparse(eventData).netloc.lower().endswith("..amazonaws.com"):
                 b = self.sf.urlFQDN(eventData)
                 if b in self.opts['endpoints']:
                     try:
