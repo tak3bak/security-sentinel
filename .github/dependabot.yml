@@ -1,12 +1,6 @@
+version: 2
 updates:
-  # Monitor Python dependencies at root
   - package-ecosystem: "pip"
     directory: "/"
-    schedule:
-      interval: "weekly"
-
-  # Monitor SpiderFoot Node.js / NPM dependencies
-  - package-ecosystem: "npm"
-    directory: "/spiderfoot/spiderfoot/static"
     schedule:
       interval: "weekly"

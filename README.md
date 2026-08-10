@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Security Sentinel 🛡️
 
 **Security Sentinel** is an automated, real-time security monitoring tool designed to detect, contain, and analyze sensitive information leaks across monitored file systems. It continuously watches designated directories for file creation or modification, scans content for high-risk secrets (such as API keys, credentials, and tokens), automatically quarantines policy-violating files, and enriches exposed IP addresses with threat intelligence via the SpiderFoot API.
@@ -78,3 +79,19 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more details.
+=======
+# Nomadik Security Sentinel
+
+Production-grade automated security monitoring and active-defense platform tailored for SMBs.
+
+## Features
+- **Automated Incident Response:** Real-time log monitoring and active defense orchestration.
+- **Compliance Tracking:** Automated auditing for industry frameworks and compliance policies.
+- **Microservice Ready:** Containerized execution with Docker and lightweight FastAPI engine.
+
+## Quickstart
+```bash
+cp config/.env.example config/.env
+docker-compose up -d --build
+```
+>>>>>>> 360eff33 (refactor: consolidate configs, standardize layout, add docs and workflows)

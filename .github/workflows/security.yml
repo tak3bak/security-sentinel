@@ -1,0 +1,13 @@
+name: Security Analysis
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  codeql-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: github/codeql-action/init@v3
+      with:
+        languages: python
+    - uses: github/codeql-action/analyze@v3
