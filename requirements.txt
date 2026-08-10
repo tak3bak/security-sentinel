@@ -1,4 +1,4 @@
-# Core dependencies (security patched)
+# Core dependencies (security patches)
 cryptography==50.0.0
 requests>=2.32.2
 python-dotenv>=1.0.1
