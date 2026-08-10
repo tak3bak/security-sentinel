@@ -1,21 +1,35 @@
-[tool.poetry]
-name = "security-sentinel"
-version = "0.1.0"
-description = "Automated Security Sentinel for monitoring and responding to sensitive data leaks."
-authors = ["Your Name <youremail@example.com>"]
-license = "MIT"
-readme = "README.md"
-homepage = "https://github.com/yourusername/security-sentinel"
-repository = "https://github.com/yourusername/security-sentinel"
-keywords = ["security", "monitoring", "leak detection", "osint"]
-
-[tool.poetry.dependencies]
-python = "^3.8"
-requests = "^2.26.0"
-watchdog = "^2.1.6"
-pyyaml = "^5.4.1"
-python-dotenv = "^0.19.2"
-
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nomadik-security-sentinel"
+version = "0.1.0"
+description = "Automated real-time security monitoring and active-defense platform."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Nomadik Security Team"}
+]
+dependencies = [
+    "cryptography>=43.0.0",
+    "requests>=2.32.2",
+    "python-dotenv>=1.0.1",
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.0",
+    "pydantic>=2.7.0",
+    "watchdog>=4.0.0",
+    "pyyaml>=6.0.1"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.0.0",
+    "pip-audit>=2.7.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
