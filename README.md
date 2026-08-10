@@ -1,53 +1,52 @@
-# Security Sentinel
+# Security Sentinel 🛡️
 
-## Overview
-Security Sentinel is an automated security monitoring tool designed to detect and respond to sensitive information leaks in files. It monitors specified directories for changes, inspects files for sensitive data, and triggers appropriate responses, such as quarantining files or enriching detected IP addresses with OSINT data.
+**Security Sentinel** is an automated, real-time security monitoring tool designed to detect, contain, and analyze sensitive information leaks across monitored file systems. It continuously watches designated directories for file creation or modification, scans content for high-risk secrets (such as API keys, credentials, and tokens), automatically quarantines policy-violating files, and enriches exposed IP addresses with threat intelligence via the SpiderFoot API.
 
-## Features
-- Monitors directories for file changes.
-- Inspects files for sensitive information (e.g., AWS keys, passwords).
-- Quarantines files containing sensitive data.
-- Extracts and enriches IP addresses found in files using the Spiderfoot API.
-- Configurable through environment variables and a YAML configuration file.
+---
+
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+---
+
+## Key Features
+
+- ⏱️ **Real-Time Directory Monitoring**: Tracks file creation and modification events asynchronously using event-driven file watchers.
+- 🔍 **Deep Inspection & Secret Detection**: Uses robust regex signatures and entropy analysis to identify AWS keys, API tokens, passwords, private keys, and credentials.
+- 📦 **Automated Isolation & Quarantine**: Instantly removes flagged files from sensitive paths and moves them to a secure quarantine workspace with strict file permissions.
+- 🌐 **OSINT & Threat Intelligence**: Extracts embedded IP addresses from flagged files and enriches them with OSINT data through the SpiderFoot API.
+- ⚙️ **Flexible Configuration**: Fully customizable behavior controlled via YAML configuration files and standard environment variable overrides.
+- 📊 **Structured Audit Logging**: Generates detailed, structured logs for security information and event management (SIEM) integration.
+
+---
 
 ## Project Structure
-```
-security-sentinel
-├── src
-│   ├── security_sentinel
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── file_inspector.py
-│   │   ├── quarantine.py
-│   │   ├── spiderfoot.py
-│   │   ├── watcher.py
-│   │   └── main.py
-│   └── scripts
-│       └── run_sentinel.py
-├── tests
-│   ├── test_file_inspector.py
-│   ├── test_quarantine.py
-│   ├── test_spiderfoot.py
-│   └── test_watcher.py
+
+```text
+security-sentinel/
+├── src/
+│   ├── security_sentinel/
+│   │   ├── __init__.py          # Package initialization
+│   │   ├── config.py             # Configuration parsing & validation
+│   │   ├── file_inspector.py     # Regex pattern matching & secret detection
+│   │   ├── quarantine.py         # Quarantine file handling & security policies
+│   │   ├── spiderfoot.py         # SpiderFoot API wrapper for OSINT enrichment
+│   │   ├── watcher.py            # File system event listener (Watchdog integration)
+│   │   └── main.py               # Core orchestrator and execution flow
+│   └── scripts/
+│       └── run_sentinel.py       # Main CLI entrypoint script
+├── tests/
+│   ├── test_file_inspector.py   # Unit tests for secret detection logic
+│   ├── test_quarantine.py       # Unit tests for quarantine operations
+│   ├── test_spiderfoot.py       # Mocks and tests for SpiderFoot API integrations
+│   └── test_watcher.py          # Functional tests for file system watchers
+├── config/
+│   └── config.example.yaml      # Configuration template file
 ├── .gitignore
-├── README.md
-├── requirements.txt
-├── pyproject.toml
-└── config
-    └── config.example.yaml
-```
-
-## Installation
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/security-sentinel.git
-   cd security-sentinel
-   ```
-
-2. Create a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+├── pyproject.toml               # Build system configuration & metadata
+├── README.md                    # Project documentation
+└── requirements.txt             # Python dependency specifications
    ```
 
 3. Install the required dependencies:
