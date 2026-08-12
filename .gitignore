@@ -30,3 +30,6 @@ __pycache__/
 # OS junk
 Thumbs.db
 .DS_Store
+stripe.tar.gz
+growth_agent.log
+transactions.log
