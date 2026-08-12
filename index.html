@@ -1,197 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nomadik Security Sentinel | Containerized Active Defense</title>
+    <title>Security Sentinel | Automated Security Monitoring</title>
+    <meta name="description" content="Detect exposed secrets, suspicious files, infrastructure changes, and security threats before they become expensive incidents.">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #0b0f19;
-            --card-bg: #111827;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --border-color: #1f2937;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-        }
-
-        header {
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.025em;
-            color: var(--text-main);
-        }
-
-        .logo span {
-            color: var(--accent-color);
-        }
-
-        .hero {
-            max-width: 900px;
-            margin: 4rem auto 2rem auto;
-            text-align: center;
-            padding: 0 1.5rem;
-        }
-
-        .hero h1 {
-            font-size: 2.75rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 1.25rem;
-            letter-spacing: -0.03em;
-        }
-
-        .hero p.lead {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            max-width: 750px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cta-btn {
-            display: inline-block;
-            background-color: var(--accent-color);
-            color: #ffffff;
-            font-weight: 600;
-            padding: 0.85rem 2rem;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            transition: background-color 0.2s ease;
-        }
-
-        .cta-btn:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .features {
-            max-width: 1100px;
-            margin: 4rem auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            padding: 0 1.5rem;
-        }
-
-        .feature-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 2rem;
-            border-radius: 0.5rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-            color: var(--text-main);
-        }
-
-        .feature-card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        footer {
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            padding: 2rem;
-            margin-top: 4rem;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 antialiased">
 
-    <header>
-        <div class="logo">Nomadik <span>Sentinel</span></div>
-        <a href="#purchase" class="cta-btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Get Started</a>
-    </header>
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center font-bold text-xl tracking-tight text-slate-900">
+                    Security Sentinel
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#how-it-works" class="text-sm font-medium text-slate-600 hover:text-slate-900">How it Works</a>
+                    <a href="#features" class="text-sm font-medium text-slate-600 hover:text-slate-900">Features</a>
+                    <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-slate-900">Pricing</a>
+                    <a href="/docs" class="text-sm font-medium text-slate-600 hover:text-slate-900">Docs</a>
+                    <a href="/dashboard" class="text-sm font-medium text-slate-600 hover:text-slate-900">Sign In</a>
+                    <a href="/checkout" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <main>
-        <section class="hero">
-            <h1>Containerized Active-Defense & Compliance Monitoring</h1>
-            <p class="lead">
-                Automate threat detection and gain real-time security insights across your infrastructure. Maintain strict regulatory compliance and complete visibility without enterprise operational overhead.
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+                Know when your infrastructure is becoming a <span class="text-blue-400">security problem.</span>
+            </h1>
+            <p class="mt-4 text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10">
+                Automated Security Monitoring for Small Businesses. Detect exposed secrets, suspicious files, infrastructure changes, and security threats before they become expensive incidents.
             </p>
-            <a href="#purchase" class="cta-btn" id="purchase">Deploy Nomadik Sentinel</a>
-        </section>
-
-        <section class="features">
-            <div class="feature-card">
-                <h3>Real-Time Active Defense</h3>
-                <p>Monitors containerized environments continuous threats and executes automated active responses using Wazuh and FastAPI engines.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="/checkout" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition shadow-lg shadow-blue-500/30">
+                    Start Protecting Your Business
+                </a>
+                <a href="#how-it-works" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition">
+                    View How It Works
+                </a>
             </div>
+        </div>
+    </section>
 
-            <div class="feature-card">
-                <h3>Automated Compliance</h3>
-                <p>Streamline compliance tracking across frameworks with continuous auditing and direct audit log integration.</p>
+    <!-- How It Works (Commercial Funnel) -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">How Security Sentinel Works</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">We bridge the gap between complex enterprise security tools and the practical needs of small businesses.</p>
             </div>
-
-            <div class="feature-card">
-                <h3>Zero-Complexity Infrastructure</h3>
-                <p>Fully containerized architecture designed to deploy cleanly into existing pipelines with immediate visibility.</p>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="p-6 border border-slate-200 rounded-xl bg-slate-50">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">1</div>
+                    <h3 class="text-xl font-bold mb-2">Connect Your Infrastructure</h3>
+                    <p class="text-slate-600">Deploy our lightweight monitoring agents or connect via API to your existing cloud environments.</p>
+                </div>
+                <div class="p-6 border border-slate-200 rounded-xl bg-slate-50">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">2</div>
+                    <h3 class="text-xl font-bold mb-2">Continuous Scanning</h3>
+                    <p class="text-slate-600">Sentinel silently scans for exposed credentials, file integrity changes, and known threat vectors.</p>
+                </div>
+                <div class="p-6 border border-slate-200 rounded-xl bg-slate-50">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">3</div>
+                    <h3 class="text-xl font-bold mb-2">Automated Response</h3>
+                    <p class="text-slate-600">Get instant alerts and automated quarantine actions before a vulnerability becomes a breach.</p>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <footer>
-        <p>&copy; 2026 Nomadik. All rights reserved.</p>
+    <!-- Capabilities / Features -->
+    <section id="features" class="py-20 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Production-Grade Capabilities</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">Built on open-source transparency (verified via our public GitHub repository), engineered for commercial reliability.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature Items -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Continuous Monitoring</h4>
+                    <p class="text-slate-600 text-sm">24/7 oversight of your digital assets to catch anomalies in real-time.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Secret & Credential Detection</h4>
+                    <p class="text-slate-600 text-sm">Automatically identify exposed API keys, passwords, and tokens in your environments.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Threat Intelligence Enrichment</h4>
+                    <p class="text-slate-600 text-sm">Cross-reference findings with global threat databases to prioritize real risks.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Automated Quarantine</h4>
+                    <p class="text-slate-600 text-sm">Isolate suspicious files and processes instantly to prevent lateral movement.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Security Event Logging</h4>
+                    <p class="text-slate-600 text-sm">Immutable audit trails for post-incident forensics and operational visibility.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Compliance Reporting</h4>
+                    <p class="text-slate-600 text-sm">Generate executive and auditor-friendly reports to prove your security posture.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Wazuh/SIEM Integration</h4>
+                    <p class="text-slate-600 text-sm">Pipe alerts directly into your existing Security Information and Event Management systems.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">API & CLI Automation</h4>
+                    <p class="text-slate-600 text-sm">Programmatic access to build custom workflows and integrate into your CI/CD pipelines.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-lg mb-2 text-slate-900">Self-Hosted Deployment</h4>
+                    <p class="text-slate-600 text-sm">Keep your data entirely on-premise with flexible deployment options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Transparent Pricing</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">Security that scales with your infrastructure. No arbitrary SaaS markups—pricing is based on operational footprint.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Tier 1 -->
+                <div class="border border-slate-200 rounded-2xl p-8 bg-white flex flex-col">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-2">Free / Scan</h3>
+                    <p class="text-slate-500 mb-6 flex-grow">One-time comprehensive security assessment to identify immediate risks.</p>
+                    <div class="text-4xl font-extrabold text-slate-900 mb-6">$0</div>
+                    <ul class="space-y-3 mb-8 text-slate-600 text-sm">
+                        <li class="flex items-center">✓ Infrastructure scan</li>
+                        <li class="flex items-center">✓ Exposed secret check</li>
+                        <li class="flex items-center">✓ Assessment report</li>
+                    </ul>
+                    <a href="/checkout?tier=free" class="w-full block text-center border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-900 font-bold py-3 rounded-lg transition mt-auto">Get Your Assessment</a>
+                </div>
+
+                <!-- Tier 2 -->
+                <div class="border-2 border-blue-500 rounded-2xl p-8 bg-white shadow-xl relative flex flex-col transform md:-translate-y-4">
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Most Popular</div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-2">Sentinel</h3>
+                    <p class="text-slate-500 mb-6 flex-grow">Continuous monitoring built for small and medium businesses.</p>
+                    <div class="text-4xl font-extrabold text-slate-900 mb-2">Usage Based</div>
+                    <p class="text-sm text-slate-500 mb-6">Priced on operational compute</p>
+                    <ul class="space-y-3 mb-8 text-slate-600 text-sm">
+                        <li class="flex items-center font-semibold text-slate-900">✓ Everything in Free, plus:</li>
+                        <li class="flex items-center">✓ Continuous monitoring</li>
+                        <li class="flex items-center">✓ Threat intel enrichment</li>
+                        <li class="flex items-center">✓ Automated alerts</li>
+                        <li class="flex items-center">✓ Standard reporting</li>
+                    </ul>
+                    <a href="/checkout?tier=sentinel" class="w-full block text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition mt-auto shadow-md">Start Monitoring</a>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="border border-slate-200 rounded-2xl p-8 bg-white flex flex-col">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-2">Sentinel Pro</h3>
+                    <p class="text-slate-500 mb-6 flex-grow">Advanced monitoring, automated response, and enterprise integrations.</p>
+                    <div class="text-4xl font-extrabold text-slate-900 mb-2">Custom</div>
+                    <p class="text-sm text-slate-500 mb-6">Tailored for complex environments</p>
+                    <ul class="space-y-3 mb-8 text-slate-600 text-sm">
+                        <li class="flex items-center font-semibold text-slate-900">✓ Everything in Sentinel, plus:</li>
+                        <li class="flex items-center">✓ Automated quarantine</li>
+                        <li class="flex items-center">✓ Wazuh/SIEM integrations</li>
+                        <li class="flex items-center">✓ Compliance-oriented reporting</li>
+                        <li class="flex items-center">✓ API/CLI automation support</li>
+                    </ul>
+                    <a href="/contact" class="w-full block text-center border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-900 font-bold py-3 rounded-lg transition mt-auto">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="col-span-2">
+                    <div class="text-xl font-bold text-white mb-2">Security Sentinel</div>
+                    <div class="text-sm text-slate-500 mb-6">A Nomadik security product.</div>
+                    <p class="text-sm max-w-sm">
+                        Providing production-grade automated security monitoring tools for SMBs. Detect threats before they escalate.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Product</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/features" class="hover:text-white transition">Features</a></li>
+                        <li><a href="/how-it-works" class="hover:text-white transition">How it Works</a></li>
+                        <li><a href="/pricing" class="hover:text-white transition">Pricing</a></li>
+                        <li><a href="/demo" class="hover:text-white transition">Request Demo</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Resources</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/docs" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="https://github.com/tak3bak/security-sentinel" target="_blank" class="hover:text-white transition">Source Code (GitHub)</a></li>
+                        <li><a href="/security" class="hover:text-white transition">Security Findings</a></li>
+                        <li><a href="/contact" class="hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
+                <p>&copy; 2026 Nomadik. All rights reserved.</p>
+                <div class="mt-4 md:mt-0 space-x-4">
+                    <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
+                    <a href="/terms" class="hover:text-white transition">Terms of Service</a>
+                </div>
+            </div>
+        </div>
     </footer>
 
 </body>
 </html>
-
-<!-- Nomadik Security Audit CTA Button -->
-<a href="https://buy.stripe.com/eVq28qeUm98ngRebr1d7q0a" 
-   target="_blank" 
-   rel="noopener noreferrer" 
-   class="nomadik-cta-btn">
-  Purchase Security Audit — $500
-</a>
-
-<style>
-  .nomadik-cta-btn {
-    display: inline-block;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #6366f1;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  }
-  .nomadik-cta-btn:hover {
-    background-color: #4f46e5;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
-  }
-</style>
