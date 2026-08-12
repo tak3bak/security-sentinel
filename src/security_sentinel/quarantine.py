@@ -1,23 +1,20 @@
 import os
-import shutil
 import logging
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 class QuarantineManager:
-    def __init__(self, quarantine_dir):
-        self.quarantine_dir = quarantine_dir
+    def __init__(self, quarantine_dir=None):
+        default_dir = os.getenv("QUARANTINE_DIR", "./security-sentinel/quarantine")
+        self.quarantine_dir = os.path.abspath(quarantine_dir or default_dir)
         self.setup_quarantine_directory()
 
     def setup_quarantine_directory(self):
-        if not os.path.exists(self.quarantine_dir):
-            os.makedirs(self.quarantine_dir)
-            logging.info(f"Quarantine directory created at: {self.quarantine_dir}")
-
-    def quarantine_file(self, file_path):
-        if os.path.exists(file_path):
-            filename = os.path.basename(file_path)
-            destination = os.path.join(self.quarantine_dir, os.path.basename(filename))
-            shutil.move(file_path, destination)
-            logging.warning(f"File quarantined: {filename}")
-        else:
-            logging.error(f"Attempted to quarantine non-existent file: {file_path}")
+        try:
+            os.makedirs(self.quarantine_dir, exist_ok=True)
+            logging.info(f"Quarantine directory operational: {self.quarantine_dir}")
+        except OSError as e:
+            fallback = os.path.abspath("./quarantine_fallback")
+            logging.warning(f"Failed to create {self.quarantine_dir} ({e}). Falling back to {fallback}")
+            self.quarantine_dir = fallback
+            os.makedirs(self.quarantine_dir, exist_ok=True)

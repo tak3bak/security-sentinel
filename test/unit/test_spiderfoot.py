@@ -1,8 +1,9 @@
+from spiderfoot import SpiderFoot
 # test_spiderfoot.py
 import pytest
 import unittest
 
-from sflib import SpiderFoot
+from sflib import SpiderFootLib as SpiderFoot
 
 
 @pytest.mark.usefixtures
