@@ -142,7 +142,9 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
 
     def test_module_watched_events_are_valid(self):
         sf = SpiderFoot(self.default_options)
-        sf.dbh = SpiderFootDb(self.default_options, True)
+        opts = getattr(self, "default_options", None) or {"_debug": False, "useragent": "SpiderFoot", "socks1_type": "", "http_timeout": 10}
+        sf.config = opts
+        sf.dbh = SpiderFootDb(opts, True)
 
         valid_events = []
         for event in sf.dbh.eventTypes():
@@ -159,7 +161,9 @@ class TestSpiderFootModuleLoading(unittest.TestCase):
 
     def test_module_produced_events_are_valid(self):
         sf = SpiderFoot(self.default_options)
-        sf.dbh = SpiderFootDb(self.default_options, True)
+        opts = getattr(self, "default_options", None) or {"_debug": False, "useragent": "SpiderFoot", "socks1_type": "", "http_timeout": 10}
+        sf.config = opts
+        sf.dbh = SpiderFootDb(opts, True)
 
         valid_events = []
         for event in sf.dbh.eventTypes():

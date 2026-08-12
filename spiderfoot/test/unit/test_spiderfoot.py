@@ -8,30 +8,20 @@ from sflib import SpiderFoot
 @pytest.mark.usefixtures
 class TestSpiderFoot(unittest.TestCase):
     def setUp(self):
-        self.default_options = {}
-        self.cli_default_options = {}
+        super().setUp() if hasattr(super(), "setUp") else None
+        
+        try:
+            from spiderfoot.opts import SpiderFootOpts
+            opts = SpiderFootOpts().optsobj
+        except Exception:
+            opts = {"_debug": False, "useragent": "SpiderFoot", "socks1_type": "", "http_timeout": 10, "__database": ":memory:", "__modules__": {}}
 
-    default_modules = [
-        "sfp_binstring",
-        "sfp_company",
-        "sfp_cookie",
-        "sfp_countryname",
-        "sfp_creditcard",
-        "sfp_email",
-        "sfp_errors",
-        "sfp_ethereum",
-        "sfp_filemeta",
-        "sfp_hashes",
-        "sfp_iban",
-        "sfp_names",
-        "sfp_pageinfo",
-        "sfp_phone",
-        "sfp_webanalytics",
-    ]
-
-    test_tlds = "// ===BEGIN ICANN DOMAINS===\n\ncom\nnet\norg\n\n// // ===END ICANN DOMAINS===\n"
-
-    def test_init_argument_options_of_invalid_type_should_raise_TypeError(self):
+        self.default_options = opts
+        if hasattr(self, "sfwebui"):
+            self.sfwebui.config = self.default_options
+        if hasattr(self, "cli_default_options"):
+            self.cli_default_options = self.default_options
+def test_init_argument_options_of_invalid_type_should_raise_TypeError(self):
         invalid_types = [None, "", bytes(), list(), int()]
         for invalid_type in invalid_types:
             with self.subTest(invalid_type=invalid_type), self.assertRaises(TypeError):

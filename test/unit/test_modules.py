@@ -3,7 +3,7 @@ import os
 import pytest
 import unittest
 
-from sflib import SpiderFoot
+from sflib import SpiderFootLib as SpiderFoot
 from spiderfoot import SpiderFootDb
 from spiderfoot import SpiderFootHelpers
 

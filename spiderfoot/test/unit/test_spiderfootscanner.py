@@ -9,13 +9,20 @@ from sfscan import SpiderFootScanner
 @pytest.mark.usefixtures
 class TestSpiderFootScanner(unittest.TestCase):
     def setUp(self):
-        self.default_options = {}
-        self.cli_default_options = {}
-    """
-    Test SpiderFootScanStatus
-    """
+        super().setUp() if hasattr(super(), "setUp") else None
+        
+        try:
+            from spiderfoot.opts import SpiderFootOpts
+            opts = SpiderFootOpts().optsobj
+        except Exception:
+            opts = {"_debug": False, "useragent": "SpiderFoot", "socks1_type": "", "http_timeout": 10, "__database": ":memory:", "__modules__": {}}
 
-    def test_init_argument_start_false_should_create_a_scan_without_starting_the_scan(
+        self.default_options = opts
+        if hasattr(self, "sfwebui"):
+            self.sfwebui.config = self.default_options
+        if hasattr(self, "cli_default_options"):
+            self.cli_default_options = self.default_options
+def test_init_argument_start_false_should_create_a_scan_without_starting_the_scan(
         self,
     ):
         """

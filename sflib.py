@@ -75,3 +75,5 @@ class SpiderFootLib:
             return None
         with io.open(cacheFile, "r", encoding="utf-8", errors="ignore") as fp:
             return fp.read()
+
+SpiderFoot = SpiderFootLib

@@ -33,3 +33,4 @@ Thumbs.db
 stripe.tar.gz
 growth_agent.log
 transactions.log
+.env

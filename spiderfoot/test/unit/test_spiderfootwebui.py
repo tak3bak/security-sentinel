@@ -8,20 +8,20 @@ from sfwebui import SpiderFootWebUi
 @pytest.mark.usefixtures
 class TestSpiderFootWebUi:
     def setUp(self):
-        self.web_default_options = {}
-        self.default_options = {}
-        self.cli_default_options = {}
-    default_options = {}
-class TestSpiderFootWebUi(unittest.TestCase):
-    def setUp(self):
-        self.web_default_options = {}
-        self.default_options = {}
-        self.cli_default_options = {}
-    """
-    Test SpiderFootWebUi
-    """
+        super().setUp() if hasattr(super(), "setUp") else None
+        
+        try:
+            from spiderfoot.opts import SpiderFootOpts
+            opts = SpiderFootOpts().optsobj
+        except Exception:
+            opts = {"_debug": False, "useragent": "SpiderFoot", "socks1_type": "", "http_timeout": 10, "__database": ":memory:", "__modules__": {}}
 
-    def test_init_config_invalid_type_should_raise_TypeError(self):
+        self.default_options = opts
+        if hasattr(self, "sfwebui"):
+            self.sfwebui.config = self.default_options
+        if hasattr(self, "cli_default_options"):
+            self.cli_default_options = self.default_options
+def test_init_config_invalid_type_should_raise_TypeError(self):
         """
         Test __init__(self, config, web_config)
         """

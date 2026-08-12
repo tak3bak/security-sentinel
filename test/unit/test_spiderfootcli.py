@@ -104,7 +104,8 @@ class TestSpiderFootCli(unittest.TestCase):
         """
         Test do_debug(self, line)
         """
-        sfcli = SpiderFootCli(self.cli_default_options)
+        opts = getattr(self, "cli_default_options", None) or {"_debug": False, "useragent": "SpiderFoot", "spool": True}
+        sfcli = SpiderFootCli(opts)
 
         sfcli.do_debug(None)
         initial_debug_state = sfcli.ownopts["cli.debug"]
@@ -132,7 +133,8 @@ class TestSpiderFootCli(unittest.TestCase):
         """
         Test do_history(self, line)
         """
-        sfcli = SpiderFootCli(self.cli_default_options)
+        opts = getattr(self, "cli_default_options", None) or {"_debug": False, "useragent": "SpiderFoot", "spool": True}
+        sfcli = SpiderFootCli(opts)
 
         sfcli.do_history("0")
         initial_history_state = sfcli.ownopts["cli.history"]
