@@ -1,56 +1,19 @@
-services:
-  sentinel-db:
-    image: postgres:17-alpine
-    container_name: sentinel-db
-    environment:
-      POSTGRES_USER: sentinel_admin
-      POSTGRES_PASSWORD: secure_sentinel_password
-      POSTGRES_DB: security_sentinel
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - sentinel-net
-    restart: unless-stopped
+version: '3.8'
 
-  analysis-engine:
+services:
+  sentinel-api:
     build: .
-    container_name: sentinel-analysis
-    command: python main.py
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://sentinel_admin:secure_sentinel_password@sentinel-db:5432/security_sentinel
-      - CAPTURE_INTERFACE=eth0
-      - SENTINEL_API_KEY=${SENTINEL_API_KEY:-default-secret-change-me}
-      - LOG_LEVEL=INFO
+    container_name: sentinel-api
     ports:
       - "8000:8000"
-    volumes:
-      - ./logs:/var/log/nomadik_sentinel
-    depends_on:
-      - sentinel-db
-    networks:
-      - sentinel-net
-    restart: "on-failure"
-
-  spiderfoot:
-    build:
-      context: ./spiderfoot
-    container_name: sentinel-spiderfoot
-    command: python sf.py -l 0.0.0.0:5001
-    ports:
-      - "5001:5001"
-    networks:
-      - sentinel-net
+    environment:
+      # These will be loaded from a local .env file
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PRICE_ID_SENTINEL=${STRIPE_PRICE_ID_SENTINEL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     restart: unless-stopped
-
-volumes:
-  pgdata:
-
-networks:
-  sentinel-net:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
