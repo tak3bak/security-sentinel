@@ -1,13 +1,13 @@
 # Core Networking & Parsing
 urllib3==2.7.0
-requests==2.33.0
+requests==2.34.2
 httpx==0.27.0
 # Security & Cryptography
 cryptography==50.0.0
-pyjwt==2.8.0
+pyjwt==2.13.0
 # Web Utilities & Templating
-starlette==1.3.1
-python-multipart==0.0.31
+starlette==1.6.0
+python-multipart==0.0.32
 jinja2==3.1.6
 # Spiderfoot Testing Utilities
 pytest>=7.0.0
