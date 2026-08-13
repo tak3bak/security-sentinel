@@ -1,0 +1,10 @@
+{
+  "advisory_id": "SEC-ADV-2026-0810",
+  "title": "Passkey Replay, Credential Exposure, and Windows Event Logging Flaw (CVE-2026-34348)",
+  "severity": "Critical",
+  "rules": [
+    {"rule_id": "SEC-RULE-2026-001", "name": "Windows Event Log Access Auditing (CVE-2026-34348 Exploitation)", "severity": "Critical"},
+    {"rule_id": "SEC-RULE-2026-002", "name": "Chrome Process Memory Inspection (Golden Pass-ta-key)", "severity": "High"},
+    {"rule_id": "SEC-RULE-2026-003", "name": "Windows Hello Sign-ins Lacking Device Claims Anomaly", "severity": "High"}
+  ]
+}

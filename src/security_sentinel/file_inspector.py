@@ -1,120 +1,102 @@
-import os
-import re
-import json
-import logging
-from security_sentinel.quarantine import QuarantineManager
-
-DEFAULT_LEAK_KEYWORDS = [
-    "AWS_SECRET_ACCESS_KEY",
-    "AWS_ACCESS_KEY_ID",
-    "PRIVATE_KEY",
-    "AKIAIOSFODNN7EXAMPLE"
-]
-
-try:
-    from security_sentinel.config import LEAK_KEYWORDS
-    # Filter out generic high-false-positive words if listed alone
-    LEAK_KEYWORDS = [k.strip().upper() for k in LEAK_KEYWORDS if k.strip().upper() not in ["SECRET", "PASSWORD"]]
-    LEAK_KEYWORDS = list(set(LEAK_KEYWORDS + DEFAULT_LEAK_KEYWORDS))
-except ImportError:
-    LEAK_KEYWORDS = DEFAULT_LEAK_KEYWORDS
+import os, re, math, uuid, json, shutil, hashlib, logging
+from datetime import datetime
+from typing import List, Dict, Any, Optional
+from security_sentinel.edr_threat_rules import EDRThreatEngine, ThreatAlert
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("FileInspector")
+
+SECRET_PATTERNS: Dict[str, re.Pattern] = {
+    "AWS_ACCESS_KEY_ID": re.compile(r"\b(AKIA|ASIA)[0-9A-Z]{16}\b"),
+    "AWS_SECRET_ACCESS_KEY": re.compile(r"(?i)aws_secret_access_key\s*[:=]\s*['\"]?([A-Za-z0-9/+=]{40})['\"]?"),
+    "GITHUB_TOKEN": re.compile(r"\b(ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36}\b"),
+    "OPENAI_API_KEY": re.compile(r"\bsk-(proj-)?[a-zA-Z0-9_\-]{32,}\b"),
+    "PRIVATE_KEY": re.compile(r"-----BEGIN\s+(RSA|EC|DSA|OPENSSH|PRIVATE)\s+KEY-----"),
+    "GENERIC_SECRET_ASSIGNMENT": re.compile(r"(?i)(password|secret_key|api_key|access_token)\s*[:=]\s*['\"]([^'\"]{8,})['\"]")
+}
+
+def calculate_shannon_entropy(data: str) -> float:
+    if not data: return 0.0
+    entropy = 0.0
+    for x in set(data):
+        p_x = float(data.count(x)) / len(data)
+        entropy -= p_x * math.log(p_x, 2)
+    return round(entropy, 4)
+
+class QuarantineManager:
+    def __init__(self, quarantine_dir: str = "quarantine"):
+        self.quarantine_dir = os.path.abspath(quarantine_dir)
+        os.makedirs(self.quarantine_dir, exist_ok=True)
+
+    def quarantine_file(self, file_path: str, rule_matched: str, entropy: float, alert_details: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        if not os.path.exists(file_path): return None
+        now = datetime.utcnow()
+        date_path = os.path.join(self.quarantine_dir, now.strftime("%Y"), now.strftime("%m"), now.strftime("%d"))
+        os.makedirs(date_path, exist_ok=True)
+        dest_path = os.path.join(date_path, f"{str(uuid.uuid4())[:8]}_{os.path.basename(file_path)}")
+
+        sha256 = hashlib.sha256()
+        try:
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""): sha256.update(chunk)
+            shutil.move(file_path, dest_path)
+            logger.info(f"Quarantined {file_path} -> {dest_path}")
+            with open(f"{dest_path}.json", "w", encoding="utf-8") as meta_f:
+                json.dump({
+                    "original_path": os.path.abspath(file_path), "quarantined_path": dest_path,
+                    "sha256": sha256.hexdigest(), "detected_rule": rule_matched, "entropy_score": entropy,
+                    "timestamp": now.isoformat() + "Z", "alert_details": alert_details
+                }, meta_f, indent=2)
+            return dest_path
+        except Exception as e:
+            logger.error(f"Quarantine error: {e}")
+            return None
 
 class FileInspector:
-    """
-    Inspects target files for threats and automatically quarantines files matching leak criteria.
-    """
-    def __init__(self, quarantine_dir=None):
-        self.q_manager = QuarantineManager(quarantine_dir)
-        self.leak_keywords = LEAK_KEYWORDS
+    def __init__(self, quarantine_dir: str = "quarantine", entropy_threshold: float = 4.5, manifest_path: Optional[str] = "rules/edr_threat_rules.json"):
+        self.quarantine_mgr = QuarantineManager(quarantine_dir)
+        self.entropy_threshold = entropy_threshold
+        self.edr_engine = EDRThreatEngine(manifest_path if os.path.exists(manifest_path or "") else None)
 
-    def inspect_file(self, file_path: str) -> dict:
-        if not os.path.exists(file_path):
-            logging.error(f"Target file not found: {file_path}")
-            return {
-                "is_clean": False,
-                "status": "error",
-                "reason": "file_not_found",
-                "file_path": file_path
-            }
+    def inspect_file(self, file_path: str) -> Dict[str, Any]:
+        result = {"file_path": file_path, "is_clean": True, "rule_matched": None, "entropy": 0.0, "quarantined_to": None, "edr_alerts": []}
+        if not os.path.isfile(file_path) or os.path.abspath(file_path).startswith(self.quarantine_mgr.quarantine_dir):
+            return result
 
-        file_size = os.path.getsize(file_path)
-        logging.info(f"Inspecting file: {file_path} (size: {file_size} bytes)")
-
-        detected_keyword = None
         try:
-            with open(file_path, "r", errors="ignore") as f:
-                content = f.read().upper()
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f: content = f.read()
+        except Exception: return result
 
-            # 1. Match specific leak keywords
-            for keyword in self.leak_keywords:
-                if keyword in content:
-                    detected_keyword = keyword
-                    break
+        # 1. EDR JSON Log check
+        if file_path.endswith(".json") or content.strip().startswith("{"):
+            try:
+                data = json.loads(content)
+                events = data if isinstance(data, list) else [data]
+                for evt in events:
+                    if isinstance(evt, dict):
+                        alerts = self.edr_engine.process_event(evt)
+                        if alerts:
+                            top = alerts[0]
+                            q = self.quarantine_mgr.quarantine_file(file_path, top.rule_id, 0.0, top.dict())
+                            result.update({"is_clean": False, "rule_matched": top.rule_id, "quarantined_to": q, "edr_alerts": [a.dict() for a in alerts]})
+                            return result
+            except json.JSONDecodeError: pass
 
-            # 2. Match structural secret patterns (e.g. key = value or bearer tokens)
-            if not detected_keyword:
-                secret_patterns = [
-                    r'AWS_ACCESS_KEY_ID\s*=\s*\S+',
-                    r'AWS_SECRET_ACCESS_KEY\s*=\s*\S+',
-                    r'AKIA[0-9A-Z]{16}'
-                ]
-                for pat in secret_patterns:
-                    if re.search(pat, content):
-                        detected_keyword = pat
-                        break
+        # 2. Secret signatures
+        for rule_name, pat in SECRET_PATTERNS.items():
+            m = pat.search(content)
+            if m:
+                ent = calculate_shannon_entropy(m.group(0))
+                q = self.quarantine_mgr.quarantine_file(file_path, rule_name, ent)
+                result.update({"is_clean": False, "rule_matched": rule_name, "entropy": ent, "quarantined_to": q})
+                return result
 
-        except Exception as e:
-            logging.error(f"Failed to read file {file_path}: {e}")
-            return {
-                "is_clean": False,
-                "status": "error",
-                "reason": f"read_error:{e}",
-                "file_path": file_path
-            }
+        # 3. High entropy tokens
+        for token in re.findall(r"\b[A-Za-z0-9/+=_-]{20,}\b", content):
+            ent = calculate_shannon_entropy(token)
+            if ent >= self.entropy_threshold:
+                q = self.quarantine_mgr.quarantine_file(file_path, "HIGH_ENTROPY_TOKEN", ent)
+                result.update({"is_clean": False, "rule_matched": "HIGH_ENTROPY_TOKEN", "entropy": ent, "quarantined_to": q})
+                return result
 
-        # If dirty or zero-byte, isolate and generate sidecar metadata
-        if detected_keyword or file_size == 0:
-            reason = f"leak_keyword_detected:{detected_keyword}" if detected_keyword else "zero_byte_file"
-            logging.warning(f"File {file_path} failed inspection ({reason}). Quarantining...")
-            
-            quarantined_to = self.isolate_file(file_path, reason=reason)
-            return {
-                "is_clean": False,
-                "status": "suspicious",
-                "reason": reason,
-                "file_path": file_path,
-                "quarantined_to": quarantined_to
-            }
-
-        return {
-            "is_clean": True,
-            "status": "clean",
-            "reason": "no_threats_detected",
-            "file_path": file_path
-        }
-
-    def isolate_file(self, file_path: str, reason: str = "suspicious_file") -> str:
-        filename = os.path.basename(file_path)
-        dest = os.path.join(self.q_manager.quarantine_dir, f"isolated_{filename}")
-        
-        try:
-            os.rename(file_path, dest)
-            logging.info(f"Quarantined {file_path} -> {dest}")
-            
-            meta_path = f"{dest}.json"
-            meta_data = {
-                "original_file": file_path,
-                "quarantined_file": dest,
-                "reason": reason
-            }
-            with open(meta_path, "w") as mf:
-                json.dump(meta_data, mf, indent=2)
-
-            return dest
-        except OSError as e:
-            logging.error(f"Failed to quarantine file {file_path}: {e}")
-            return ""
-
-inspect_file = lambda path: FileInspector().inspect_file(path)
+        return result

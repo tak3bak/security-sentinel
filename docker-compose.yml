@@ -1,19 +1,13 @@
 version: '3.8'
-
 services:
-  sentinel-api:
+  sentinel-gateway:
     build: .
-    container_name: sentinel-api
-    ports:
-      - "8000:8000"
-    environment:
-      # These will be loaded from a local .env file
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_PRICE_ID_SENTINEL=${STRIPE_PRICE_ID_SENTINEL}
-      - RESEND_API_KEY=${RESEND_API_KEY}
+    container_name: nomadik-sentinel-gateway
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    ports:
+      - "8080:8080"
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./quarantine:/app/quarantine
