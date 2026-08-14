@@ -88,7 +88,7 @@ class AnalysisResponse(BaseModel):
     chokepoints: List[Chokepoint]
 
 
-class HULApprovalRequest(BaseModel):
+class HITLApprovalRequest(BaseModel):
     approved_by: str
     action: ApprovalStatusEnum
     remediation_notes: Optional[str] = None
@@ -109,7 +109,7 @@ def calculate_weighted_risk(
     return round(max_cvss * count_multiplier * max_criticality, 2)
 
 
-@router.post("/analyze", response_model=AnalysisRequest)
+@router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_vulnerabilities(payload: AnalysisRequest):
     grouped_data: Dict[str, Dict[str, Any]] = {}
     for finding in payload.findings:
@@ -175,7 +175,11 @@ async def analyze_vulnerabilities(payload: AnalysisRequest):
         chokepoints.append(chk)
 
     chokepoints.sort(key=lambda x: x.weighted_risk_score, reverse=True)
-    return AnalysisRequest(total_raw_findings=len(chokepoints), chokepoints=chokepoints)
+    return AnalysisResponse(
+        total_raw_findings=len(payload.findings),
+        condensed_chokepoints_count=len(chokepoints),
+        chokepoints=chokepoints
+    )
 
 
 @router.get("/", response_model=List[Chokepoint])
@@ -186,7 +190,7 @@ async def list_chokepoints():
 @router.post("/{chokepoint_id}/approve", response_model=Chokepoint)
 async def approve_chokepoint(chokepoint_id: str, request: HITLApprovalRequest):
     if chokepoint_id not in CHOKEPOINT_STORE:
-        raise ATPException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Chokepoint not found."
         )
     chk = CHOKEPOINT_STORE[chokepoint_id]
