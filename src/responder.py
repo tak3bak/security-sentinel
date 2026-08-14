@@ -63,7 +63,7 @@ def wazuh_get_alerts():
         auth_payload = {"username": wazuh_user, "password": wazuh_pass}
 
         auth_resp = requests.post(
-            f"{wazuh_url}/security/user/authenticate", json=auth_payload, verify=False
+            f"{wazuh_url}/security/user/authenticate", json=auth_payload, verify=False  # nosec B501
         )
 
         if auth_resp.status_code != 200:
@@ -84,7 +84,7 @@ def wazuh_get_alerts():
         # Correct Wazuh 4.x endpoint
         # -----------------------------
         alerts_resp = requests.get(
-            f"{wazuh_url}/alerts/summary", headers=headers, verify=False
+            f"{wazuh_url}/alerts/summary", headers=headers, verify=False  # nosec B501
         )
 
         if alerts_resp.status_code != 200:

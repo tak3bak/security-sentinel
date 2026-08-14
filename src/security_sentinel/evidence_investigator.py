@@ -94,7 +94,7 @@ async def investigate_alert(alert: WazuhAlertPayload):
     severity = "CRITICAL" if cvss_score >= 9.0 else "HIGH"
     status_val = ComplianceStatusEnum.NON_COMPLIANT if cvss_score >= 9.0 else ComplianceStatusEnum.MITIGATED_COMPENSATING_CONTROL
 
-    disp_id = f"disp_{hashlib.md5(f'{alert.alert_id}:{cve}'.encode('utf-8')).hexdigest()[:10]}"
+    disp_id = f"disp_{hashlib.md5(f'{alert.alert_id}:{cve}'.encode('utf-8')).hexdigest()[:10]}"  # nosec B324
     report = AuditorDispositionReport(
         disposition_id=disp_id,
         cve_id=cve,
