@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: nomadik-sentinel-api
+    env: docker
+    plan: standard
+    branch: main
+    dockerfile: Dockerfile
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PYTHON_ENV
+        value: production
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
