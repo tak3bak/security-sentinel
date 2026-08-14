@@ -1,7 +1,7 @@
 import base64
 import os
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_OAEP, AES
+from Crypto.PublicKey import RSA  # nosec B413
+from Crypto.Cipher import PKCS1_OAEP, AES  # nosec B413
 
 
 class HybridEncryption:

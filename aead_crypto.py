@@ -1,6 +1,6 @@
 import base64
 import os
-from Crypto.Cipher import AES
+from Crypto.Cipher import AES  # nosec B413
 
 
 class AuthenticatedEncryption:

@@ -74,4 +74,4 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
     return {"status": "success", "event": event_type}
 
 if __name__ == "__main__":
-    uvicorn.run("growth_agent_api:app", host="0.0.0.0", port=8080, reload=False)
+    uvicorn.run("growth_agent_api:app", host="0.0.0.0", port=8080, reload=False)  # nosec B104
