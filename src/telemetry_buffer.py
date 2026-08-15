@@ -94,13 +94,14 @@ class DynamicSigmaEngine:
     def __init__(self, rules_dir: str = "rules"):
         self.rules_dir = rules_dir
         self.rules: List[SigmaRule] = []
+        self.last_reloaded_at: float = time.time()
         self.reload_rules()
 
     def reload_rules(self) -> int:
         """Loads default built-in rules and all external YAML/JSON rules from rules/ directory."""
         new_rules: List[SigmaRule] = []
         
-        # 1. Built-in Core Rule Fallbacks
+        # 1. Built-in Core Fallbacks
         new_rules.extend([
             SigmaRule(
                 rule_id="SIGMA-001",
@@ -140,7 +141,7 @@ class DynamicSigmaEngine:
             )
         ])
 
-        # 2. Dynamically Load YAML and JSON rules from rules/ directory
+        # 2. Dynamically Load YAML and JSON rules from disk
         if os.path.exists(self.rules_dir):
             file_patterns = [
                 os.path.join(self.rules_dir, "**/*.yml"),
@@ -165,7 +166,6 @@ class DynamicSigmaEngine:
                     if not isinstance(data, dict):
                         continue
 
-                    # Handle list of rules or single rule structure
                     rule_items = data.get("rules", [data]) if "rules" in data else [data]
                     for item in rule_items:
                         if "rule_id" in item and "title" in item and "event_type" in item:
@@ -184,13 +184,14 @@ class DynamicSigmaEngine:
                 except Exception as e:
                     logger.error(f"[!] Failed to parse rule definition in {file_path}: {e}")
 
-        # Deduplicate rules by rule_id (file rules override builtins)
+        # Deduplicate rules by rule_id (file definitions take precedence)
         dedup_rules: Dict[str, SigmaRule] = {}
         for r in new_rules:
             dedup_rules[r.rule_id] = r
 
         self.rules = list(dedup_rules.values())
-        logger.info(f"[✓] Dynamic Sigma Engine initialized: {len(self.rules)} active rules loaded.")
+        self.last_reloaded_at = time.time()
+        logger.info(f"[✓] Dynamic Sigma Engine synced: {len(self.rules)} active rules loaded.")
         return len(self.rules)
 
     def evaluate_event(self, event: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -205,6 +206,61 @@ class DynamicSigmaEngine:
                     "source_file": rule.source_file
                 })
         return matches
+
+# =========================================================
+# Async Filesystem Directory Watcher (Zero External Deps)
+# =========================================================
+class AsyncRuleDirectoryWatcher:
+    """Non-blocking async filesystem poller monitoring modification timestamps (mtime)."""
+    def __init__(self, engine: DynamicSigmaEngine, poll_interval_sec: float = 2.0):
+        self.engine = engine
+        self.poll_interval = poll_interval_sec
+        self._running = False
+        self._task: Optional[asyncio.Task] = None
+        self._file_snapshots: Dict[str, float] = {}
+
+    def _scan_directory_mtimes(self) -> Dict[str, float]:
+        snapshots = {}
+        if not os.path.exists(self.engine.rules_dir):
+            return snapshots
+
+        for root, _, files in os.walk(self.engine.rules_dir):
+            for file in files:
+                if file.endswith((".yml", ".yaml", ".json")):
+                    full_path = os.path.join(root, file)
+                    try:
+                        snapshots[full_path] = os.path.getmtime(full_path)
+                    except OSError:
+                        pass
+        return snapshots
+
+    async def start(self):
+        self._running = True
+        self._file_snapshots = await asyncio.to_thread(self._scan_directory_mtimes)
+        self._task = asyncio.create_task(self._watch_loop())
+        logger.info(f"[✓] Async Rules Watcher active (Directory: '{self.engine.rules_dir}/', Poll Interval: {self.poll_interval}s)")
+
+    async def stop(self):
+        self._running = False
+        if self._task:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+        logger.info("[✓] Async Rules Watcher stopped.")
+
+    async def _watch_loop(self):
+        while self._running:
+            await asyncio.sleep(self.poll_interval)
+            current_snapshots = await asyncio.to_thread(self._scan_directory_mtimes)
+            
+            # Check for added, removed, or modified rule files
+            if current_snapshots != self._file_snapshots:
+                logger.info("[!] Filesystem event detected in rules directory. Hot-reloading Sigma rules...")
+                self._file_snapshots = current_snapshots
+                count = self.engine.reload_rules()
+                logger.info(f"[✓] Hot-reload complete: {count} active rules online.")
 
 # =========================================================
 # Async Database Persistence Layer
@@ -430,7 +486,6 @@ class TelemetryStreamBuffer:
         t0 = time.perf_counter()
         generated_alerts: List[Dict[str, Any]] = []
 
-        # 1. Run Dynamic Sigma Rule Matching
         for event in batch:
             matches = self.sigma_engine.evaluate_event(event)
             if matches:
@@ -456,7 +511,6 @@ class TelemetryStreamBuffer:
                     generated_alerts.append(alert)
                     logger.warning(f"🚨 [DETECTION TRIGGERED] {match['rule_id']} ({match['severity']}) - {match['title']} on {event['host_identifier']} [source: {match['source_file']}]")
 
-        # 2. Persist Telemetry Batch & Alerts to DB
         try:
             inserted_count = await self.db_store.insert_batch_and_alerts(batch, generated_alerts)
             latency_ms = (time.perf_counter() - t0) * 1000
@@ -474,19 +528,22 @@ class TelemetryStreamBuffer:
 # =========================================================
 db_store = AsyncTelemetryStore()
 sigma_engine = DynamicSigmaEngine(rules_dir="rules")
+rule_watcher = AsyncRuleDirectoryWatcher(engine=sigma_engine, poll_interval_sec=2.0)
 buffer_engine = TelemetryStreamBuffer(db_store=db_store, sigma_engine=sigma_engine)
 
 app = FastAPI(
     title="Nomadik Security Sentinel - Telemetry Engine",
-    version="2.3.0"
+    version="2.4.0"
 )
 
 @app.on_event("startup")
 async def startup_event():
     await buffer_engine.start_worker()
+    await rule_watcher.start()
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    await rule_watcher.stop()
     await buffer_engine.stop_worker()
 
 @app.post("/api/v1/telemetry/ingest", status_code=status.HTTP_202_ACCEPTED)
@@ -539,7 +596,10 @@ async def telemetry_health():
         "dlq_depth": buffer_engine.dlq.qsize(),
         "max_capacity": buffer_engine.queue.maxsize,
         "persisted_events": metrics["total_events"],
-        "security_alerts_count": metrics["total_alerts"]
+        "security_alerts_count": metrics["total_alerts"],
+        "active_rules": len(sigma_engine.rules),
+        "last_rules_reload": sigma_engine.last_reloaded_at,
+        "watcher_active": rule_watcher._running
     }
 
 @app.get("/api/v1/telemetry/alerts")
@@ -555,6 +615,7 @@ async def get_active_rules():
     return {
         "total_rules": len(sigma_engine.rules),
         "rules_directory": sigma_engine.rules_dir,
+        "last_reloaded_at": sigma_engine.last_reloaded_at,
         "rules": [
             {
                 "rule_id": r.rule_id,
@@ -572,7 +633,7 @@ async def get_active_rules():
 async def reload_sigma_rules():
     count = sigma_engine.reload_rules()
     return {
-        "status": "reloaded",
+        "status": "reloaded_manually",
         "total_rules_active": count,
         "rules_directory": sigma_engine.rules_dir
     }

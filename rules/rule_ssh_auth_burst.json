@@ -1,0 +1,13 @@
+{
+  "rule_id": "SIGMA-007-EXT",
+  "title": "SSH Brute Force / Excessive Authentication Failures",
+  "severity": "HIGH",
+  "mitre_tag": "T1110.001",
+  "event_type": "auth_failure",
+  "field_matches": {
+    "service": ["sshd", "ssh"]
+  },
+  "regex_matches": {
+    "username": "(root|admin|support|postgres|ubuntu)"
+  }
+}
