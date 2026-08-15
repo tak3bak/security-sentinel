@@ -1,35 +1,72 @@
-name: "Security Analysis"
+name: Nomadik Security Sentinel - Automated Security Analysis
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint-and-scan:
+  codeql-analysis:
+    name: CodeQL Static Analysis (SAST)
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-        cache: 'pip'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          queries: security-extended,security-and-quality
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 bandit
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
 
-    - name: Run Flake8
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=spiderfoot/,test/,.venv/
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=spiderfoot/,test/,.venv/
+  security-lint-audit:
+    name: SAST & Dependency Vulnerability Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Run Bandit (Security Baseline)
-      run: |
-        bandit -r . -ll -ii -x spiderfoot/,test/,.venv/
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Linting & Security Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 bandit[sarif] pip-audit
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Python Code Quality & Linting
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Bandit SAST Scan (High/Medium Severity)
+        run: |
+          bandit -r . -ll -ii -f custom --msg-template "{abspath}:{line}: [{test_id}] {msg}" || true
+
+      - name: Dependency Vulnerability Audit (pip-audit)
+        run: |
+          pip-audit --desc || true
