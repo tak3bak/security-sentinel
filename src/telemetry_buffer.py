@@ -1,17 +1,21 @@
 import os
+import re
 import time
 import json
 import asyncio
 import logging
+import sqlite3
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, BackgroundTasks, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Query
 from fastapi.responses import JSONResponse
 
-# Configure structured logging
+# =========================================================
+# Logging Configuration
+# =========================================================
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] [TelemetryBuffer] %(message)s"
+    format="%(asctime)s [%(levelname)s] [SentinelDetection] %(message)s"
 )
 logger = logging.getLogger("NomadikTelemetry")
 
@@ -33,10 +37,293 @@ class TelemetryBatch(BaseModel):
     events: List[SecurityEvent]
 
 # =========================================================
-# High-Throughput Buffer Queue
+# Sigma Threat Detection Engine
+# =========================================================
+class SigmaRule:
+    def __init__(
+        self,
+        rule_id: str,
+        title: str,
+        severity: str,
+        mitre_tag: str,
+        event_type: str,
+        field_matches: Optional[Dict[str, List[str]]] = None,
+        regex_matches: Optional[Dict[str, str]] = None
+    ):
+        self.rule_id = rule_id
+        self.title = title
+        self.severity = severity.upper()
+        self.mitre_tag = mitre_tag
+        self.event_type = event_type
+        self.field_matches = field_matches or {}
+        self.regex_matches = {k: re.compile(v, re.IGNORECASE) for k, v in (regex_matches or {}).items()}
+
+    def evaluate(self, event: Dict[str, Any]) -> bool:
+        if self.event_type != "*" and event.get("event_type") != self.event_type:
+            return False
+
+        payload = event.get("payload", {})
+        
+        # 1. Evaluate substring field matches
+        for field, keywords in self.field_matches.items():
+            field_val = str(payload.get(field, "")).lower()
+            if not any(kw.lower() in field_val for kw in keywords):
+                return False
+
+        # 2. Evaluate regular expressions
+        for field, regex in self.regex_matches.items():
+            field_val = str(payload.get(field, ""))
+            if not regex.search(field_val):
+                return False
+
+        return True
+
+
+class SigmaEngine:
+    def __init__(self):
+        self.rules: List[SigmaRule] = []
+        self._load_default_rules()
+
+    def _load_default_rules(self):
+        self.rules = [
+            SigmaRule(
+                rule_id="SIGMA-001",
+                title="Credential Dumping via Memory Extraction (Mimikatz/LSA)",
+                severity="CRITICAL",
+                mitre_tag="T1003.001",
+                event_type="sysmon_process_create",
+                field_matches={
+                    "command_line": ["sekurlsa::logonpasswords", "privilege::debug", "token::elevate", "lsadump::sam"]
+                }
+            ),
+            SigmaRule(
+                rule_id="SIGMA-002",
+                title="Obfuscated / Bypassed PowerShell Execution",
+                severity="HIGH",
+                mitre_tag="T1059.001",
+                event_type="sysmon_process_create",
+                field_matches={
+                    "process": ["powershell.exe", "pwsh.exe"]
+                },
+                regex_matches={
+                    "command_line": r"(-enc|-encodedcommand|-nop|-noprofile|-w\s+hidden|-exec\s+bypass)"
+                }
+            ),
+            SigmaRule(
+                rule_id="SIGMA-003",
+                title="Shadow Copy Deletion / Ransomware Inhibit System Recovery",
+                severity="CRITICAL",
+                mitre_tag="T1490",
+                event_type="sysmon_process_create",
+                field_matches={
+                    "command_line": ["delete shadows", "resize shadowstorage", "bcdedit /set {default} bootstatuspolicy"]
+                }
+            ),
+            SigmaRule(
+                rule_id="SIGMA-004",
+                title="Suspicious Living-off-the-Land Ingress Tool (Certutil/Bitsadmin)",
+                severity="HIGH",
+                mitre_tag="T1105",
+                event_type="sysmon_process_create",
+                field_matches={
+                    "process": ["certutil.exe", "bitsadmin.exe"]
+                },
+                regex_matches={
+                    "command_line": r"(-urlcache|-split|/transfer)"
+                }
+            ),
+            SigmaRule(
+                rule_id="SIGMA-005",
+                title="Suspicious C2 Domain Telemetry Lookup",
+                severity="HIGH",
+                mitre_tag="T1071.004",
+                event_type="dns_query",
+                regex_matches={
+                    "query_domain": r"(c2\.|payload\.|exfil\.|temp-tunnel\.|ngrok\.io|webhook\.site)"
+                }
+            )
+        ]
+        logger.info(f"[✓] Sigma Detection Engine loaded {len(self.rules)} high-fidelity rules.")
+
+    def evaluate_event(self, event: Dict[str, Any]) -> List[Dict[str, Any]]:
+        matches = []
+        for rule in self.rules:
+            if rule.evaluate(event):
+                matches.append({
+                    "rule_id": rule.rule_id,
+                    "title": rule.title,
+                    "severity": rule.severity,
+                    "mitre_tag": rule.mitre_tag
+                })
+        return matches
+
+# =========================================================
+# Async Database Persistence Layer
+# =========================================================
+class AsyncTelemetryStore:
+    def __init__(self, db_path: str = "data/telemetry_events.db"):
+        self.db_path = db_path
+        self._init_db()
+
+    def _get_connection(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.db_path, timeout=10.0)
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        return conn
+
+    def _init_db(self):
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # Telemetry events table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS telemetry_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id TEXT UNIQUE NOT NULL,
+                    batch_id TEXT,
+                    agent_version TEXT,
+                    source_ip TEXT,
+                    host_identifier TEXT,
+                    event_type TEXT,
+                    severity TEXT,
+                    payload TEXT,
+                    matched_rules TEXT,
+                    event_timestamp REAL,
+                    received_at REAL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            # Security alerts table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS security_alerts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    alert_id TEXT UNIQUE NOT NULL,
+                    event_id TEXT NOT NULL,
+                    rule_id TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    mitre_tag TEXT NOT NULL,
+                    host_identifier TEXT NOT NULL,
+                    source_ip TEXT NOT NULL,
+                    details TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY(event_id) REFERENCES telemetry_events(event_id)
+                );
+            """)
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_telemetry_event_id ON telemetry_events(event_id);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_telemetry_host ON telemetry_events(host_identifier);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_telemetry_severity ON telemetry_events(severity);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_alerts_rule ON security_alerts(rule_id);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_alerts_severity ON security_alerts(severity);")
+            conn.commit()
+            logger.info(f"[✓] SQLite schema verified with alerts index at {self.db_path}")
+
+    def _sync_insert_batch_and_alerts(self, batch: List[Dict[str, Any]], alerts: List[Dict[str, Any]]) -> int:
+        records = [
+            (
+                ev["event_id"],
+                ev.get("batch_id"),
+                ev.get("agent_version"),
+                ev["source_ip"],
+                ev["host_identifier"],
+                ev["event_type"],
+                ev["severity"],
+                json.dumps(ev.get("payload", {})),
+                json.dumps(ev.get("matched_rules", [])),
+                ev.get("timestamp", time.time()),
+                ev.get("received_at", time.time())
+            )
+            for ev in batch
+        ]
+
+        alert_records = [
+            (
+                al["alert_id"],
+                al["event_id"],
+                al["rule_id"],
+                al["title"],
+                al["severity"],
+                al["mitre_tag"],
+                al["host_identifier"],
+                al["source_ip"],
+                json.dumps(al.get("details", {}))
+            )
+            for al in alerts
+        ]
+
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.executemany("""
+                INSERT INTO telemetry_events (
+                    event_id, batch_id, agent_version, source_ip, host_identifier,
+                    event_type, severity, payload, matched_rules, event_timestamp, received_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(event_id) DO UPDATE SET
+                    payload=excluded.payload,
+                    severity=excluded.severity,
+                    matched_rules=excluded.matched_rules,
+                    received_at=excluded.received_at;
+            """, records)
+
+            if alert_records:
+                cursor.executemany("""
+                    INSERT INTO security_alerts (
+                        alert_id, event_id, rule_id, title, severity, mitre_tag,
+                        host_identifier, source_ip, details
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(alert_id) DO NOTHING;
+                """, alert_records)
+
+            conn.commit()
+            return cursor.rowcount
+
+    def _sync_get_metrics(self) -> Dict[str, int]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM telemetry_events;")
+            total_events = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM security_alerts;")
+            total_alerts = cursor.fetchone()[0]
+            return {"total_events": total_events, "total_alerts": total_alerts}
+
+    def _sync_get_recent_alerts(self, limit: int = 50) -> List[Dict[str, Any]]:
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, alert_id, event_id, rule_id, title, severity, mitre_tag,
+                       host_identifier, source_ip, details, created_at
+                FROM security_alerts
+                ORDER BY id DESC
+                LIMIT ?;
+            """, (limit,))
+            rows = cursor.fetchall()
+            results = []
+            for row in rows:
+                item = dict(row)
+                try:
+                    item["details"] = json.loads(item["details"])
+                except Exception:
+                    pass
+                results.append(item)
+            return results
+
+    async def insert_batch_and_alerts(self, batch: List[Dict[str, Any]], alerts: List[Dict[str, Any]]) -> int:
+        return await asyncio.to_thread(self._sync_insert_batch_and_alerts, batch, alerts)
+
+    async def get_metrics(self) -> Dict[str, int]:
+        return await asyncio.to_thread(self._sync_get_metrics)
+
+    async def get_recent_alerts(self, limit: int = 50) -> List[Dict[str, Any]]:
+        return await asyncio.to_thread(self._sync_get_recent_alerts, limit)
+
+# =========================================================
+# High-Throughput Buffer Queue & Consumer
 # =========================================================
 class TelemetryStreamBuffer:
-    def __init__(self, max_buffer_size: int = 50000, batch_window_ms: int = 100, batch_size: int = 500):
+    def __init__(self, db_store: AsyncTelemetryStore, sigma_engine: SigmaEngine, max_buffer_size: int = 50000, batch_window_ms: int = 100, batch_size: int = 500):
+        self.db_store = db_store
+        self.sigma_engine = sigma_engine
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=max_buffer_size)
         self.dlq: asyncio.Queue = asyncio.Queue(maxsize=10000)
         self.batch_window_sec = batch_window_ms / 1000.0
@@ -45,16 +332,14 @@ class TelemetryStreamBuffer:
         self._worker_task: Optional[asyncio.Task] = None
 
     async def push(self, event: Dict[str, Any]) -> bool:
-        """Non-blocking ingest into buffer. Returns False if backpressure limit reached."""
         try:
             self.queue.put_nowait(event)
             return True
         except asyncio.QueueFull:
-            logger.warning("[!] Telemetry buffer saturated. Activating emergency backpressure.")
+            logger.warning("[!] Telemetry buffer queue full. Applying backpressure.")
             return False
 
     async def push_batch(self, events: List[Dict[str, Any]]) -> int:
-        """Ingests all events that fit in buffer, returns count accepted."""
         accepted = 0
         for ev in events:
             if await self.push(ev):
@@ -66,7 +351,7 @@ class TelemetryStreamBuffer:
     async def start_worker(self):
         self._running = True
         self._worker_task = asyncio.create_task(self._consumer_loop())
-        logger.info(f"[✓] Telemetry batch consumer initialized (Batch Size: {self.batch_size}, Window: {self.batch_window_sec*1000}ms)")
+        logger.info(f"[✓] Micro-batch consumer initialized (Window: {self.batch_window_sec*1000}ms, Max Batch: {self.batch_size})")
 
     async def stop_worker(self):
         self._running = False
@@ -76,7 +361,7 @@ class TelemetryStreamBuffer:
                 await self._worker_task
             except asyncio.CancelledError:
                 pass
-        logger.info("[✓] Telemetry buffer worker terminated cleanly.")
+        logger.info("[✓] Micro-batch worker terminated cleanly.")
 
     async def _consumer_loop(self):
         while self._running:
@@ -96,28 +381,60 @@ class TelemetryStreamBuffer:
                 await self._process_batch(batch)
 
     async def _process_batch(self, batch: List[Dict[str, Any]]):
-        """Flushes micro-batch to threat analysis engine and persistent store."""
-        try:
-            t0 = time.perf_counter()
-            # Simulation of engine parsing latency
-            latency_ms = (time.perf_counter() - t0) * 1000
-            logger.info(f"Processed telemetry batch of {len(batch)} events in {latency_ms:.2f}ms | Buffer depth: {self.queue.qsize()}")
-        except Exception as e:
-            logger.error(f"[!] Batch processing exception: {e}. Moving events to DLQ.")
-            for failed_event in batch:
-                try:
-                    self.dlq.put_nowait(failed_event)
-                except asyncio.QueueFull:
-                    logger.critical("[!] DLQ buffer full! Dropping stale event to preserve stability.")
+        t0 = time.perf_counter()
+        generated_alerts: List[Dict[str, Any]] = []
 
-buffer_engine = TelemetryStreamBuffer()
+        # 1. Run Continuous Sigma Rule Evaluation
+        for event in batch:
+            matches = self.sigma_engine.evaluate_event(event)
+            if matches:
+                event["matched_rules"] = matches
+                # Elevate event severity to highest matched rule
+                severities = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+                highest_sev = max(matches, key=lambda m: severities.index(m["severity"]) if m["severity"] in severities else 0)["severity"]
+                if severities.index(highest_sev) > severities.index(event.get("severity", "INFO")):
+                    event["severity"] = highest_sev
+
+                # Create structured alerts
+                for match in matches:
+                    alert_id = f"ALT-{event['event_id'][:8]}-{match['rule_id']}"
+                    alert = {
+                        "alert_id": alert_id,
+                        "event_id": event["event_id"],
+                        "rule_id": match["rule_id"],
+                        "title": match["title"],
+                        "severity": match["severity"],
+                        "mitre_tag": match["mitre_tag"],
+                        "host_identifier": event["host_identifier"],
+                        "source_ip": event["source_ip"],
+                        "details": event.get("payload", {})
+                    }
+                    generated_alerts.append(alert)
+                    logger.warning(f"🚨 [DETECTION TRIGGERED] {match['rule_id']} ({match['severity']}) - {match['title']} on {event['host_identifier']}")
+
+        # 2. Persist Telemetry Batch & Alerts to DB
+        try:
+            inserted_count = await self.db_store.insert_batch_and_alerts(batch, generated_alerts)
+            latency_ms = (time.perf_counter() - t0) * 1000
+            logger.info(f"Processed batch of {inserted_count} events ({len(generated_alerts)} alerts) in {latency_ms:.2f}ms | Buffer depth: {self.queue.qsize()}")
+        except Exception as e:
+            logger.error(f"[!] Batch persistence error: {e}. Moving events to DLQ.")
+            for failed_ev in batch:
+                try:
+                    self.dlq.put_nowait(failed_ev)
+                except asyncio.QueueFull:
+                    pass
 
 # =========================================================
 # FastAPI Application & Endpoints
 # =========================================================
+db_store = AsyncTelemetryStore()
+sigma_engine = SigmaEngine()
+buffer_engine = TelemetryStreamBuffer(db_store=db_store, sigma_engine=sigma_engine)
+
 app = FastAPI(
-    title="Nomadik Security Sentinel - Ingestion Engine",
-    version="2.0.0"
+    title="Nomadik Security Sentinel - Telemetry Engine",
+    version="2.2.0"
 )
 
 @app.on_event("startup")
@@ -137,9 +454,8 @@ async def ingest_single_event(event: SecurityEvent):
     if not accepted:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Ingestion buffer full. Retry with exponential backoff."
+            detail="Ingestion buffer saturated. Retry with backpressure."
         )
-    
     return {"status": "buffered", "event_id": event.event_id}
 
 @app.post("/api/v1/telemetry/batch", status_code=status.HTTP_202_ACCEPTED)
@@ -149,6 +465,7 @@ async def ingest_batch_stream(batch: TelemetryBatch):
     for ev in raw_events:
         ev["received_at"] = now
         ev["batch_id"] = batch.batch_id
+        ev["agent_version"] = batch.agent_version
 
     accepted_count = await buffer_engine.push_batch(raw_events)
     
@@ -159,7 +476,7 @@ async def ingest_batch_stream(batch: TelemetryBatch):
                 "status": "partial_success",
                 "accepted": accepted_count,
                 "rejected": len(raw_events) - accepted_count,
-                "detail": "Buffer threshold reached under heavy burst."
+                "detail": "Buffer threshold reached."
             }
         )
 
@@ -170,12 +487,39 @@ async def ingest_batch_stream(batch: TelemetryBatch):
     }
 
 @app.get("/api/v1/telemetry/health")
-async def telemetry_buffer_health():
+async def telemetry_health():
+    metrics = await db_store.get_metrics()
     return {
         "status": "healthy",
         "buffer_depth": buffer_engine.queue.qsize(),
         "dlq_depth": buffer_engine.dlq.qsize(),
-        "max_capacity": buffer_engine.queue.maxsize
+        "max_capacity": buffer_engine.queue.maxsize,
+        "persisted_events": metrics["total_events"],
+        "security_alerts_count": metrics["total_alerts"]
+    }
+
+@app.get("/api/v1/telemetry/alerts")
+async def get_security_alerts(limit: int = Query(25, ge=1, le=500)):
+    alerts = await db_store.get_recent_alerts(limit=limit)
+    return {
+        "count": len(alerts),
+        "alerts": alerts
+    }
+
+@app.get("/api/v1/telemetry/rules")
+async def get_active_rules():
+    return {
+        "total_rules": len(sigma_engine.rules),
+        "rules": [
+            {
+                "rule_id": r.rule_id,
+                "title": r.title,
+                "severity": r.severity,
+                "mitre_tag": r.mitre_tag,
+                "event_type": r.event_type
+            }
+            for r in sigma_engine.rules
+        ]
     }
 
 if __name__ == "__main__":
