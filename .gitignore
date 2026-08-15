@@ -52,3 +52,19 @@ Thumbs.db
 # Environment files
 .env
 *.env
+
+# Local artifacts, databases & runtime logs
+data/
+logs/
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# Outbound queues & prospecting artifacts
+leads.csv
+outreach_queue.txt
+*.bak
+
+# Compiled local binaries
+main
