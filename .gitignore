@@ -1,13 +1,54 @@
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-quarantine/
-test_monitored/
-test_quarantine/
-*.log
-*.pid
-*.pem
+
+=======
+>>>>>>> 103143a (Include missing files and finalize structure before sync)
+api/venv/
+app/core/core/
+audits/
+*.cert
+config.env
+*.crt
+data/
+# Databases & Caches
+*.db
+.docker/
+# Docker Local State
+.DS_Store
+*.env
+.env
+.env*
+# Environment & Credentials
+# Environment variables & secrets
+<<<<<<< HEAD
+# Ignore environment variables and secrets
+# Ignore local audit data
+# Ignore logs
+# Ignore OS junk
+# Ignore Python bytecode and cache
 *.key
-keys/
-*.tar.gz
+# Keys & Certificates
+*.log
+*.pem
+prioritized_threats.txt
+*.pub
+*.pyc
+__pycache__/
+.pytest_cache/
+quarantine/
+*.quarantined
+# Quarantined test artifacts
+# Quarantine test artifacts
+secrets/
+# Security & Secrets
+semgrep_findings.json
+# Temporary Audit Outputs
+Thumbs.db
+.vercel
+.wrangler/
+
+# Environment files
+.env
+*.env
+
+# Environment files
+.env
+*.env

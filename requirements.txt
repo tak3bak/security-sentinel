@@ -1,5 +1,10 @@
-fastapi==0.110.0
-uvicorn==0.28.0
-stripe>=8.11.0
-resend==0.6.0
-pydantic==2.6.4
+fastapi==0.141.1
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.4
+sqlalchemy[asyncio]>=2.0.36
+asyncpg>=0.30.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+sse-starlette>=2.2.1
+resend==2.35.0
+greenlet
