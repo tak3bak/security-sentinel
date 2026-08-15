@@ -1,5 +1,6 @@
 import os
 import re
+import glob
 import time
 import json
 import asyncio
@@ -9,6 +10,14 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, status, Query
 from fastapi.responses import JSONResponse
+
+# Optional PyYAML support with JSON fallback
+try:
+    import yaml
+    YAML_AVAILABLE = True
+except ImportError:
+    yaml = None
+    YAML_AVAILABLE = False
 
 # =========================================================
 # Logging Configuration
@@ -37,7 +46,7 @@ class TelemetryBatch(BaseModel):
     events: List[SecurityEvent]
 
 # =========================================================
-# Sigma Threat Detection Engine
+# Dynamic Sigma Threat Detection Engine
 # =========================================================
 class SigmaRule:
     def __init__(
@@ -48,7 +57,8 @@ class SigmaRule:
         mitre_tag: str,
         event_type: str,
         field_matches: Optional[Dict[str, List[str]]] = None,
-        regex_matches: Optional[Dict[str, str]] = None
+        regex_matches: Optional[Dict[str, str]] = None,
+        source_file: str = "builtin"
     ):
         self.rule_id = rule_id
         self.title = title
@@ -57,6 +67,7 @@ class SigmaRule:
         self.event_type = event_type
         self.field_matches = field_matches or {}
         self.regex_matches = {k: re.compile(v, re.IGNORECASE) for k, v in (regex_matches or {}).items()}
+        self.source_file = source_file
 
     def evaluate(self, event: Dict[str, Any]) -> bool:
         if self.event_type != "*" and event.get("event_type") != self.event_type:
@@ -64,13 +75,13 @@ class SigmaRule:
 
         payload = event.get("payload", {})
         
-        # 1. Evaluate substring field matches
+        # 1. Substring keyword evaluation
         for field, keywords in self.field_matches.items():
             field_val = str(payload.get(field, "")).lower()
             if not any(kw.lower() in field_val for kw in keywords):
                 return False
 
-        # 2. Evaluate regular expressions
+        # 2. Regular expression evaluation
         for field, regex in self.regex_matches.items():
             field_val = str(payload.get(field, ""))
             if not regex.search(field_val):
@@ -79,13 +90,18 @@ class SigmaRule:
         return True
 
 
-class SigmaEngine:
-    def __init__(self):
+class DynamicSigmaEngine:
+    def __init__(self, rules_dir: str = "rules"):
+        self.rules_dir = rules_dir
         self.rules: List[SigmaRule] = []
-        self._load_default_rules()
+        self.reload_rules()
 
-    def _load_default_rules(self):
-        self.rules = [
+    def reload_rules(self) -> int:
+        """Loads default built-in rules and all external YAML/JSON rules from rules/ directory."""
+        new_rules: List[SigmaRule] = []
+        
+        # 1. Built-in Core Rule Fallbacks
+        new_rules.extend([
             SigmaRule(
                 rule_id="SIGMA-001",
                 title="Credential Dumping via Memory Extraction (Mimikatz/LSA)",
@@ -94,7 +110,8 @@ class SigmaEngine:
                 event_type="sysmon_process_create",
                 field_matches={
                     "command_line": ["sekurlsa::logonpasswords", "privilege::debug", "token::elevate", "lsadump::sam"]
-                }
+                },
+                source_file="builtin"
             ),
             SigmaRule(
                 rule_id="SIGMA-002",
@@ -107,43 +124,74 @@ class SigmaEngine:
                 },
                 regex_matches={
                     "command_line": r"(-enc|-encodedcommand|-nop|-noprofile|-w\s+hidden|-exec\s+bypass)"
-                }
+                },
+                source_file="builtin"
             ),
             SigmaRule(
                 rule_id="SIGMA-003",
-                title="Shadow Copy Deletion / Ransomware Inhibit System Recovery",
-                severity="CRITICAL",
-                mitre_tag="T1490",
-                event_type="sysmon_process_create",
-                field_matches={
-                    "command_line": ["delete shadows", "resize shadowstorage", "bcdedit /set {default} bootstatuspolicy"]
-                }
-            ),
-            SigmaRule(
-                rule_id="SIGMA-004",
-                title="Suspicious Living-off-the-Land Ingress Tool (Certutil/Bitsadmin)",
-                severity="HIGH",
-                mitre_tag="T1105",
-                event_type="sysmon_process_create",
-                field_matches={
-                    "process": ["certutil.exe", "bitsadmin.exe"]
-                },
-                regex_matches={
-                    "command_line": r"(-urlcache|-split|/transfer)"
-                }
-            ),
-            SigmaRule(
-                rule_id="SIGMA-005",
                 title="Suspicious C2 Domain Telemetry Lookup",
                 severity="HIGH",
                 mitre_tag="T1071.004",
                 event_type="dns_query",
                 regex_matches={
                     "query_domain": r"(c2\.|payload\.|exfil\.|temp-tunnel\.|ngrok\.io|webhook\.site)"
-                }
+                },
+                source_file="builtin"
             )
-        ]
-        logger.info(f"[✓] Sigma Detection Engine loaded {len(self.rules)} high-fidelity rules.")
+        ])
+
+        # 2. Dynamically Load YAML and JSON rules from rules/ directory
+        if os.path.exists(self.rules_dir):
+            file_patterns = [
+                os.path.join(self.rules_dir, "**/*.yml"),
+                os.path.join(self.rules_dir, "**/*.yaml"),
+                os.path.join(self.rules_dir, "**/*.json")
+            ]
+            found_files = []
+            for pattern in file_patterns:
+                found_files.extend(glob.glob(pattern, recursive=True))
+
+            for file_path in found_files:
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        if file_path.endswith((".yml", ".yaml")):
+                            if not YAML_AVAILABLE:
+                                logger.warning(f"[!] PyYAML not installed. Skipping YAML rule: {file_path}")
+                                continue
+                            data = yaml.safe_load(f)
+                        else:
+                            data = json.load(f)
+
+                    if not isinstance(data, dict):
+                        continue
+
+                    # Handle list of rules or single rule structure
+                    rule_items = data.get("rules", [data]) if "rules" in data else [data]
+                    for item in rule_items:
+                        if "rule_id" in item and "title" in item and "event_type" in item:
+                            new_rules.append(
+                                SigmaRule(
+                                    rule_id=str(item["rule_id"]),
+                                    title=str(item["title"]),
+                                    severity=str(item.get("severity", "MEDIUM")),
+                                    mitre_tag=str(item.get("mitre_tag", "UNKNOWN")),
+                                    event_type=str(item["event_type"]),
+                                    field_matches=item.get("field_matches", {}),
+                                    regex_matches=item.get("regex_matches", {}),
+                                    source_file=os.path.basename(file_path)
+                                )
+                            )
+                except Exception as e:
+                    logger.error(f"[!] Failed to parse rule definition in {file_path}: {e}")
+
+        # Deduplicate rules by rule_id (file rules override builtins)
+        dedup_rules: Dict[str, SigmaRule] = {}
+        for r in new_rules:
+            dedup_rules[r.rule_id] = r
+
+        self.rules = list(dedup_rules.values())
+        logger.info(f"[✓] Dynamic Sigma Engine initialized: {len(self.rules)} active rules loaded.")
+        return len(self.rules)
 
     def evaluate_event(self, event: Dict[str, Any]) -> List[Dict[str, Any]]:
         matches = []
@@ -153,7 +201,8 @@ class SigmaEngine:
                     "rule_id": rule.rule_id,
                     "title": rule.title,
                     "severity": rule.severity,
-                    "mitre_tag": rule.mitre_tag
+                    "mitre_tag": rule.mitre_tag,
+                    "source_file": rule.source_file
                 })
         return matches
 
@@ -175,7 +224,6 @@ class AsyncTelemetryStore:
     def _init_db(self):
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            # Telemetry events table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS telemetry_events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -193,7 +241,6 @@ class AsyncTelemetryStore:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            # Security alerts table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS security_alerts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -216,7 +263,6 @@ class AsyncTelemetryStore:
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_alerts_rule ON security_alerts(rule_id);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_alerts_severity ON security_alerts(severity);")
             conn.commit()
-            logger.info(f"[✓] SQLite schema verified with alerts index at {self.db_path}")
 
     def _sync_insert_batch_and_alerts(self, batch: List[Dict[str, Any]], alerts: List[Dict[str, Any]]) -> int:
         records = [
@@ -321,7 +367,7 @@ class AsyncTelemetryStore:
 # High-Throughput Buffer Queue & Consumer
 # =========================================================
 class TelemetryStreamBuffer:
-    def __init__(self, db_store: AsyncTelemetryStore, sigma_engine: SigmaEngine, max_buffer_size: int = 50000, batch_window_ms: int = 100, batch_size: int = 500):
+    def __init__(self, db_store: AsyncTelemetryStore, sigma_engine: DynamicSigmaEngine, max_buffer_size: int = 50000, batch_window_ms: int = 100, batch_size: int = 500):
         self.db_store = db_store
         self.sigma_engine = sigma_engine
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=max_buffer_size)
@@ -336,7 +382,7 @@ class TelemetryStreamBuffer:
             self.queue.put_nowait(event)
             return True
         except asyncio.QueueFull:
-            logger.warning("[!] Telemetry buffer queue full. Applying backpressure.")
+            logger.warning("[!] Ingestion buffer queue full. Applying backpressure.")
             return False
 
     async def push_batch(self, events: List[Dict[str, Any]]) -> int:
@@ -351,7 +397,7 @@ class TelemetryStreamBuffer:
     async def start_worker(self):
         self._running = True
         self._worker_task = asyncio.create_task(self._consumer_loop())
-        logger.info(f"[✓] Micro-batch consumer initialized (Window: {self.batch_window_sec*1000}ms, Max Batch: {self.batch_size})")
+        logger.info(f"[✓] Micro-batch consumer loop started (Window: {self.batch_window_sec*1000}ms, Max Batch: {self.batch_size})")
 
     async def stop_worker(self):
         self._running = False
@@ -384,18 +430,16 @@ class TelemetryStreamBuffer:
         t0 = time.perf_counter()
         generated_alerts: List[Dict[str, Any]] = []
 
-        # 1. Run Continuous Sigma Rule Evaluation
+        # 1. Run Dynamic Sigma Rule Matching
         for event in batch:
             matches = self.sigma_engine.evaluate_event(event)
             if matches:
                 event["matched_rules"] = matches
-                # Elevate event severity to highest matched rule
                 severities = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
                 highest_sev = max(matches, key=lambda m: severities.index(m["severity"]) if m["severity"] in severities else 0)["severity"]
                 if severities.index(highest_sev) > severities.index(event.get("severity", "INFO")):
                     event["severity"] = highest_sev
 
-                # Create structured alerts
                 for match in matches:
                     alert_id = f"ALT-{event['event_id'][:8]}-{match['rule_id']}"
                     alert = {
@@ -410,15 +454,15 @@ class TelemetryStreamBuffer:
                         "details": event.get("payload", {})
                     }
                     generated_alerts.append(alert)
-                    logger.warning(f"🚨 [DETECTION TRIGGERED] {match['rule_id']} ({match['severity']}) - {match['title']} on {event['host_identifier']}")
+                    logger.warning(f"🚨 [DETECTION TRIGGERED] {match['rule_id']} ({match['severity']}) - {match['title']} on {event['host_identifier']} [source: {match['source_file']}]")
 
         # 2. Persist Telemetry Batch & Alerts to DB
         try:
             inserted_count = await self.db_store.insert_batch_and_alerts(batch, generated_alerts)
             latency_ms = (time.perf_counter() - t0) * 1000
-            logger.info(f"Processed batch of {inserted_count} events ({len(generated_alerts)} alerts) in {latency_ms:.2f}ms | Buffer depth: {self.queue.qsize()}")
+            logger.info(f"Persisted {inserted_count} events ({len(generated_alerts)} alerts) in {latency_ms:.2f}ms | Buffer depth: {self.queue.qsize()}")
         except Exception as e:
-            logger.error(f"[!] Batch persistence error: {e}. Moving events to DLQ.")
+            logger.error(f"[!] Batch persistence failure: {e}. Diverting events to DLQ.")
             for failed_ev in batch:
                 try:
                     self.dlq.put_nowait(failed_ev)
@@ -429,12 +473,12 @@ class TelemetryStreamBuffer:
 # FastAPI Application & Endpoints
 # =========================================================
 db_store = AsyncTelemetryStore()
-sigma_engine = SigmaEngine()
+sigma_engine = DynamicSigmaEngine(rules_dir="rules")
 buffer_engine = TelemetryStreamBuffer(db_store=db_store, sigma_engine=sigma_engine)
 
 app = FastAPI(
     title="Nomadik Security Sentinel - Telemetry Engine",
-    version="2.2.0"
+    version="2.3.0"
 )
 
 @app.on_event("startup")
@@ -510,16 +554,27 @@ async def get_security_alerts(limit: int = Query(25, ge=1, le=500)):
 async def get_active_rules():
     return {
         "total_rules": len(sigma_engine.rules),
+        "rules_directory": sigma_engine.rules_dir,
         "rules": [
             {
                 "rule_id": r.rule_id,
                 "title": r.title,
                 "severity": r.severity,
                 "mitre_tag": r.mitre_tag,
-                "event_type": r.event_type
+                "event_type": r.event_type,
+                "source_file": r.source_file
             }
             for r in sigma_engine.rules
         ]
+    }
+
+@app.post("/api/v1/telemetry/rules/reload")
+async def reload_sigma_rules():
+    count = sigma_engine.reload_rules()
+    return {
+        "status": "reloaded",
+        "total_rules_active": count,
+        "rules_directory": sigma_engine.rules_dir
     }
 
 if __name__ == "__main__":

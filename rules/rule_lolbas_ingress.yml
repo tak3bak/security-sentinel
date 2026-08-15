@@ -1,0 +1,11 @@
+rule_id: "SIGMA-005-EXT"
+title: "Living-off-the-Land Ingress Tool Download via Certutil/Bitsadmin"
+severity: "HIGH"
+mitre_tag: "T1105"
+event_type: "sysmon_process_create"
+field_matches:
+  process:
+    - "certutil.exe"
+    - "bitsadmin.exe"
+regex_matches:
+  command_line: "(-urlcache|-split|/transfer|/download)"

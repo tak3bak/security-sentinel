@@ -1,0 +1,17 @@
+{
+  "rule_id": "SIGMA-006-EXT",
+  "title": "Suspicious Scheduled Task / Cron Tampering",
+  "severity": "HIGH",
+  "mitre_tag": "T1053.003",
+  "event_type": "file_event",
+  "field_matches": {
+    "target_path": [
+      "/etc/cron.d/",
+      "/etc/crontab",
+      "/var/spool/cron/"
+    ]
+  },
+  "regex_matches": {
+    "process": "(bash|sh|python3|curl|wget)"
+  }
+}
