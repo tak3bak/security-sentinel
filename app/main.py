@@ -73,6 +73,7 @@ async def customer_portal(body: PortalIn, db: AsyncSession = Depends(get_session
         raise HTTPException(500, f"Portal creation failed: {str(e)}")
 
 @app.post("/api/v1/billing/stripe")
+@app.post("/api/v1/billing/webhook")
 async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_session)):
     payload = await request.body()
     signature = request.headers.get("stripe-signature")
