@@ -1,0 +1,2 @@
+# Cloudflare Pages Reverse Proxy to Render FastAPI API
+/api/*  https://nomadik-sentinel-api.onrender.com/api/:splat  200
