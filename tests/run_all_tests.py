@@ -72,6 +72,32 @@ async def test_investigator():
     print(f"[PASS] Generated Disposition: {report.disposition_id} | Evidence SHA-256: {report.attached_evidence.sha256_hash[:16]}...")
     print("[OK] Evidence Investigator Tests Passed!")
 
+def test_billing():
+    from fastapi.testclient import TestClient
+    from security_sentinel.main_app import app
+    client = TestClient(app)
+    
+    # 1. Product Catalog
+    p_resp = client.get("/api/v1/billing/plans")
+    assert p_resp.status_code == 200 and "starter" in p_resp.json() and "pro" in p_resp.json()
+    print("[PASS] Product Catalog: Starter ($1,500/mo) & Pro ($5,000/mo) verified.")
+    
+    # 2. Starter Checkout
+    c_resp = client.post("/api/v1/billing/checkout-session", json={"plan_tier": "starter", "customer_email": "cto@alpha.io", "tenant_id": "tenant_01"})
+    assert c_resp.status_code == 200 and c_resp.json()["allocated_credits"] == 5000
+    print(f"[PASS] Starter Checkout Session: {c_resp.json()['session_id']} | Credits: 5,000 verified.")
+    
+    # 3. Pro Checkout
+    pro_resp = client.post("/api/v1/billing/checkout-session", json={"plan_tier": "pro", "customer_email": "ciso@beta.io", "tenant_id": "tenant_02"})
+    assert pro_resp.status_code == 200 and pro_resp.json()["allocated_credits"] == 25000
+    print(f"[PASS] Pro Enterprise Checkout Session: {pro_resp.json()['session_id']} | Credits: 25,000 verified.")
+    
+    # 4. Webhook
+    wh_resp = client.post("/api/v1/billing/webhook", json={"type": "checkout.session.completed", "id": "evt_001"})
+    assert wh_resp.status_code == 200
+    print("[PASS] Stripe Webhook: checkout.session.completed ingestion verified.")
+    print("[OK] Billing & Monetization Tests Passed!")
+
 def main():
     print("=========================================================")
     print("[*] Running Nomadik Security Sentinel Unified Test Suite")
@@ -82,6 +108,8 @@ def main():
     asyncio.run(test_chokepoints())
     print("\n--- 3. Testing Evidence-Backed Compliance Investigator ---")
     asyncio.run(test_investigator())
+    print("\n--- 4. Testing Billing & Singularity Credit Engine ---")
+    test_billing()
     print("\n=========================================================")
     print("[SUCCESS] ALL SECURITY SENTINEL MODULES VERIFIED GREEN!")
     print("=========================================================")

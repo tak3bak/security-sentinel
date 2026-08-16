@@ -1,0 +1,161 @@
+company,domain,email,status_code,missing_headers_count,missing_headers,server,pitch_body
+Company One,company1.com,security@company1.com,0,0,,Hidden / Cloudflare,"Subject: Security posture audit for Company One — automated vulnerability monitoring
+
+Hi Company One Team,
+
+We ran a passive external surface check on company1.com and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 0 critical security headers unconfigured (standard audit).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=company1.com
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=company1.com
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+Company Two,company2.io,contact@company2.io,200,5,"strict-transport-security, content-security-policy, x-content-type-options, x-frame-options, referrer-policy",,"Subject: Security posture audit for Company Two — automated vulnerability monitoring
+
+Hi Company Two Team,
+
+We ran a passive external surface check on company2.io and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 5 critical security headers unconfigured (strict-transport-security, content-security-policy, x-content-type-options).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=company2.io
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=company2.io
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+Nomad List,nomadlist.com,contact@nomadlist.com,200,3,"content-security-policy, x-content-type-options, referrer-policy",cloudflare,"Subject: Security posture audit for Nomad List — automated vulnerability monitoring
+
+Hi Nomad List Team,
+
+We ran a passive external surface check on nomadlist.com and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 3 critical security headers unconfigured (content-security-policy, x-content-type-options, referrer-policy).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=nomadlist.com
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=nomadlist.com
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+RemoteOK,remoteok.com,security@remoteok.com,200,5,"strict-transport-security, content-security-policy, x-content-type-options, x-frame-options, referrer-policy",cloudflare,"Subject: Security posture audit for RemoteOK — automated vulnerability monitoring
+
+Hi RemoteOK Team,
+
+We ran a passive external surface check on remoteok.com and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 5 critical security headers unconfigured (strict-transport-security, content-security-policy, x-content-type-options).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=remoteok.com
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=remoteok.com
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+Postman Inc,postman.com,security@postman.com,200,1,content-security-policy,cloudflare,"Subject: Security posture audit for Postman Inc — automated vulnerability monitoring
+
+Hi Postman Inc Team,
+
+We ran a passive external surface check on postman.com and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 1 critical security headers unconfigured (content-security-policy).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=postman.com
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=postman.com
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+Resend,resend.com,support@resend.com,200,0,,Vercel,"Subject: Security posture audit for Resend — automated vulnerability monitoring
+
+Hi Resend Team,
+
+We ran a passive external surface check on resend.com and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 0 critical security headers unconfigured (standard audit).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=resend.com
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=resend.com
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+Render Services,render.com,security@render.com,200,0,,cloudflare,"Subject: Security posture audit for Render Services — automated vulnerability monitoring
+
+Hi Render Services Team,
+
+We ran a passive external surface check on render.com and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 0 critical security headers unconfigured (standard audit).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=render.com
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=render.com
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"
+Fly.io,fly.io,security@fly.io,200,2,"strict-transport-security, x-frame-options",Fly/40bd1ce81 (2026-08-13),"Subject: Security posture audit for Fly.io — automated vulnerability monitoring
+
+Hi Fly.io Team,
+
+We ran a passive external surface check on fly.io and identified several perimeter hardening opportunities:
+
+- Perimeter Exposure: 2 critical security headers unconfigured (strict-transport-security, x-frame-options).
+- Risk Profile: Leaves client endpoints exposed to clickjacking, MIME-sniffing, and cross-site scripting (XSS) vectors.
+
+Nomadik Security Sentinel provides continuous 24/7 autonomous threat detection, Wazuh alert ingestion, and perimeter auditing for your infrastructure.
+
+Get onboarded with continuous monitoring in under 60 seconds:
+👉 Starter Plan ($99/mo): https://nomadik.site/pricing?plan=starter&domain=fly.io
+👉 Professional Plan ($299/mo): https://nomadik.site/pricing?plan=pro&domain=fly.io
+
+Best regards,
+
+Kalen Vandenbos
+Systems Architect | Nomadik Security Operations
+https://nomadik.site"

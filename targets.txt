@@ -1,0 +1,9 @@
+# domain, email, company_name
+company1.com, security@company1.com, Company One
+company2.io, contact@company2.io, Company Two
+nomadlist.com, contact@nomadlist.com, Nomad List
+remoteok.com, security@remoteok.com, RemoteOK
+postman.com, security@postman.com, Postman Inc
+resend.com, support@resend.com, Resend
+render.com, security@render.com, Render Services
+fly.io, security@fly.io, Fly.io

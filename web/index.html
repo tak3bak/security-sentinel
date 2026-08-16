@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nomadik Security Sentinel — Control Plane</title>
+<style>
+:root{--bg:#0b0d10;--surface:#12161b;--border:#2a2f36;--text:#e8eaed;--muted:#9aa4af;--accent:#3b82f6;--green:#10b981}
+body{font-family:system-ui,-apple-system,sans-serif;max-width:1100px;margin:30px auto;padding:0 20px;background:var(--bg);color:var(--text);line-height:1.5}
+.card{border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0;background:var(--surface)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.tier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:12px}
+.tier-card{border:1px solid var(--border);border-radius:10px;padding:18px;background:#181d24;display:flex;flex-direction:column;justify-content:space-between}
+.tier-card.featured{border-color:var(--accent);box-shadow:0 0 15px rgba(59,130,246,0.2)}
+.value{font-size:28px;font-weight:700}
+.price{font-size:32px;font-weight:800;color:#fff;margin:8px 0}
+small{color:var(--muted)}
+code{background:#20252b;padding:2px 6px;border-radius:4px;font-size:13px}
+button{width:100%;padding:10px 12px;margin:6px 0;background:var(--accent);border:none;border-radius:6px;color:#fff;font-weight:600;cursor:pointer;transition:background 0.2s}
+button:hover{background:#2563eb}
+.btn-green{background:var(--green)}
+.btn-green:hover{background:#059669}
+ul{padding-left:20px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<h1>Nomadik Security Sentinel</h1>
+<p><small>Autonomous Threat Detection, Vulnerability Auditing & SecOps Control Plane</small></p>
+
+<div class="grid">
+<div class="card"><small>API Status</small><div id="api" class="value">checking</div></div>
+<div class="card"><small>Total Events</small><div id="events" class="value">—</div></div>
+<div class="card"><small>Completed Scans</small><div id="scans" class="value">—</div></div>
+<div class="card"><small>Active Tenants</small><div id="tenants" class="value">—</div></div>
+</div>
+
+<div class="card">
+<h2>Commercial Subscription Plans</h2>
+<p><small>Instant automated provisioning with API key dispatch upon checkout completion.</small></p>
+<div class="tier-grid">
+  <div class="tier-card">
+    <div>
+      <h3>Starter</h3>
+      <div class="price">$99<small>/mo</small></div>
+      <ul>
+        <li>100 Surface Scans / month</li>
+        <li>10,000 Ingested Events</li>
+        <li>Automated Wazuh Alert Hook</li>
+        <li>Standard OSINT Headers</li>
+      </ul>
+    </div>
+    <button onclick="startCheckout('starter')">Subscribe Starter</button>
+  </div>
+
+  <div class="tier-card featured">
+    <div>
+      <span style="color:var(--accent);font-size:12px;font-weight:700">MOST POPULAR</span>
+      <h3>Professional</h3>
+      <div class="price">$299<small>/mo</small></div>
+      <ul>
+        <li>1,000 Surface Scans / month</li>
+        <li>100,000 Ingested Events</li>
+        <li>Local Ollama AI Triage</li>
+        <li>Full DNS/TLS Auditing</li>
+        <li>Email Threshold Alerts</li>
+      </ul>
+    </div>
+    <button class="btn-green" onclick="startCheckout('pro')">Subscribe Pro</button>
+  </div>
+
+  <div class="tier-card">
+    <div>
+      <h3>Enterprise</h3>
+      <div class="price">$799<small>/mo</small></div>
+      <ul>
+        <li>10,000 Surface Scans / month</li>
+        <li>1,000,000 Ingested Events</li>
+        <li>Dedicated Ollama Model Triage</li>
+        <li>Self-Service Billing Portal</li>
+        <li>Custom SLA & Support</li>
+      </ul>
+    </div>
+    <button onclick="startCheckout('premium')">Subscribe Enterprise</button>
+  </div>
+</div>
+</div>
+
+<div class="card">
+<h2>API Ingress & Documentation</h2>
+<p>OpenAPI / Swagger: <a href="/docs" style="color:var(--accent)">/docs</a></p>
+<p>Authentication: Pass <code>X-API-Key</code> on all protected endpoints.</p>
+</div>
+
+<script>
+fetch('/health').then(r=>r.json()).then(()=>{document.getElementById('api').textContent='online'}).catch(()=>{document.getElementById('api').textContent='offline'});
+fetch('/api/v1/status').then(r=>r.json()).then(d=>{
+  document.getElementById('events').textContent=d.events??0;
+  document.getElementById('scans').textContent=d.scans??0;
+  document.getElementById('tenants').textContent=d.tenants??0;
+}).catch(()=>{});
+
+async function startCheckout(plan) {
+  const email = prompt("Enter your corporate email for tenant provisioning:");
+  if (!email) return;
+  const company = prompt("Enter your company / organization name:") || email;
+
+  try {
+    const res = await fetch('/api/v1/billing/checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        plan: plan,
+        customer_email: email,
+        company_name: company,
+        success_url: window.location.origin + '/dashboard/?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: window.location.href
+      })
+    });
+    const data = await res.json();
+    if (data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      alert("Checkout error: " + JSON.stringify(data));
+    }
+  } catch (err) {
+    alert("Network error creating checkout session: " + err);
+  }
+}
+</script>
+</body>
+</html>
