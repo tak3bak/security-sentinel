@@ -1,0 +1,13 @@
+rule_id: "SIGMA-011-EXT"
+title: "Docker Socket Mount or Volume Exposure for Container Escape"
+severity: "CRITICAL"
+mitre_tag: "T1611"
+event_type: "sysmon_process_create"
+field_matches:
+  process:
+    - "docker"
+    - "podman"
+    - "nerdctl"
+    - "crictl"
+regex_matches:
+  command_line: "(-v\\s+.*docker\\.sock|--volume\\s+.*docker\\.sock|--mount\\s+.*docker\\.sock|docker\\.sock:)"

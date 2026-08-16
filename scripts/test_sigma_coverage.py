@@ -10,6 +10,7 @@ RULES_ENDPOINT = f"{BASE_URL}/api/v1/telemetry/rules"
 BATCH_ENDPOINT = f"{BASE_URL}/api/v1/telemetry/batch"
 ALERTS_ENDPOINT = f"{BASE_URL}/api/v1/telemetry/alerts?limit=100"
 
+# Synthetic attack payloads mapped to all 13 active Sigma rules
 SYNTHETIC_PAYLOADS = {
     "SIGMA-001": {
         "event_type": "sysmon_process_create",
@@ -93,6 +94,30 @@ SYNTHETIC_PAYLOADS = {
             "process": "bash",
             "target_path": "/root/.ssh/authorized_keys",
             "action": "append"
+        }
+    },
+    "SIGMA-011-EXT": {
+        "event_type": "sysmon_process_create",
+        "severity": "INFO",
+        "payload": {
+            "process": "docker",
+            "command_line": "docker run -it -v /var/run/docker.sock:/var/run/docker.sock alpine sh"
+        }
+    },
+    "SIGMA-012-EXT": {
+        "event_type": "sysmon_process_create",
+        "severity": "INFO",
+        "payload": {
+            "process": "docker",
+            "command_line": "docker run --rm --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu:latest"
+        }
+    },
+    "SIGMA-013-EXT": {
+        "event_type": "sysmon_process_create",
+        "severity": "INFO",
+        "payload": {
+            "process": "nsenter",
+            "command_line": "nsenter -t 1 -m -u -i -n -p /bin/bash"
         }
     }
 }

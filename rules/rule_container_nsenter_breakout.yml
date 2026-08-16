@@ -1,0 +1,10 @@
+rule_id: "SIGMA-013-EXT"
+title: "Host Namespace Breakout via Nsenter Execution"
+severity: "CRITICAL"
+mitre_tag: "T1611"
+event_type: "sysmon_process_create"
+field_matches:
+  process:
+    - "nsenter"
+regex_matches:
+  command_line: "(-t\\s+1|-t1|--target(\\s+|=)1|--mount=/proc/1/ns/mnt|--net=/proc/1/ns/net|--pid=/proc/1/ns/pid)"

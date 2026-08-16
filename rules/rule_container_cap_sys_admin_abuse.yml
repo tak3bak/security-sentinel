@@ -1,0 +1,13 @@
+rule_id: "SIGMA-012-EXT"
+title: "Privileged Container Spawn or CAP_SYS_ADMIN Capability Abuse"
+severity: "CRITICAL"
+mitre_tag: "T1611"
+event_type: "sysmon_process_create"
+field_matches:
+  process:
+    - "docker"
+    - "podman"
+    - "nerdctl"
+    - "crictl"
+regex_matches:
+  command_line: "(--privileged|--cap-add(=|\\s+)(SYS_ADMIN|ALL)|--security-opt\\s+apparmor=unconfined|--security-opt\\s+seccomp=unconfined)"
