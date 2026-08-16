@@ -68,3 +68,4 @@ outreach_queue.txt
 
 # Compiled local binaries
 main
+nginx/certs/*.key
