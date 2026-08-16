@@ -1,3 +1,6 @@
+from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 import uuid
 import secrets
 import hashlib
@@ -23,6 +26,38 @@ from .billing import (
 )
 
 app = FastAPI(title="Nomadik Security Sentinel", version="1.2.0")
+
+# 1. CORS Configuration
+origins = [
+    "https://nomadik.site",
+    "https://www.nomadik.site",
+    "http://localhost:10000",
+    "http://127.0.0.1:10000",
+    "http://0.0.0.0:10000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "stripe-signature"],
+)
+
+# 2. Security Headers Middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[x.strip() for x in settings().cors_origins.split(",") if x.strip()],
