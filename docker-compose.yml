@@ -8,7 +8,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot:ro
       - ./logs/nginx:/var/log/nginx
     depends_on:
       telemetry-engine:
@@ -29,13 +30,23 @@ services:
     networks:
       - sentinel-net
 
+  certbot:
+    image: certbot/certbot:latest
+    container_name: nomadik-sentinel-certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    networks:
+      - sentinel-net
+
   telemetry-engine:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: nomadik-security-sentinel
     restart: unless-stopped
-    # Expose internally to docker network only; proxy terminates public ingress
     expose:
       - "10000"
     environment:

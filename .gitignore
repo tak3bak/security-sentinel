@@ -69,3 +69,7 @@ outreach_queue.txt
 # Compiled local binaries
 main
 nginx/certs/*.key
+
+# Let's Encrypt credentials and keys
+certbot/conf/
+certbot/www/
