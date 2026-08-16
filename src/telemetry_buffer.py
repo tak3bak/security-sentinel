@@ -20,13 +20,28 @@ except ImportError:
     YAML_AVAILABLE = False
 
 # =========================================================
+# Environment Variable Configuration
+# =========================================================
+DB_PATH = os.getenv("SENTINEL_DB_PATH", os.getenv("DB_PATH", "data/telemetry_events.db"))
+RULES_DIR = os.getenv("SENTINEL_RULES_DIR", os.getenv("RULES_DIR", "rules"))
+BATCH_SIZE = int(os.getenv("SENTINEL_BATCH_SIZE", os.getenv("BATCH_SIZE", "500")))
+BATCH_WINDOW_MS = int(os.getenv("SENTINEL_BATCH_WINDOW_MS", os.getenv("BATCH_WINDOW_MS", "100")))
+MAX_BUFFER_SIZE = int(os.getenv("SENTINEL_MAX_BUFFER_SIZE", os.getenv("MAX_BUFFER_SIZE", "50000")))
+WATCHER_INTERVAL_SEC = float(os.getenv("SENTINEL_WATCHER_INTERVAL", os.getenv("WATCHER_INTERVAL", "2.0")))
+
+# =========================================================
 # Logging Configuration
 # =========================================================
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] [SentinelDetection] %(message)s"
+    format="%(asctime)s [%(levelname)s] [SentinelEngine] %(message)s"
 )
 logger = logging.getLogger("NomadikTelemetry")
+
+logger.info(
+    f"[INIT] Config: DB='{DB_PATH}' | BatchSize={BATCH_SIZE} | "
+    f"Window={BATCH_WINDOW_MS}ms | BufferMax={MAX_BUFFER_SIZE} | RulesDir='{RULES_DIR}/'"
+)
 
 # =========================================================
 # Data Models
@@ -75,7 +90,7 @@ class SigmaRule:
 
         payload = event.get("payload", {})
         
-        # 1. Substring keyword evaluation
+        # 1. Field keyword matching
         for field, keywords in self.field_matches.items():
             field_val = str(payload.get(field, "")).lower()
             if not any(kw.lower() in field_val for kw in keywords):
@@ -91,18 +106,14 @@ class SigmaRule:
 
 
 class DynamicSigmaEngine:
-    def __init__(self, rules_dir: str = "rules"):
+    def __init__(self, rules_dir: str = RULES_DIR):
         self.rules_dir = rules_dir
         self.rules: List[SigmaRule] = []
         self.last_reloaded_at: float = time.time()
         self.reload_rules()
 
     def reload_rules(self) -> int:
-        """Loads default built-in rules and all external YAML/JSON rules from rules/ directory."""
-        new_rules: List[SigmaRule] = []
-        
-        # 1. Built-in Core Fallbacks
-        new_rules.extend([
+        new_rules: List[SigmaRule] = [
             SigmaRule(
                 rule_id="SIGMA-001",
                 title="Credential Dumping via Memory Extraction (Mimikatz/LSA)",
@@ -139,9 +150,8 @@ class DynamicSigmaEngine:
                 },
                 source_file="builtin"
             )
-        ])
+        ]
 
-        # 2. Dynamically Load YAML and JSON rules from disk
         if os.path.exists(self.rules_dir):
             file_patterns = [
                 os.path.join(self.rules_dir, "**/*.yml"),
@@ -157,7 +167,7 @@ class DynamicSigmaEngine:
                     with open(file_path, "r", encoding="utf-8") as f:
                         if file_path.endswith((".yml", ".yaml")):
                             if not YAML_AVAILABLE:
-                                logger.warning(f"[!] PyYAML not installed. Skipping YAML rule: {file_path}")
+                                logger.warning(f"[!] PyYAML missing. Skipping: {file_path}")
                                 continue
                             data = yaml.safe_load(f)
                         else:
@@ -182,16 +192,15 @@ class DynamicSigmaEngine:
                                 )
                             )
                 except Exception as e:
-                    logger.error(f"[!] Failed to parse rule definition in {file_path}: {e}")
+                    logger.error(f"[!] Failed to parse rule in {file_path}: {e}")
 
-        # Deduplicate rules by rule_id (file definitions take precedence)
         dedup_rules: Dict[str, SigmaRule] = {}
         for r in new_rules:
             dedup_rules[r.rule_id] = r
 
         self.rules = list(dedup_rules.values())
         self.last_reloaded_at = time.time()
-        logger.info(f"[✓] Dynamic Sigma Engine synced: {len(self.rules)} active rules loaded.")
+        logger.info(f"[✓] Dynamic Sigma Engine synced: {len(self.rules)} active rules online.")
         return len(self.rules)
 
     def evaluate_event(self, event: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -208,11 +217,10 @@ class DynamicSigmaEngine:
         return matches
 
 # =========================================================
-# Async Filesystem Directory Watcher (Zero External Deps)
+# Async Filesystem Directory Watcher
 # =========================================================
 class AsyncRuleDirectoryWatcher:
-    """Non-blocking async filesystem poller monitoring modification timestamps (mtime)."""
-    def __init__(self, engine: DynamicSigmaEngine, poll_interval_sec: float = 2.0):
+    def __init__(self, engine: DynamicSigmaEngine, poll_interval_sec: float = WATCHER_INTERVAL_SEC):
         self.engine = engine
         self.poll_interval = poll_interval_sec
         self._running = False
@@ -254,10 +262,8 @@ class AsyncRuleDirectoryWatcher:
         while self._running:
             await asyncio.sleep(self.poll_interval)
             current_snapshots = await asyncio.to_thread(self._scan_directory_mtimes)
-            
-            # Check for added, removed, or modified rule files
             if current_snapshots != self._file_snapshots:
-                logger.info("[!] Filesystem event detected in rules directory. Hot-reloading Sigma rules...")
+                logger.info("[!] Rule file changes detected. Hot-reloading Sigma engine...")
                 self._file_snapshots = current_snapshots
                 count = self.engine.reload_rules()
                 logger.info(f"[✓] Hot-reload complete: {count} active rules online.")
@@ -266,8 +272,11 @@ class AsyncRuleDirectoryWatcher:
 # Async Database Persistence Layer
 # =========================================================
 class AsyncTelemetryStore:
-    def __init__(self, db_path: str = "data/telemetry_events.db"):
+    def __init__(self, db_path: str = DB_PATH):
         self.db_path = db_path
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
@@ -319,6 +328,7 @@ class AsyncTelemetryStore:
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_alerts_rule ON security_alerts(rule_id);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_alerts_severity ON security_alerts(severity);")
             conn.commit()
+            logger.info(f"[✓] SQLite storage verified at '{self.db_path}'")
 
     def _sync_insert_batch_and_alerts(self, batch: List[Dict[str, Any]], alerts: List[Dict[str, Any]]) -> int:
         records = [
@@ -423,7 +433,14 @@ class AsyncTelemetryStore:
 # High-Throughput Buffer Queue & Consumer
 # =========================================================
 class TelemetryStreamBuffer:
-    def __init__(self, db_store: AsyncTelemetryStore, sigma_engine: DynamicSigmaEngine, max_buffer_size: int = 50000, batch_window_ms: int = 100, batch_size: int = 500):
+    def __init__(
+        self,
+        db_store: AsyncTelemetryStore,
+        sigma_engine: DynamicSigmaEngine,
+        max_buffer_size: int = MAX_BUFFER_SIZE,
+        batch_window_ms: int = BATCH_WINDOW_MS,
+        batch_size: int = BATCH_SIZE
+    ):
         self.db_store = db_store
         self.sigma_engine = sigma_engine
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=max_buffer_size)
@@ -453,7 +470,7 @@ class TelemetryStreamBuffer:
     async def start_worker(self):
         self._running = True
         self._worker_task = asyncio.create_task(self._consumer_loop())
-        logger.info(f"[✓] Micro-batch consumer loop started (Window: {self.batch_window_sec*1000}ms, Max Batch: {self.batch_size})")
+        logger.info(f"[✓] Micro-batch worker started (Window: {self.batch_window_sec*1000}ms, Max Batch: {self.batch_size})")
 
     async def stop_worker(self):
         self._running = False
@@ -463,7 +480,7 @@ class TelemetryStreamBuffer:
                 await self._worker_task
             except asyncio.CancelledError:
                 pass
-        logger.info("[✓] Micro-batch worker terminated cleanly.")
+        logger.info("[✓] Micro-batch worker stopped.")
 
     async def _consumer_loop(self):
         while self._running:
@@ -516,7 +533,7 @@ class TelemetryStreamBuffer:
             latency_ms = (time.perf_counter() - t0) * 1000
             logger.info(f"Persisted {inserted_count} events ({len(generated_alerts)} alerts) in {latency_ms:.2f}ms | Buffer depth: {self.queue.qsize()}")
         except Exception as e:
-            logger.error(f"[!] Batch persistence failure: {e}. Diverting events to DLQ.")
+            logger.error(f"[!] Batch persistence error: {e}. Moving events to DLQ.")
             for failed_ev in batch:
                 try:
                     self.dlq.put_nowait(failed_ev)
@@ -526,14 +543,20 @@ class TelemetryStreamBuffer:
 # =========================================================
 # FastAPI Application & Endpoints
 # =========================================================
-db_store = AsyncTelemetryStore()
-sigma_engine = DynamicSigmaEngine(rules_dir="rules")
-rule_watcher = AsyncRuleDirectoryWatcher(engine=sigma_engine, poll_interval_sec=2.0)
-buffer_engine = TelemetryStreamBuffer(db_store=db_store, sigma_engine=sigma_engine)
+db_store = AsyncTelemetryStore(db_path=DB_PATH)
+sigma_engine = DynamicSigmaEngine(rules_dir=RULES_DIR)
+rule_watcher = AsyncRuleDirectoryWatcher(engine=sigma_engine, poll_interval_sec=WATCHER_INTERVAL_SEC)
+buffer_engine = TelemetryStreamBuffer(
+    db_store=db_store,
+    sigma_engine=sigma_engine,
+    max_buffer_size=MAX_BUFFER_SIZE,
+    batch_window_ms=BATCH_WINDOW_MS,
+    batch_size=BATCH_SIZE
+)
 
 app = FastAPI(
     title="Nomadik Security Sentinel - Telemetry Engine",
-    version="2.4.0"
+    version="2.5.0"
 )
 
 @app.on_event("startup")
@@ -592,12 +615,18 @@ async def telemetry_health():
     metrics = await db_store.get_metrics()
     return {
         "status": "healthy",
+        "config": {
+            "batch_size": buffer_engine.batch_size,
+            "batch_window_ms": int(buffer_engine.batch_window_sec * 1000),
+            "max_buffer_capacity": buffer_engine.queue.maxsize,
+            "db_path": db_store.db_path,
+            "rules_directory": sigma_engine.rules_dir
+        },
         "buffer_depth": buffer_engine.queue.qsize(),
         "dlq_depth": buffer_engine.dlq.qsize(),
-        "max_capacity": buffer_engine.queue.maxsize,
         "persisted_events": metrics["total_events"],
         "security_alerts_count": metrics["total_alerts"],
-        "active_rules": len(sigma_engine.rules),
+        "active_rules_count": len(sigma_engine.rules),
         "last_rules_reload": sigma_engine.last_reloaded_at,
         "watcher_active": rule_watcher._running
     }
