@@ -1,35 +1,30 @@
-# Use a stable, official Linux Python base image to eliminate OS/environment mismatches
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-# Set working directory inside the container
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=10000
+
 WORKDIR /app
 
-# Install system dependencies required for native compilation and security packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libffi-dev \
-    libssl-dev \
-    git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip to prevent package resolution errors
-RUN pip install --no-cache-dir --upgrade pip
-
-# Copy dependency specifications first to optimize layer caching
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application source code into the container
-COPY . .
+RUN useradd -m -u 10001 sentinel && \
+    mkdir -p /app/data /app/logs /app/rules /app/src && \
+    chown -R sentinel:sentinel /app
 
-# Expose Render's default web service port
+COPY --chown=sentinel:sentinel src/ /app/src/
+COPY --chown=sentinel:sentinel rules/ /app/rules/
+
+USER sentinel
+
 EXPOSE 10000
 
-# Set environment variables for production execution
-ENV PORT=10000
-ENV PYTHONUNBUFFERED=1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://127.0.0.1:${PORT}/api/v1/telemetry/health || exit 1
 
-# Run the ASGI server (adjust 'main:app' to match your entrypoint package/module)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD ["sh", "-c", "uvicorn src.telemetry_buffer:app --host 0.0.0.0 --port ${PORT:-10000}"]

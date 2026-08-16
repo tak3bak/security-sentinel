@@ -1,18 +1,20 @@
 services:
   - type: web
-    name: nomadik-sentinel-api
-    env: docker
-    plan: standard
+    name: security-sentinel-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
     branch: main
-    dockerfile: Dockerfile
     autoDeploy: true
-    healthCheckPath: /health
+    healthCheckPath: /api/v1/telemetry/health
+    disk:
+      name: sentinel-storage
+      mountPath: /app/data
+      sizeGB: 1
     envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
       - key: PORT
         value: "10000"
-      - key: PYTHON_ENV
-        value: production
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: DATABASE_URL
-        sync: false
