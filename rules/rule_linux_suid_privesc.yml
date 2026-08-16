@@ -1,0 +1,11 @@
+rule_id: "SIGMA-009-EXT"
+title: "Suspicious SUID/SGID Bit Modification via Chmod"
+severity: "CRITICAL"
+mitre_tag: "T1548.001"
+event_type: "sysmon_process_create"
+field_matches:
+  process:
+    - "chmod"
+    - "fchmod"
+regex_matches:
+  command_line: "(u\\+s|g\\+s|\\+s|4[0-7]{3}|2[0-7]{3}|6[0-7]{3})"

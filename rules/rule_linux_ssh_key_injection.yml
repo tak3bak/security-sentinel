@@ -1,0 +1,12 @@
+rule_id: "SIGMA-010-EXT"
+title: "Unauthorized SSH Key Injection into Authorized Keys"
+severity: "CRITICAL"
+mitre_tag: "T1098.004"
+event_type: "file_event"
+field_matches:
+  target_path:
+    - ".ssh/authorized_keys"
+    - "authorized_keys2"
+    - "/root/.ssh"
+regex_matches:
+  action: "(create|modify|append|write)"

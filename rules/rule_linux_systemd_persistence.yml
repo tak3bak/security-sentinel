@@ -1,0 +1,14 @@
+rule_id: "SIGMA-008-EXT"
+title: "Linux Systemd Service or Timer Creation for Persistence"
+severity: "HIGH"
+mitre_tag: "T1543.002"
+event_type: "file_event"
+field_matches:
+  target_path:
+    - "/etc/systemd/system/"
+    - "/usr/lib/systemd/system/"
+    - "/lib/systemd/system/"
+    - ".service"
+    - ".timer"
+regex_matches:
+  action: "(create|modify|write|append)"

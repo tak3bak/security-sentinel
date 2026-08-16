@@ -10,7 +10,6 @@ RULES_ENDPOINT = f"{BASE_URL}/api/v1/telemetry/rules"
 BATCH_ENDPOINT = f"{BASE_URL}/api/v1/telemetry/batch"
 ALERTS_ENDPOINT = f"{BASE_URL}/api/v1/telemetry/alerts?limit=100"
 
-# Synthetic attack payloads mapped to known Sigma rule conditions
 SYNTHETIC_PAYLOADS = {
     "SIGMA-001": {
         "event_type": "sysmon_process_create",
@@ -69,12 +68,40 @@ SYNTHETIC_PAYLOADS = {
             "username": "root",
             "failed_attempts": 10
         }
+    },
+    "SIGMA-008-EXT": {
+        "event_type": "file_event",
+        "severity": "INFO",
+        "payload": {
+            "process": "systemd",
+            "target_path": "/etc/systemd/system/backdoor.service",
+            "action": "create"
+        }
+    },
+    "SIGMA-009-EXT": {
+        "event_type": "sysmon_process_create",
+        "severity": "INFO",
+        "payload": {
+            "process": "chmod",
+            "command_line": "chmod u+s /tmp/rootbash"
+        }
+    },
+    "SIGMA-010-EXT": {
+        "event_type": "file_event",
+        "severity": "INFO",
+        "payload": {
+            "process": "bash",
+            "target_path": "/root/.ssh/authorized_keys",
+            "action": "append"
+        }
     }
 }
 
+opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
 def http_get(url: str) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": "SentinelCoverageTest/1.0"})
-    with urllib.request.urlopen(req, timeout=5.0) as resp:
+    with opener.open(req, timeout=5.0) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 def http_post(url: str, data: dict) -> dict:
@@ -83,7 +110,7 @@ def http_post(url: str, data: dict) -> dict:
         data=json.dumps(data).encode("utf-8"),
         headers={"Content-Type": "application/json", "User-Agent": "SentinelCoverageTest/1.0"}
     )
-    with urllib.request.urlopen(req, timeout=5.0) as resp:
+    with opener.open(req, timeout=5.0) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 def run_coverage_verification():
@@ -91,7 +118,6 @@ def run_coverage_verification():
     print(" Nomadik Security Sentinel - Sigma Detection Coverage Verification")
     print("=" * 90)
 
-    # 1. Fetch live active rules
     try:
         rules_data = http_get(RULES_ENDPOINT)
         loaded_rules = rules_data.get("rules", [])
@@ -100,28 +126,20 @@ def run_coverage_verification():
         print(f"[!] Failed to connect to {RULES_ENDPOINT}: {e}")
         return
 
-    # 2. Build test batch matching loaded rules
     test_events = []
     expected_rule_ids = set()
-    event_rule_map = {}
 
     for r in loaded_rules:
         rule_id = r["rule_id"]
         expected_rule_ids.add(rule_id)
-        template = SYNTHETIC_PAYLOADS.get(rule_id)
-        
-        if not template:
-            # Fallback heuristic payload generator for dynamic rules
-            template = {
-                "event_type": r.get("event_type", "sysmon_process_create"),
-                "severity": "INFO",
-                "payload": {"test_field": "synthetic_match"}
-            }
+        template = SYNTHETIC_PAYLOADS.get(rule_id, {
+            "event_type": r.get("event_type", "sysmon_process_create"),
+            "severity": "INFO",
+            "payload": {"test_field": "synthetic_match"}
+        })
 
-        event_id = f"test-cov-{rule_id}-{uuid.uuid4().hex[:6]}"
-        event_rule_map[event_id] = rule_id
         test_events.append({
-            "event_id": event_id,
+            "event_id": f"cov-{rule_id}-{uuid.uuid4().hex[:6]}",
             "source_ip": "10.250.0.99",
             "host_identifier": "coverage-validation-node",
             "event_type": template["event_type"],
@@ -141,20 +159,16 @@ def run_coverage_verification():
     post_res = http_post(BATCH_ENDPOINT, test_batch)
     print(f"[✓] Batch accepted: {post_res.get('count', 0)} events buffered.")
 
-    # 3. Wait briefly for async consumer micro-batch and SQLite persistence
     time.sleep(0.35)
 
-    # 4. Fetch alerts and verify matching
     alerts_data = http_get(ALERTS_ENDPOINT)
     recent_alerts = alerts_data.get("alerts", [])
     
     triggered_rules = set()
-    triggered_map = {}
     for alert in recent_alerts:
         r_id = alert.get("rule_id")
         if r_id in expected_rule_ids:
             triggered_rules.add(r_id)
-            triggered_map[r_id] = alert
 
     latency_ms = (time.perf_counter() - t0) * 1000
 
@@ -168,12 +182,7 @@ def run_coverage_verification():
         mitre_tag = r.get("mitre_tag", "UNKNOWN")
         severity = r.get("severity", "MEDIUM")
         title = r.get("title", "")
-
-        if rule_id in triggered_rules:
-            status_str = "PASSED"
-        else:
-            status_str = "FAILED"
-
+        status_str = "PASSED" if rule_id in triggered_rules else "FAILED"
         print(f"{rule_id:<16} | {mitre_tag:<12} | {severity:<10} | {status_str:<8} | {title}")
 
     coverage_pct = (len(triggered_rules) / len(expected_rule_ids) * 100) if expected_rule_ids else 0
