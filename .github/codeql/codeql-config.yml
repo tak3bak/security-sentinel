@@ -1,0 +1,16 @@
+name: "Nomadik Security Sentinel CodeQL Config"
+
+paths:
+  - src
+  - api
+  - config
+  - rules
+
+paths-ignore:
+  - spiderfoot
+  - test
+  - tests
+  - audits
+  - docs
+  - .venv
+  - venv

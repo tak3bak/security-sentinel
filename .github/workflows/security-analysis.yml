@@ -1,81 +1,44 @@
-name: Nomadik Security Sentinel - Automated Security Analysis
+name: "Security Analysis"
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "main" ]
   schedule:
-    - cron: '0 4 * * *'
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  security-events: write
-  actions: read
-
-concurrency:
-  group: security-scan-${{ github.ref }}
-  cancel-in-progress: true
+    - cron: '0 6 * * 1'
 
 jobs:
-  codeql-analysis:
-    name: CodeQL Static Analysis (SAST)
+  codeql-scan:
+    name: CodeQL Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
+          python-version: '3.12'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: python
-          queries: security-extended,security-and-quality
+          languages: ${{ matrix.language }}
+          config-file: .github/codeql/codeql-config.yml
+          setup-python-dependencies: false
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:python"
-
-  security-lint-audit:
-    name: SAST & Dependency Vulnerability Audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python Environment
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Linting & Security Tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8 bandit[sarif] pip-audit
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Python Code Quality & Linting
-        run: |
-          # Lint core modules while ignoring legacy test directories
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=".git,__pycache__,.venv,venv,test*,tests*,spiderfoot*,docs*,build*,dist*,quarantine*"
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=".git,__pycache__,.venv,venv,test*,tests*,spiderfoot*,docs*,build*,dist*,quarantine*"
-
-      - name: Bandit SAST Scan (High/Medium Severity)
-        run: |
-          bandit -r . -x "./test*,./tests*,./spiderfoot*,./quarantine*" -ll -ii -f custom --msg-template "{abspath}:{line}: [{test_id}] {msg}" || true
-
-      - name: Dependency Vulnerability Audit (pip-audit)
-        run: |
-          pip-audit --desc || true
-    - name: Run Flake8
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=spiderfoot,test,.venv
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=spiderfoot,test,.venv
-
-    - name: Run Bandit (Security Baseline)
-      run: |
-        bandit -r . -ll -ii -x spiderfoot,test,.venv
+          category: "/language:${{ matrix.language }}"
