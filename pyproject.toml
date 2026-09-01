@@ -13,6 +13,8 @@ authors = [
     {name = "Nomadik Security Team"}
 ]
 dependencies = [
+    "dnspython>=2.6.0",
+    "email-validator>=2.2.0",
     "cryptography>=43.0.0",
     "requests>=2.32.2",
     "python-dotenv>=1.0.1",
