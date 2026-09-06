@@ -1,5 +1,5 @@
 import os, re, math, uuid, json, shutil, hashlib, logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from security_sentinel.edr_threat_rules import EDRThreatEngine, ThreatAlert
 
@@ -30,7 +30,7 @@ class QuarantineManager:
 
     def quarantine_file(self, file_path: str, rule_matched: str, entropy: float, alert_details: Optional[Dict[str, Any]] = None) -> Optional[str]:
         if not os.path.exists(file_path): return None
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         date_path = os.path.join(self.quarantine_dir, now.strftime("%Y"), now.strftime("%m"), now.strftime("%d"))
         os.makedirs(date_path, exist_ok=True)
         dest_path = os.path.join(date_path, f"{str(uuid.uuid4())[:8]}_{os.path.basename(file_path)}")
