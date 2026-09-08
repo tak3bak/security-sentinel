@@ -1,3 +1,4 @@
+import json
 from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -197,13 +198,13 @@ async def create_event(body: EventIn, db: AsyncSession = Depends(get_session)):
         INSERT INTO events (id, tenant_id, source, event_type, severity, title, payload)
         VALUES (:id, :tenant_id, :source, :event_type, :severity, :title, :payload)
     """), {
-        "id": event_id,
+        "id": str(event_id),
         "tenant_id": body.tenant_id,
         "source": body.source,
         "event_type": body.event_type,
         "severity": body.severity,
         "title": body.title,
-        "payload": body.payload
+        "payload": json.dumps(body.payload) if isinstance(body.payload, (dict, list)) else body.payload
     })
 
     if body.tenant_id:
