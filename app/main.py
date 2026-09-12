@@ -5,6 +5,17 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import uuid
 import secrets
 import hashlib
+
+def hash_api_key(raw_key: str) -> str:
+    salt = secrets.token_hex(16)
+    iterations = 600000
+    derived = hashlib.pbkdf2_hmac(
+        "sha256",
+        raw_key.encode("utf-8"),
+        salt.encode("utf-8"),
+        iterations
+    )
+    return f"pbkdf2_sha256${iterations}${salt}${derived.hex()}"
 from datetime import datetime, timezone
 from fastapi import FastAPI, Depends, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -134,7 +145,7 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_sessio
 
         tenant_id = uuid.uuid4()
         raw_api_key = f"nss_live_{secrets.token_urlsafe(32)}"
-        key_hash = hashlib.sha256(raw_api_key.encode()).hexdigest()
+        key_hash = hash_api_key(raw_api_key)
 
         await db.execute(text("""
             INSERT INTO tenants (id, name, stripe_customer_id, plan, subscription_status, api_key_hash, raw_api_key_initial)
