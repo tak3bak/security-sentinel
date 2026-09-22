@@ -9,7 +9,7 @@ requests==2.33.0
 urllib3==2.7.0
 httpx==0.28.1
 # Security & Cryptography
-cryptography==50.0.0
+cryptography==50.0.1
 passlib[bcrypt]==1.7.4
 # Templating & Utilities
 jinja2==3.1.6
