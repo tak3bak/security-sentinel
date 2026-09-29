@@ -18,7 +18,9 @@ class SpiderFootLib:
         if not isinstance(data, str):
             return data
         pattern = r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]+)['\"]?"
-        return re.sub(pattern, r"\1=***REDACTED***", data)
+        sanitized = re.sub(pattern, r"\1=***REDACTED***", data)
+        uri_userinfo_pattern = r"(?i)([a-z][a-z0-9+\-.]*://[^/\s:@]+:)([^@\s]+)(@)"
+        return re.sub(uri_userinfo_pattern, r"\1***REDACTED***\3", sanitized)
 
     def error(self, message: str) -> None:
         if not self.opts.get("__logging", True):
