@@ -6,7 +6,7 @@ pydantic-settings==2.2.1
 starlette==1.6.0
 # HTTP & Networking
 requests==2.34.2
-urllib3==2.7.0
+urllib3==2.8.0
 httpx==0.28.1
 # Security & Cryptography
 cryptography==50.0.1
