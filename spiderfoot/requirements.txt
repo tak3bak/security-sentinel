@@ -3,7 +3,7 @@ fastapi==0.141.1
 uvicorn[standard]==0.53.0
 pydantic==2.13.5
 pydantic-settings==2.2.1
-starlette==1.6.0
+starlette==1.7.0
 # HTTP & Networking
 requests==2.34.2
 urllib3==2.7.0
