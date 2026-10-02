@@ -40,7 +40,11 @@ class SpiderFootLib:
             return
         if not self.opts.get("__logging", True):
             return
-        clean_msg = self._sanitize_log_data(str(message))
+        msg_str = str(message)
+        if any(k in msg_str.lower() for k in ["password", "passwd", "secret", "token", "api_key", "apikey"]):
+            self.log.debug("[SENSITIVE DATA REDACTED]", extra={"scanId": self._scanId})
+            return
+        clean_msg = self._sanitize_log_data(msg_str)
         self.log.debug("%s", clean_msg, extra={"scanId": self._scanId})
 
     def hashstring(self, string: str) -> str:
