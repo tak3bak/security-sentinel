@@ -115,10 +115,11 @@ class TestSpiderFoot(unittest.TestCase):
         self.assertEqual("TBD", "TBD")
 
     def test_debug(self):
-        sf = SpiderFootHelpers()
-
+        sf = SpiderFoot(dict())
+        # Verify debug handles None and redacted strings without throwing
         sf.debug(None)
-        self.assertEqual("TBD", "TBD")
+        sf.debug("Testing debug message with api_key=SECRET_VAL_123")
+        self.assertTrue(True)
 
     def test_hash_string_should_return_a_string(self):
         sf = SpiderFoot(dict())

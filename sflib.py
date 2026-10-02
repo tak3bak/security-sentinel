@@ -14,11 +14,36 @@ class SpiderFootLib:
         self._scanId = opts.get("__scanId", "")
         self.log = logging.getLogger(f"spiderfoot.{self.__class__.__name__}")
 
-    def _sanitize_log_data(self, data: str) -> str:
-        if not isinstance(data, str):
+    def _sanitize_log_data(self, data: object) -> str:
+        if data is None:
             return ""
-        pattern = r"(?i)(api[_-]?key|secret|password|passwd|pwd|token|auth)\s*[:=]\s*['\"]?([^\s,;'\"]+)['\"]?"
-        return re.sub(pattern, r"\1=[REDACTED]", data)
+
+        if isinstance(data, (dict, list, tuple)):
+            try:
+                import json
+                raw_text = json.dumps(data, default=str)
+            except Exception:
+                raw_text = str(data)
+        else:
+            raw_text = str(data)
+
+        # 1. Redact Authorization Bearer and Basic headers
+        raw_text = re.sub(
+            r"(?i)(bearer|basic)\s+[A-Za-z0-9\-._~+/]+=*",
+            r"\g<1> [REDACTED]",
+            raw_text
+        )
+
+        # 2. Redact key-value credentials (handles unquoted and quoted values)
+        pattern = r"""(?i)(api[_-]?key|secret|token|password|passwd|pwd|authorization|auth|privkey|private[_-]?key)\s*[:=]\s*(?:(["'])(.*?)|([^\s,;]+))"""
+        def _replace_kv(m):
+            key = m.group(1)
+            quote = m.group(2) or ""
+            return f"{key}={quote}[REDACTED]{quote}"
+
+        raw_text = re.sub(pattern, _replace_kv, raw_text)
+
+        return raw_text
 
     def error(self, message: str) -> None:
         if not self.opts.get("__logging", True):
