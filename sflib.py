@@ -16,9 +16,9 @@ class SpiderFootLib:
 
     def _sanitize_log_data(self, data: str) -> str:
         if not isinstance(data, str):
-            return data
-        pattern = r"(?i)(api[_-]?key|secret|password|token)\s*[:=]\s*['\"]?([a-zA-Z0-9_\-]+)['\"]?"
-        return re.sub(pattern, r"\1=***REDACTED***", data)
+            return ""
+        pattern = r"(?i)(api[_-]?key|secret|password|passwd|pwd|token|auth)\s*[:=]\s*['\"]?([^\s,;'\"]+)['\"]?"
+        return re.sub(pattern, r"\1=[REDACTED]", data)
 
     def error(self, message: str) -> None:
         if not self.opts.get("__logging", True):
@@ -40,7 +40,8 @@ class SpiderFootLib:
             return
         if not self.opts.get("__logging", True):
             return
-        self.log.debug(self._sanitize_log_data(message), extra={"scanId": self._scanId})
+        clean_msg = self._sanitize_log_data(str(message))
+        self.log.debug("%s", clean_msg, extra={"scanId": self._scanId})
 
     def hashstring(self, string: str) -> str:
         if isinstance(string, str):
