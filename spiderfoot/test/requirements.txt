@@ -1,5 +1,5 @@
 # Core Networking & Parsing
-urllib3==2.7.0
+urllib3==2.8.0
 requests==2.33.0
 httpx==0.27.0
 # Security & Cryptography
