@@ -1,7 +1,12 @@
-import asyncio
-import pytest
+import unittest
 from app.osint import surface_scan
 
-def test_rejects_oversized_hostname():
-    with pytest.raises(ValueError):
-        asyncio.run(surface_scan("a" * 254))
+
+class TestOsint(unittest.IsolatedAsyncioTestCase):
+    async def test_rejects_oversized_hostname(self):
+        with self.assertRaises(ValueError):
+            await surface_scan("a" * 254)
+
+
+if __name__ == "__main__":
+    unittest.main()
