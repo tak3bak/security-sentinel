@@ -1,7 +1,7 @@
 import os
 import json
 import stripe
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")

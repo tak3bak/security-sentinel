@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import asyncio
 import os
-import sys
 import httpx
 from typing import Dict, Any, Optional
 

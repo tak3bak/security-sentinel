@@ -24,7 +24,7 @@ class Remediator:
     def fix_permissions(self, file_path):
         """Sets file permissions to 644 (Owner: Read/Write, Group: Read, Others: Read)."""
         try:
-            os.chmod(file_path, 0o644)
+            os.chmod(file_path, 0o600)
             return True
         except Exception as e:
             print(f"[!] Remediation Error (Permissions): {e}")

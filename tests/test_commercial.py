@@ -1,4 +1,3 @@
-import pytest
 from app.billing import get_plan_limits, price_to_plan
 
 def test_plan_limits():

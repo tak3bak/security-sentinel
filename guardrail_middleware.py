@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Dict, Set
 from urllib.parse import urlparse
 
 
@@ -21,17 +21,14 @@ from urllib.parse import urlparse
 
 class SecurityPolicyViolation(Exception):
     """Raised when an operation violates an explicit security policy."""
-    pass
 
 
 class ContextInjectionDetected(SecurityPolicyViolation):
     """Raised when dynamically generated output contains injection patterns."""
-    pass
 
 
 class EgressViolation(SecurityPolicyViolation):
     """Raised when unauthorized outbound communication is attempted."""
-    pass
 
 
 # ==========================================

@@ -1,9 +1,9 @@
 import os
 import sqlite3
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("GrowthAgent")

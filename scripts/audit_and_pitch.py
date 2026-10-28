@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import asyncio
-import json
 from app.osint import surface_scan
 
 async def audit_and_generate_pitch(target_domain: str, prospect_email: str, company_name: str):

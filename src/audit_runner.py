@@ -1,12 +1,6 @@
-import json
 import os
-import sys
-import time
-import shutil
 from engine import SecurityEngine
-from reporter import SecurityAuditGenerator
 from log_analyzer import LogAnalyzer
-from firewall import FirewallManager
 from remediator import Remediator
 from alerter import Alerter
 from network_scanner import NetworkScanner

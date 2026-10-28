@@ -1,4 +1,3 @@
-import pytest
 import tempfile
 from security_sentinel.file_inspector import FileInspector
 from security_sentinel.watcher import SentinelWatcher, SentinelEventHandler

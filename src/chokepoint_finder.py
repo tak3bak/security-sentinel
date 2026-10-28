@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 import hashlib
 import math
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, status
 
 router = APIRouter(prefix="/api/v1/chokepoints", tags=["Chokepoint Finder"])
 

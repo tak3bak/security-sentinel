@@ -14,7 +14,6 @@ from typing import Optional, AsyncGenerator
 from fastapi import FastAPI, Depends, Header, HTTPException, BackgroundTasks, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime, Text

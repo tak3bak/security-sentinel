@@ -1,7 +1,7 @@
 import os, re, math, uuid, json, shutil, hashlib, logging
 from datetime import datetime, timezone
-from typing import List, Dict, Any, Optional
-from security_sentinel.edr_threat_rules import EDRThreatEngine, ThreatAlert
+from typing import Dict, Any, Optional
+from security_sentinel.edr_threat_rules import EDRThreatEngine
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("FileInspector")

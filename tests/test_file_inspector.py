@@ -1,6 +1,3 @@
-import pytest
-import os
-import tempfile
 from security_sentinel.file_inspector import FileInspector, calculate_shannon_entropy
 
 def test_shannon_entropy_calculation():

@@ -1,6 +1,4 @@
-import os
 import json
-import pytest
 from security_sentinel.file_inspector import FileInspector, QuarantineManager, calculate_shannon_entropy
 
 def test_calculate_shannon_entropy_empty():

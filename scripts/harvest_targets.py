@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import sys
-import os
 import argparse
 
 # Default seed list of high-intent target categories

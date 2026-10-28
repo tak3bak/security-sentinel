@@ -2,9 +2,6 @@ import os
 import time
 import logging
 from logging.handlers import RotatingFileHandler
-import json
-from email.message import EmailMessage
-from reporter import SecurityAuditGenerator
 
 # Setup Log Rotation
 log_file = os.path.join(os.path.dirname(__file__), "../dispatcher.log")

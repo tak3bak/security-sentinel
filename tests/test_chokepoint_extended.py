@@ -1,8 +1,7 @@
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from security_sentinel.chokepoint_finder import (
-    router, CHOKEPOINT_STORE, VulnerabilityFinding, SeverityEnum, ResourceTypeEnum, ApprovalStatusEnum
+    router, CHOKEPOINT_STORE
 )
 
 app = FastAPI()

@@ -56,7 +56,7 @@ def restore_artifact(artifact_id: int):
         print(f"[*] Extracting file from isolation storage...")
         o_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(q_path), str(o_path))
-        os.chmod(str(o_path), 0o644)
+        os.chmod(str(o_path), 0o600)
         cursor.execute(
             "UPDATE quarantined_artifacts SET status = 'RESTORED' WHERE id = ?;",
             (artifact_id,),

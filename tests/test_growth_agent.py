@@ -2,7 +2,7 @@ import os
 import pytest
 from unittest.mock import patch
 from fastapi.testclient import TestClient
-from growth_agent.main import app, init_db, DB_PATH
+from growth_agent.main import app
 
 @pytest.fixture(autouse=True)
 def setup_test_db(tmp_path):

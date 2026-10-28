@@ -1,9 +1,9 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from enum import Enum
 from datetime import datetime, timezone
 import hashlib
-from pydantic import BaseModel, Field
-from fastapi import APIRouter, HTTPException, Query, status
+from pydantic import BaseModel
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/api/v1/investigation", tags=["Evidence Investigator"])
 
