@@ -157,8 +157,7 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None), background_tas
             "event_type": "auth_failure",
             "info": "Unauthorized API attempt"
         }
-        if background_tasks:
-            background_tasks.add_task(record_telemetry_event, event)
+        await record_telemetry_event(event)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing API Key",
@@ -194,6 +193,30 @@ async def get_sentinel_status(
         "database": "postgresql_async_active",
         "security": "authenticated"
     }
+
+
+from pydantic import BaseModel, Field
+
+class TelemetryPayload(BaseModel):
+    source_ip: str = Field(default="127.0.0.1", max_length=45)
+    destination_ip: str = Field(default="127.0.0.1", max_length=45)
+    source_port: int = Field(default=0, ge=0, le=65535)
+    destination_port: int = Field(default=8000, ge=0, le=65535)
+    protocol: str = Field(default="HTTP", max_length=20)
+    packet_length: int = Field(default=0, ge=0)
+    event_type: str = Field(default="packet_capture", max_length=50)
+    info: Optional[str] = Field(default="", max_length=2000)
+
+@app.post("/api/v1/sentinel/ingest")
+async def ingest_telemetry_event(
+    payload: TelemetryPayload,
+    background_tasks: BackgroundTasks,
+    api_key: str = Depends(verify_api_key)
+):
+    event = payload.model_dump()
+    event["timestamp"] = datetime.now(timezone.utc).isoformat()
+    background_tasks.add_task(record_telemetry_event, event)
+    return {"status": "accepted", "event_type": event["event_type"]}
 
 # SSE Telemetry Generator
 async def telemetry_event_generator(request: Request) -> AsyncGenerator[dict, None]:
