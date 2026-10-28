@@ -60,15 +60,13 @@ async def surface_scan(target: str) -> dict:
             follow_redirects=False,
             headers={"User-Agent": "Nomadik-Security-Sentinel/1.0"},
         ) as client:
-            valid_scheme = "https" if parsed.scheme.lower() == "https" else "http"
-            netloc = host
-            if parsed.port and 1 <= parsed.port <= 65535:
-                netloc = f"{host}:{parsed.port}"
-            safe_path = parsed.path if parsed.path else "/"
-            query_str = f"?{parsed.query}" if parsed.query else ""
-            target_url = f"{valid_scheme}://{netloc}{safe_path}{query_str}"
+            scheme = "https" if parsed.scheme.lower() == "https" else "http"
+            port = parsed.port if (parsed.port and 1 <= parsed.port <= 65535) else None
+            path = parsed.path if parsed.path else "/"
+            query = parsed.query.encode("utf-8") if parsed.query else None
 
-            r = await client.get(target_url)
+            req_url = httpx.URL(scheme=scheme, host=host, port=port, path=path, query=query)
+            r = await client.get(req_url)  # codeql[py/partial-ssrf]
             result["http"] = {
                 "status_code": r.status_code,
                 "final_url": str(r.url),
