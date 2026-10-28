@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  sentinel-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nomadik-sentinel-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY:-default_sentinel_key}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/sentinel.db
+    volumes:
+      - sentinel-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  sentinel-data:
