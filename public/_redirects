@@ -1,1 +1,1 @@
-/api/*  https://nomadik-sentinel-api.onrender.com/api/:splat  200
+/api/*  https://api.nomadik.site/api/:splat  200

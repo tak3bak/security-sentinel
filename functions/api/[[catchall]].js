@@ -1,6 +1,6 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
-  const backendHost = "nomadik-sentinel-api.onrender.com";
+  const backendHost = "api.nomadik.site";
   const targetUrl = `https://${backendHost}${url.pathname}${url.search}`;
 
   const forwardHeaders = new Headers(context.request.headers);
