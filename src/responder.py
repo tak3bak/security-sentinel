@@ -61,9 +61,10 @@ def wazuh_get_alerts():
 
         # Step 1: Authenticate and get JWT token
         auth_payload = {"username": wazuh_user, "password": wazuh_pass}
+        verify_ssl = os.getenv("WAZUH_VERIFY_SSL", "false").lower() in ("true", "1")
 
         auth_resp = requests.post(
-            f"{wazuh_url}/security/user/authenticate", json=auth_payload, verify=False  # nosec B501
+            f"{wazuh_url}/security/user/authenticate", json=auth_payload, verify=verify_ssl
         )
 
         if auth_resp.status_code != 200:
@@ -84,7 +85,7 @@ def wazuh_get_alerts():
         # Correct Wazuh 4.x endpoint
         # -----------------------------
         alerts_resp = requests.get(
-            f"{wazuh_url}/alerts/summary", headers=headers, verify=False  # nosec B501
+            f"{wazuh_url}/alerts/summary", headers=headers, verify=verify_ssl
         )
 
         if alerts_resp.status_code != 200:

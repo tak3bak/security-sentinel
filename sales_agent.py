@@ -1,3 +1,4 @@
+import sys
 # sales_agent.py
 import csv
 import os
@@ -52,11 +53,11 @@ def generate_pitch(company_name, target_email):
 if __name__ == "__main__":
     if not os.path.exists(CSV_FILE):
         print(f"Error: {CSV_FILE} not found. Please create it with 'company_name,target_email' headers.")
-        exit(1)
+        sys.exit(1)
 
     print("Initializing Nomadik Batch Sales Agent (Local Mode with Logging)...")
 
-    with open(CSV_FILE, mode="r", encoding="utf-8") as file, open(OUTPUT_FILE, mode="w", encoding="out_file") if False else open(OUTPUT_FILE, mode="w", encoding="utf-8") as out:
+    with open(CSV_FILE, mode="r", encoding="utf-8") as file, open(OUTPUT_FILE, mode="w", encoding="utf-8") as out:
         reader = csv.DictReader(file)
         
         for row in reader:
