@@ -3,42 +3,58 @@ import json
 import stripe
 from typing import Dict, Any
 
+from nomadik_stripe_config import STRIPE_PRODUCTS
+
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
-PRICE_TO_PLAN = {
-    os.getenv("STRIPE_PRICE_STARTER", "price_starter"): "starter",
-    os.getenv("STRIPE_PRICE_PRO", "price_pro"): "pro",
-    os.getenv("STRIPE_PRICE_PREMIUM", "price_premium"): "premium",
+PLAN_PRICES: Dict[str, str] = {
+    "sentinel_core": os.getenv("STRIPE_PRICE_CORE", STRIPE_PRODUCTS["sentinel_core"]["price_id"]),
+    "sentinel_compliance": os.getenv("STRIPE_PRICE_COMPLIANCE", STRIPE_PRODUCTS["sentinel_compliance"]["price_id"]),
+    "sentinel_active_defense": os.getenv("STRIPE_PRICE_ACTIVE_DEFENSE", STRIPE_PRODUCTS["sentinel_active_defense"]["price_id"]),
+    "sentinel_enterprise": os.getenv("STRIPE_PRICE_ENTERPRISE", STRIPE_PRODUCTS["sentinel_enterprise"]["price_id"]),
 }
 
-PLAN_PRICES = {
-    "starter": os.getenv("STRIPE_PRICE_STARTER", "price_starter"),
-    "pro": os.getenv("STRIPE_PRICE_PRO", "price_pro"),
-    "premium": os.getenv("STRIPE_PRICE_PREMIUM", "price_premium"),
+PRICE_TO_PLAN: Dict[str, str] = {
+    price_id: plan for plan, price_id in PLAN_PRICES.items()
 }
 
-PLAN_LIMITS = {
-    "starter": {
-        "monthly_events": 500,
-        "monthly_scans": 100,
-        "active_endpoints": 3,
-        "osint_concurrency": 1,
-        "ai_triage_enabled": False,
-    },
-    "pro": {
-        "monthly_events": 5000,
-        "monthly_scans": 1000,
+PLAN_LIMITS: Dict[str, Dict[str, Any]] = {
+    "sentinel_core": {
+        "monthly_events": 2500,
+        "monthly_scans": 250,
         "active_endpoints": 15,
+        "osint_concurrency": 2,
+        "ai_triage_enabled": False,
+        "compliance_mapping": False,
+        "growth_api_access": False,
+    },
+    "sentinel_compliance": {
+        "monthly_events": 15000,
+        "monthly_scans": 1500,
+        "active_endpoints": 50,
         "osint_concurrency": 5,
         "ai_triage_enabled": True,
+        "compliance_mapping": True,
+        "growth_api_access": False,
     },
-    "premium": {
-        "monthly_events": 100000,
-        "monthly_scans": 10000,
-        "active_endpoints": 100,
-        "osint_concurrency": 20,
+    "sentinel_active_defense": {
+        "monthly_events": 50000,
+        "monthly_scans": 5000,
+        "active_endpoints": 150,
+        "osint_concurrency": 10,
         "ai_triage_enabled": True,
+        "compliance_mapping": True,
+        "growth_api_access": True,
+    },
+    "sentinel_enterprise": {
+        "monthly_events": 250000,
+        "monthly_scans": 25000,
+        "active_endpoints": 1000,
+        "osint_concurrency": 25,
+        "ai_triage_enabled": True,
+        "compliance_mapping": True,
+        "growth_api_access": True,
     },
     "unknown": {
         "monthly_scans": 0,
@@ -46,6 +62,8 @@ PLAN_LIMITS = {
         "active_endpoints": 1,
         "osint_concurrency": 1,
         "ai_triage_enabled": False,
+        "compliance_mapping": False,
+        "growth_api_access": False,
     },
 }
 
