@@ -1,122 +1,205 @@
-#!/usr/bin/env python3
-import asyncio
+import json
 import os
-import httpx
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 
-# Normalize Base URL (Handles '0.0.0.0:11434', 'localhost:11434', or 'http://...')
-RAW_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
-if not RAW_HOST.startswith("http://") and not RAW_HOST.startswith("https://"):
-    OLLAMA_BASE_URL = f"http://{RAW_HOST}"
-else:
-    OLLAMA_BASE_URL = RAW_HOST
+TIER_1_MODEL = "qwen2.5-coder:1.5b"  # Fast triage (<15s on ARM)
+TRIAGE_PREFERRED_MODELS = [
+    "qwen2.5-coder-triage:7b",
+    "qwen2.5-coder:1.5b",
+    "qwen2.5-coder:7b",
+    "llama3.2:1b",
+]
+DEFAULT_OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 
-# Replace 0.0.0.0 with 127.0.0.1 for client connections
-OLLAMA_BASE_URL = OLLAMA_BASE_URL.replace("0.0.0.0", "127.0.0.1")
 
-TIER_1_MODEL = "qwen2.5-coder:1.5b"    # Fast triage (<15s on ARM)
-TIER_2_MODEL = "qwen2.5-coder:latest"  # Deep AST audit / remediation
+def load_sentinel_jwt_secret() -> str:
+    """Resolve SENTINEL_JWT_SECRET from env or ~/projects/security-sentinel/.env."""
+    secret = os.environ.get("SENTINEL_JWT_SECRET", "").strip()
+    if secret:
+        return secret
 
-async def query_ollama(
-    prompt: str,
-    system_prompt: str = "You are a concise security engineering assistant. Provide direct, minimal technical output.",
-    tier: int = 1,
-    max_tokens: int = 256,
-    num_ctx: Optional[int] = None,
-    timeout_sec: float = 180.0
-) -> Dict[str, Any]:
-    """
-    Executes tiered inference against Ollama with CPU thread optimization and strict timeout handling.
-    """
-    model = TIER_1_MODEL if tier == 1 else TIER_2_MODEL
-    default_ctx = 2048 if tier == 1 else 4096
-    
-    # Optimize CPU threads for Android ARM big cores (typically 4 performance cores)
-    cpu_cores = os.cpu_count() or 4
-    num_threads = min(cpu_cores, 6)
+    candidate_paths = [
+        Path(__file__).resolve().parent / ".env",
+        Path.home() / "projects" / "security-sentinel" / ".env",
+    ]
+    for env_path in candidate_paths:
+        if not env_path.is_file():
+            continue
+        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("export "):
+                line = line[len("export ") :].strip()
+            if line.startswith("SENTINEL_JWT_SECRET="):
+                val = line.split("=", 1)[1].strip()
+                if len(val) >= 2 and (
+                    (val.startswith('"') and val.endswith('"'))
+                    or (val.startswith("'") and val.endswith("'"))
+                ):
+                    val = val[1:-1]
+                if val:
+                    return val
+    return ""
 
-    payload = {
-        "model": model,
-        "prompt": prompt,
-        "system": system_prompt,
-        "stream": False,
-        "options": {
-            "num_ctx": num_ctx or default_ctx,
-            "num_predict": max_tokens,
-            "num_thread": num_threads,
-            "temperature": 0.1
-        }
+
+def get_installed_ollama_models(ollama_url: str = DEFAULT_OLLAMA_URL, timeout: float = 4.0) -> List[str]:
+    """Query local Ollama /api/tags and return installed model names."""
+    url = f"{ollama_url.rstrip('/')}/api/tags"
+    try:
+        with urllib_request.urlopen(url, timeout=timeout) as resp:
+            payload = json.loads(resp.read().decode("utf-8", errors="replace"))
+            return [m.get("name", "") for m in payload.get("models", []) if m.get("name")]
+    except Exception:
+        return []
+
+
+def select_triage_model(
+    requested_model: Optional[str] = None,
+    ollama_url: str = DEFAULT_OLLAMA_URL,
+) -> str:
+    """Pick the best available local model for triage digest execution."""
+    installed = get_installed_ollama_models(ollama_url=ollama_url)
+    if requested_model:
+        if not installed or requested_model in installed:
+            return requested_model
+    for candidate in TRIAGE_PREFERRED_MODELS:
+        if candidate in installed:
+            return candidate
+    if installed:
+        return installed[0]
+    return requested_model or TIER_1_MODEL
+
+
+def _heuristic_verdict(events: List[Dict[str, Any]]) -> Dict[str, str]:
+    """Deterministic fallback classification for telemetry batches."""
+    for ev in events:
+        event_type = str(ev.get("event_type", "")).lower()
+        attempts = int(ev.get("attempts") or 0)
+        src_ip = str(ev.get("src_ip", ""))
+        if "auth_failure" in event_type or "brute" in event_type or "stuffing" in event_type or attempts >= 10:
+            return {
+                "risk_level": "HIGH",
+                "verdict": "QUARANTINE_CANDIDATE",
+                "policy_action": "ISOLATE_AND_BLOCK_SOURCE",
+                "rationale": f"Anomalous activity ({event_type or 'event'}, attempts={attempts}) from {src_ip or 'unknown'}.",
+            }
+    return {
+        "risk_level": "LOW",
+        "verdict": "AUTHORIZED_PASS",
+        "policy_action": "ALLOW_WITH_LOGGING",
+        "rationale": "Telemetry matches routine or low-risk operational activity.",
     }
-    
-    async with httpx.AsyncClient(timeout=timeout_sec) as client:
-        try:
-            url = f"{OLLAMA_BASE_URL}/api/generate"
-            response = await client.post(url, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            
-            total_duration_ns = data.get("total_duration", 0)
-            duration_ms = round(total_duration_ns / 1_000_000, 2)
-            eval_count = data.get("eval_count", 0)
-            eval_duration_ns = data.get("eval_duration", 1)
-            tps = round(eval_count / (eval_duration_ns / 1_000_000_000), 2) if eval_duration_ns > 0 else 0.0
 
-            return {
-                "success": True,
-                "model": model,
-                "response": data.get("response", "").strip(),
-                "eval_tokens": eval_count,
-                "duration_ms": duration_ms,
-                "tokens_per_sec": tps
-            }
-        except httpx.HTTPStatusError as exc:
-            return {
-                "success": False,
-                "model": model,
-                "error": f"HTTP {exc.response.status_code}: {exc.response.text}"
-            }
-        except httpx.RequestError as exc:
-            return {
-                "success": False,
-                "model": model,
-                "error": f"Request failed to {OLLAMA_BASE_URL}: {type(exc).__name__} - {str(exc)}"
-            }
-        except Exception as exc:
-            return {
-                "success": False,
-                "model": model,
-                "error": f"Unexpected error: {str(exc)}"
-            }
 
-async def main():
-    print(f"[INFO] Connecting to Ollama endpoint at: {OLLAMA_BASE_URL}")
-    
-    # 1. Test Tier 1 (1.5B)
-    print("\n--- [Tier 1: 1.5B Fast Log Triage] ---")
-    t1_res = await query_ollama(
-        prompt="Classify this HTTP request: 'GET /index.php?id=1%20UNION%20SELECT%20null,password%20FROM%20users HTTP/1.1' 200",
-        tier=1,
-        max_tokens=128
+def generate_triage_digest(
+    source: str,
+    events: List[Dict[str, Any]],
+    model: Optional[str] = None,
+    temperature: float = 0.0,
+    ollama_url: str = DEFAULT_OLLAMA_URL,
+    timeout: float = 35.0,
+) -> Dict[str, Any]:
+    """Run local Ollama triage inference at temperature=0.0 and return structured digest."""
+    chosen_model = select_triage_model(requested_model=model, ollama_url=ollama_url)
+    fallback = _heuristic_verdict(events)
+
+    system_prompt = (
+        "You are Nomadik Security Sentinel's SOC triage engine. "
+        "Analyze security telemetry events and respond ONLY with a single JSON object containing keys: "
+        '"risk_level" ("LOW"|"MEDIUM"|"HIGH"), '
+        '"verdict" ("AUTHORIZED_PASS"|"MONITOR"|"QUARANTINE_CANDIDATE"), '
+        '"policy_action" (string), and '
+        '"summary" (concise 1-2 sentence triage summary).'
     )
-    if t1_res["success"]:
-        print(f"[OK] Completed in {t1_res['duration_ms']}ms ({t1_res['tokens_per_sec']} tok/s):")
-        print(t1_res["response"])
-    else:
-        print(f"[FAIL] Tier 1 Error: {t1_res['error']}")
-
-    # 2. Test Tier 2 (7.6B) with capped generation length
-    print("\n--- [Tier 2: 7.6B Deep Code Audit] ---")
-    t2_res = await query_ollama(
-        prompt="Audit this Python code snippet for command injection. Provide the 1-line safe fix:\n\nimport os\ndef ping(host):\n    os.system('ping -c 1 ' + host)",
-        tier=2,
-        max_tokens=160,
-        timeout_sec=180.0
+    user_prompt = json.dumps(
+        {
+            "source": source,
+            "event_count": len(events),
+            "events": events,
+        },
+        separators=(",", ":"),
     )
-    if t2_res["success"]:
-        print(f"[OK] Completed in {t2_res['duration_ms']}ms ({t2_res['tokens_per_sec']} tok/s):")
-        print(t2_res["response"])
-    else:
-        print(f"[FAIL] Tier 2 Error: {t2_res['error']}")
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    body = json.dumps(
+        {
+            "model": chosen_model,
+            "stream": False,
+            "options": {
+                "temperature": float(temperature),
+            },
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
+    ).encode("utf-8")
+
+    endpoint = f"{ollama_url.rstrip('/')}/api/chat"
+    req = urllib_request.Request(
+        endpoint,
+        data=body,
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urllib_request.urlopen(req, timeout=timeout) as resp:
+            raw_resp = json.loads(resp.read().decode("utf-8", errors="replace"))
+            content = (
+                raw_resp.get("message", {}).get("content", "")
+                if isinstance(raw_resp, dict)
+                else ""
+            ).strip()
+
+            parsed_json: Optional[Dict[str, Any]] = None
+            if content:
+                try:
+                    parsed_json = json.loads(content)
+                except json.JSONDecodeError:
+                    start = content.find("{")
+                    end = content.rfind("}")
+                    if start != -1 and end != -1 and end > start:
+                        try:
+                            parsed_json = json.loads(content[start : end + 1])
+                        except json.JSONDecodeError:
+                            parsed_json = None
+
+            if isinstance(parsed_json, dict):
+                return {
+                    "status": "ok",
+                    "source": source,
+                    "model_used": chosen_model,
+                    "ollama_reachable": True,
+                    "risk_level": str(parsed_json.get("risk_level") or fallback["risk_level"]).upper(),
+                    "verdict": str(parsed_json.get("verdict") or fallback["verdict"]).upper(),
+                    "policy_action": str(parsed_json.get("policy_action") or fallback["policy_action"]),
+                    "summary": str(parsed_json.get("summary") or content or fallback["rationale"]),
+                }
+
+            return {
+                "status": "ok",
+                "source": source,
+                "model_used": chosen_model,
+                "ollama_reachable": True,
+                "risk_level": fallback["risk_level"],
+                "verdict": fallback["verdict"],
+                "policy_action": fallback["policy_action"],
+                "summary": content or fallback["rationale"],
+            }
+
+    except (urllib_error.URLError, urllib_error.HTTPError, TimeoutError, Exception) as exc:
+        return {
+            "status": "degraded",
+            "source": source,
+            "model_used": chosen_model,
+            "ollama_reachable": False,
+            "risk_level": fallback["risk_level"],
+            "verdict": fallback["verdict"],
+            "policy_action": fallback["policy_action"],
+            "summary": fallback["rationale"],
+            "ollama_error": str(exc),
+        }
